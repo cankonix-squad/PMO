@@ -1,0 +1,18 @@
+project_id,project_code,project_name,total_risks,open_risks,high_risks,critical_risks,total_issues,open_issues,high_issues,critical_issues
+8d024b75-08e1-4439-85c4-544a329bd112,CMD-BEN-A-1787761501,Smoke Command Benefit A,1,1,0,1,0,0,0,0
+6850f463-6fda-471d-ac3a-3a48d93dd3f5,CMD-BEN-A-1787761552,Smoke Command Benefit A,1,1,0,1,0,0,0,0
+b53e8183-aea8-4cf9-ae53-4770478be344,CMD-BEN-B-1787761501,Smoke Command Benefit B,0,0,0,0,0,0,0,0
+b74cf657-8c46-4b2b-89d3-7222d9ea6922,CMD-BEN-B-1787761552,Smoke Command Benefit B,0,0,0,0,0,0,0,0
+0782c39f-5402-4206-afc8-1f000182062f,DEMO-SDA-001,Bendungan Marga Tiga,1,1,0,1,1,1,0,1
+7dc15879-9da6-40fe-9135-293135176e4f,DEMO-SDA-002,SPAM Regional Jatiluhur I,1,1,0,1,1,1,1,0
+c723a303-9ed3-44d3-9505-4fdd60ebb4bb,DEMO-SDA-003,Normalisasi Sungai Ciliwung,1,1,1,0,1,1,1,0
+a03b2382-c8b4-4922-8ec4-e14779c8e0c1,DEMO-SDA-004,Bendungan Bener,1,1,0,1,1,1,1,0
+b2a5b12f-2ce2-4789-a15b-2e2b37cb48b5,DEMO-SDA-005,Jaringan Irigasi D.I. Rentang,1,1,1,0,1,1,0,0
+59811116-edfa-4d5f-a63c-e76f19d2970c,DEMO-SDA-006,Bendungan Karian,1,1,0,0,1,1,0,0
+864ac3c8-e070-443c-919f-fb8437a6f945,DEMO-SDA-007,Pengendalian Banjir Serayu,1,1,1,0,1,1,0,0
+c02ae621-1175-4396-93af-6e00a1a027e8,DEMO-SDA-008,Sistem Air Baku Sepaku,1,1,0,0,1,1,0,0
+8be8869b-6cba-4739-b3c0-2fbad9eed111,DEMO-SDA-009,Rehabilitasi Irigasi Batanghari,1,1,0,0,1,1,0,0
+35f42e14-9dd0-4885-965f-b84494a748a3,DEMO-SDA-010,Embung Rote Ndao,1,1,0,1,1,1,0,0
+7b86d2a8-1942-4f1d-93ce-938b1ac1ff41,GIS-SMOKE-1787821487,GIS Smoke Test Project,0,0,0,0,0,0,0,0
+eec9c643-c947-46f2-a094-bc85acb846a1,GIS-SMOKE-1787821759,GIS Smoke Test Project,0,0,0,0,0,0,0,0
+b649dc50-48ff-4799-9df2-55c68ee8fa58,RSK-1787670240,Risk Smoke Project,0,0,0,0,0,0,0,0

@@ -70,6 +70,10 @@ jobs:
             set -euo pipefail
             echo "=== CANKORA PMO — Production Deploy $(date '+%Y-%m-%d %H:%M:%S') ==="
             cd /root/cankonix-node/apps/cankonix-pmo
+            git remote set-url origin https://github.com/cankonix-squad/PMO.git
+            git fetch origin
+            git checkout main
+            git reset --hard origin/main
             chmod +x scripts/deploy.sh
             ./scripts/deploy.sh
 

@@ -12,6 +12,8 @@ volumes:
     name: cankonix-pmo_redisdata
   cankonix-pmo_minio:
     name: cankonix-pmo_minio
+  cankonix-pmo_storage:
+    name: cankonix-pmo_storage
 
 services:
   # ── PostgreSQL ──────────────────────────────────────────────────────────────
@@ -148,6 +150,8 @@ services:
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       SMTP_FROM: ${SMTP_FROM:-CANKORA PMO <noreply@cankonix.com>}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-https://pmo.cankonix.com}
+    volumes:
+      - cankonix-pmo_storage:/app/storage
     expose:
       - "8080"
     networks:

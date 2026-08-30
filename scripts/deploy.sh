@@ -59,12 +59,12 @@ ELAPSED=0
 API_HEALTHY=false
 
 while [[ $ELAPSED -lt $MAX_WAIT ]]; do
-  HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/health || echo "000")
-  if [[ "$HTTP_STATUS" == "200" ]]; then
+  if docker compose -f "$COMPOSE_FILE" exec -T cankonix-pmo-api \
+    wget -qO- http://localhost:8080/health >/dev/null 2>&1; then
     API_HEALTHY=true
     break
   fi
-  echo "    API not ready yet (HTTP $HTTP_STATUS), retrying in ${INTERVAL}s... (${ELAPSED}s elapsed)"
+  echo "    API not ready yet, retrying in ${INTERVAL}s... (${ELAPSED}s elapsed)"
   sleep "$INTERVAL"
   ELAPSED=$((ELAPSED + INTERVAL))
 done

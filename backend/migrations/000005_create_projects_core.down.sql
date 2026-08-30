@@ -1,0 +1,11 @@
+DROP TABLE IF EXISTS approval_requests;
+DROP TABLE IF EXISTS project_progress_history;
+DROP TABLE IF EXISTS project_documents;
+DROP TABLE IF EXISTS project_budgets;
+DROP TABLE IF EXISTS risks;
+DROP TABLE IF EXISTS issues;
+DROP TABLE IF EXISTS task_assignments;
+DROP TABLE IF EXISTS tasks;
+DROP TABLE IF EXISTS milestones;
+DROP TABLE IF EXISTS project_teams;
+DROP TABLE IF EXISTS projects;

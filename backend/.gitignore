@@ -1,0 +1,20 @@
+# Backend environment and secrets
+.env
+.env.local
+.env.*.local
+
+# Build output
+/api
+/migrate
+/seed
+/seed-demo
+
+# Test cache
+*.test
+*.out
+
+# Air live reload
+tmp/
+
+# macOS
+.DS_Store

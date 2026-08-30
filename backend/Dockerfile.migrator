@@ -1,0 +1,26 @@
+# syntax=docker/dockerfile:1
+# One-shot migration runner — exits 0 on success, non-zero on failure
+FROM golang:1.23-alpine AS builder
+
+WORKDIR /app
+
+RUN apk add --no-cache git ca-certificates tzdata
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+    go build -ldflags="-s -w" -o /app/bin/migrator ./cmd/migrate/main.go
+
+# ── Runtime ──────────────────────────────────────────────────────────────────
+FROM alpine:3.19
+
+WORKDIR /app
+
+RUN apk add --no-cache ca-certificates tzdata
+
+COPY --from=builder /app/bin/migrator ./migrator
+COPY --from=builder /app/migrations ./migrations
+
+ENTRYPOINT ["./migrator"]

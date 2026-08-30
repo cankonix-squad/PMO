@@ -1,0 +1,214 @@
+networks:
+  pmo-internal:
+    driver: bridge
+
+  cankonix-proxy:
+    external: true
+
+volumes:
+  cankonix-pmo_pgdata:
+    name: cankonix-pmo_pgdata
+  cankonix-pmo_redisdata:
+    name: cankonix-pmo_redisdata
+  cankonix-pmo_minio:
+    name: cankonix-pmo_minio
+
+services:
+  # ── PostgreSQL ──────────────────────────────────────────────────────────────
+  cankonix-pmo-db:
+    image: postgres:15-alpine
+    container_name: cankonix-pmo-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-cankora}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:-cankora_db}
+    volumes:
+      - cankonix-pmo_pgdata:/var/lib/postgresql/data
+    networks:
+      - pmo-internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-cankora} -d ${DB_NAME:-cankora_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # ── Redis ───────────────────────────────────────────────────────────────────
+  cankonix-pmo-redis:
+    image: redis:7-alpine
+    container_name: cankonix-pmo-redis
+    restart: unless-stopped
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - cankonix-pmo_redisdata:/data
+    networks:
+      - pmo-internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # ── MinIO (object storage) ──────────────────────────────────────────────────
+  cankonix-pmo-minio:
+    image: minio/minio:latest
+    container_name: cankonix-pmo-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${STORAGE_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${STORAGE_SECRET_KEY}
+    volumes:
+      - cankonix-pmo_minio:/data
+    networks:
+      - pmo-internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # ── Migration runner (one-shot) ─────────────────────────────────────────────
+  cankonix-pmo-migrator:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.migrator
+    container_name: cankonix-pmo-migrator
+    restart: "no"
+    depends_on:
+      cankonix-pmo-db:
+        condition: service_healthy
+    environment:
+      DB_HOST: cankonix-pmo-db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-cankora}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME:-cankora_db}
+      DB_SSLMODE: ${DB_SSLMODE:-disable}
+    networks:
+      - pmo-internal
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+  # ── Backend (Go API) ────────────────────────────────────────────────────────
+  cankonix-pmo-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cankonix-pmo-api
+    restart: unless-stopped
+    depends_on:
+      cankonix-pmo-db:
+        condition: service_healthy
+      cankonix-pmo-redis:
+        condition: service_healthy
+      cankonix-pmo-migrator:
+        condition: service_completed_successfully
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      APP_VERSION: ${APP_VERSION:-1.0.0}
+      PORT: 8080
+      APP_URL: ${APP_URL:-https://pmo.cankonix.com}
+      DB_HOST: cankonix-pmo-db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-cankora}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME:-cankora_db}
+      DB_SSLMODE: ${DB_SSLMODE:-disable}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ACCESS_EXP_MINUTES: ${JWT_ACCESS_EXP_MINUTES:-15}
+      JWT_REFRESH_EXP_DAYS: ${JWT_REFRESH_EXP_DAYS:-7}
+      REDIS_URL: redis://cankonix-pmo-redis:6379/0
+      STORAGE_ENDPOINT: cankonix-pmo-minio:9000
+      STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY}
+      STORAGE_SECRET_KEY: ${STORAGE_SECRET_KEY}
+      STORAGE_BUCKET_DOCUMENTS: ${STORAGE_BUCKET_DOCUMENTS:-cankora-documents}
+      STORAGE_USE_SSL: "false"
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-CANKORA PMO <noreply@cankonix.com>}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-https://pmo.cankonix.com}
+    expose:
+      - "8080"
+    networks:
+      - pmo-internal
+      - cankonix-proxy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=cankonix-proxy"
+      - "traefik.http.routers.cankonix-pmo-api.rule=Host(`pmo.cankonix.com`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.cankonix-pmo-api.entrypoints=websecure"
+      - "traefik.http.routers.cankonix-pmo-api.tls=true"
+      - "traefik.http.routers.cankonix-pmo-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.cankonix-pmo-api.loadbalancer.server.port=8080"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # ── Frontend (Next.js) ──────────────────────────────────────────────────────
+  cankonix-pmo-web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ""
+    container_name: cankonix-pmo-web
+    restart: unless-stopped
+    depends_on:
+      cankonix-pmo-api:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-}
+    expose:
+      - "3000"
+    networks:
+      - pmo-internal
+      - cankonix-proxy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=cankonix-proxy"
+      - "traefik.http.routers.cankonix-pmo-web.rule=Host(`pmo.cankonix.com`)"
+      - "traefik.http.routers.cankonix-pmo-web.entrypoints=websecure"
+      - "traefik.http.routers.cankonix-pmo-web.tls=true"
+      - "traefik.http.routers.cankonix-pmo-web.tls.certresolver=letsencrypt"
+      - "traefik.http.services.cankonix-pmo-web.loadbalancer.server.port=3000"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"

@@ -1,0 +1,68 @@
+# =============================================================================
+# CANKORA — .gitignore
+# =============================================================================
+
+# ---- Environment files -------------------------------------------------------
+.env
+.env.local
+.env.*.local
+backend/.env
+backend/.env.local
+frontend/.env
+frontend/.env.local
+
+# ---- Go ---------------------------------------------------------------------
+backend/bin/
+backend/tmp/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go build cache
+/vendor/
+
+# ---- Node / Next.js ---------------------------------------------------------
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.turbo/
+frontend/build/
+
+# Package manager locks (keep package-lock.json for reproducibility)
+# frontend/package-lock.json  ← intentionally tracked
+
+# ---- IDE / Editor -----------------------------------------------------------
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ---- Logs -------------------------------------------------------------------
+*.log
+logs/
+
+# ---- Docker -----------------------------------------------------------------
+# Keep docker-compose files tracked
+# Ignore override files with local secrets
+docker-compose.override.yml
+
+# ---- Uploads / Storage ------------------------------------------------------
+backend/uploads/
+uploads/
+
+# ---- Test coverage ----------------------------------------------------------
+backend/coverage.out
+backend/coverage.html
+
+# ---- Miscellaneous ----------------------------------------------------------
+*.tmp
+*.bak
+*.orig
+.terraform/

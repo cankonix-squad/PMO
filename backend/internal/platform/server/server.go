@@ -37,9 +37,9 @@ import (
 	"github.com/harmanto-49/cankora/internal/modules/monitoring"
 	"github.com/harmanto-49/cankora/internal/modules/notifications"
 	"github.com/harmanto-49/cankora/internal/modules/portfolio"
-	projectcategory "github.com/harmanto-49/cankora/internal/modules/projectcategory"
 	"github.com/harmanto-49/cankora/internal/modules/priority"
 	"github.com/harmanto-49/cankora/internal/modules/project"
+	projectcategory "github.com/harmanto-49/cankora/internal/modules/projectcategory"
 	"github.com/harmanto-49/cankora/internal/modules/report"
 	"github.com/harmanto-49/cankora/internal/modules/spatial"
 	"github.com/harmanto-49/cankora/internal/platform/config"
@@ -101,9 +101,9 @@ type Dependencies struct {
 	GovernmentHandler         *government.Handler
 	BIMHandler                *bim.Handler
 	GovernanceHandler         *governance.Handler
-	AuditLogHandler             *auditlog.Handler
-	NotificationHandler         *notifications.Handler
-	ProjectCategoryHandler      *projectcategory.Handler
+	AuditLogHandler           *auditlog.Handler
+	NotificationHandler       *notifications.Handler
+	ProjectCategoryHandler    *projectcategory.Handler
 }
 
 // Wire initialises all dependencies and returns a populated Dependencies struct.
@@ -214,9 +214,9 @@ func Wire(cfg *config.Config, log *zap.Logger) (*Dependencies, error) {
 		GovernmentHandler:         governmentHandler,
 		BIMHandler:                bimHandler,
 		GovernanceHandler:         governanceHandler,
-		AuditLogHandler:             auditLogHandler,
-		NotificationHandler:         notificationHandler,
-		ProjectCategoryHandler:      projectCategoryHandler,
+		AuditLogHandler:           auditLogHandler,
+		NotificationHandler:       notificationHandler,
+		ProjectCategoryHandler:    projectCategoryHandler,
 	}, nil
 }
 
@@ -239,14 +239,18 @@ func New(deps *Dependencies) *gin.Engine {
 	r.Use(middleware.Logger(deps.Log))
 	r.Use(gin.Recovery())
 
-	// Health check — no auth required
-	r.GET("/health", func(c *gin.Context) {
+	// Health check — no auth required.
+	// /api/health is used by production reverse proxy checks where /api routes
+	// are forwarded to the backend service.
+	healthHandler := func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"status":  "ok",
 			"version": deps.Config.App.Version,
 			"env":     deps.Config.App.Env,
 		})
-	})
+	}
+	r.GET("/health", healthHandler)
+	r.GET("/api/health", healthHandler)
 
 	// API v1
 	v1 := r.Group("/api/v1")

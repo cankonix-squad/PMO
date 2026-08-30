@@ -37,6 +37,7 @@ import (
 	"github.com/harmanto-49/cankora/internal/modules/monitoring"
 	"github.com/harmanto-49/cankora/internal/modules/notifications"
 	"github.com/harmanto-49/cankora/internal/modules/portfolio"
+	projectcategory "github.com/harmanto-49/cankora/internal/modules/projectcategory"
 	"github.com/harmanto-49/cankora/internal/modules/priority"
 	"github.com/harmanto-49/cankora/internal/modules/project"
 	"github.com/harmanto-49/cankora/internal/modules/report"
@@ -100,8 +101,9 @@ type Dependencies struct {
 	GovernmentHandler         *government.Handler
 	BIMHandler                *bim.Handler
 	GovernanceHandler         *governance.Handler
-	AuditLogHandler           *auditlog.Handler
-	NotificationHandler       *notifications.Handler
+	AuditLogHandler             *auditlog.Handler
+	NotificationHandler         *notifications.Handler
+	ProjectCategoryHandler      *projectcategory.Handler
 }
 
 // Wire initialises all dependencies and returns a populated Dependencies struct.
@@ -167,6 +169,7 @@ func Wire(cfg *config.Config, log *zap.Logger) (*Dependencies, error) {
 	notifRepo := notification.NewRepository(db)
 	notifSvc := notification.NewService(notifRepo, notifProvider, log, cfg.SMTP.From)
 	notificationHandler := notifications.NewHandler(notifSvc)
+	projectCategoryHandler := projectcategory.NewHandler(db, log)
 
 	_ = auditWriter
 
@@ -211,8 +214,9 @@ func Wire(cfg *config.Config, log *zap.Logger) (*Dependencies, error) {
 		GovernmentHandler:         governmentHandler,
 		BIMHandler:                bimHandler,
 		GovernanceHandler:         governanceHandler,
-		AuditLogHandler:           auditLogHandler,
-		NotificationHandler:       notificationHandler,
+		AuditLogHandler:             auditLogHandler,
+		NotificationHandler:         notificationHandler,
+		ProjectCategoryHandler:      projectCategoryHandler,
 	}, nil
 }
 
@@ -616,6 +620,15 @@ func New(deps *Dependencies) *gin.Engine {
 	notifGroup.Use(middleware.AuthRequired(deps.TokenSvc, deps.AuthSvc))
 	notifGroup.Use(middleware.RequirePermission(deps.RBACRepo, constants.ResourceNotification, constants.ActionView))
 	deps.NotificationHandler.RegisterRoutes(notifGroup)
+
+	// Project Categories — PROJECT-FORM-002
+	projectCategoryGroup := v1.Group("/project-categories")
+	projectCategoryGroup.Use(middleware.AuthRequired(deps.TokenSvc, deps.AuthSvc))
+	projectCategoryGroup.GET("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceProjectCategory, constants.ActionView), deps.ProjectCategoryHandler.List)
+	projectCategoryGroup.POST("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceProjectCategory, constants.ActionCreate), deps.ProjectCategoryHandler.Create)
+	projectCategoryGroup.GET("/:id", middleware.RequirePermission(deps.RBACRepo, constants.ResourceProjectCategory, constants.ActionView), deps.ProjectCategoryHandler.GetByID)
+	projectCategoryGroup.PUT("/:id", middleware.RequirePermission(deps.RBACRepo, constants.ResourceProjectCategory, constants.ActionUpdate), deps.ProjectCategoryHandler.Update)
+	projectCategoryGroup.DELETE("/:id", middleware.RequirePermission(deps.RBACRepo, constants.ResourceProjectCategory, constants.ActionDelete), deps.ProjectCategoryHandler.Delete)
 
 	return r
 }

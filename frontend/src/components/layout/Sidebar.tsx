@@ -25,6 +25,7 @@ import {
   Settings,
   ShieldAlert,
   ShieldCheck,
+  Tag,
   X,
 } from "lucide-react";
 import { authService } from "@/services/auth.service";
@@ -111,6 +112,7 @@ const settingsItems: NavItem[] = [
   { label: "Sektor SDA", href: "/settings/sectors", icon: BarChart3, roles: PMO_AND_ABOVE },
   { label: "Wilayah", href: "/settings/regions", icon: MapPinned, roles: PMO_AND_ABOVE },
   { label: "DAS", href: "/settings/river-basins", icon: MapPinned, roles: PMO_AND_ABOVE },
+  { label: "Kategori Proyek", href: "/settings/project-categories", icon: Tag, roles: PMO_AND_ABOVE },
 ];
 
 const defaultOpenSections: Record<string, boolean> = {

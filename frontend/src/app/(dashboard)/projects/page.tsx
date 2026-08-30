@@ -16,12 +16,15 @@ import {
 } from "lucide-react";
 import { z } from "zod";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { RichTextEditor } from "@/components/editor/RichTextEditor";
 import { projectService } from "@/services/project.service";
 import { orgUnitService } from "@/services/org-unit.service";
 import type { OrgUnit } from "@/types/org-unit";
 import { OrgUnitLevelLabel } from "@/types/org-unit";
 import { programService } from "@/services/portfolio.service";
 import { sectorService, regionService, riverBasinService } from "@/services/spatial.service";
+import { projectCategoryService } from "@/services/project-category.service";
+import type { ProjectCategory } from "@/types/project-category";
 import type { Program } from "@/types/portfolio";
 import type { Sector, Region, RiverBasin } from "@/types/spatial";
 import { cn, formatDate, formatIDR } from "@/lib/utils";
@@ -73,20 +76,20 @@ const NEXT_STATUS: Record<ProjectStatus, ProjectStatus[]> = {
 const projectFormSchema = z.object({
   code: z.string().trim().min(1, "Kode wajib diisi").max(100),
   name: z.string().trim().min(1, "Nama proyek wajib diisi").max(500),
-  description: z.string().trim().optional(),
-  objectives: z.string().trim().optional(),
+  description: z.string().trim().min(1, "Deskripsi wajib diisi"),
+  objectives: z.string().trim().min(1, "Tujuan wajib diisi"),
   priority: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
-  category: z.string().trim().optional(),
-  start_date: z.string().trim().optional(),
-  end_date: z.string().trim().optional(),
-  budget_total: z.coerce.number().min(0, "Anggaran tidak boleh negatif"),
+  category: z.string().trim().min(1, "Kategori wajib dipilih"),
+  start_date: z.string().trim().min(1, "Tanggal mulai wajib diisi"),
+  end_date: z.string().trim().min(1, "Tanggal selesai wajib diisi"),
+  budget_total: z.coerce.number().min(1, "Anggaran wajib lebih dari 0"),
   currency: z.string().trim().min(1).max(10),
   progress_pct: z.coerce.number().min(0).max(100),
-  org_unit_id: z.string().trim().optional(),
-  program_id: z.string().trim().optional(),
-  sector_id: z.string().trim().optional(),
-  region_id: z.string().trim().optional(),
-  river_basin_id: z.string().trim().optional(),
+  org_unit_id: z.string().trim().min(1, "Balai / Unit Pemilik wajib dipilih"),
+  program_id: z.string().trim().min(1, "Program wajib dipilih"),
+  sector_id: z.string().trim().min(1, "Sektor SDA wajib dipilih"),
+  region_id: z.string().trim().min(1, "Wilayah wajib dipilih"),
+  river_basin_id: z.string().trim().min(1, "DAS wajib dipilih"),
 });
 
 type ProjectFormValues = z.infer<typeof projectFormSchema>;
@@ -122,6 +125,12 @@ export default function ProjectsPage() {
     queryKey: ["river-basins", false],
     queryFn: () => riverBasinService.list(false),
   });
+
+  const { data: projectCategories = [] } = useQuery({
+    queryKey: ["project-categories", false],
+    queryFn: () => projectCategoryService.list(false).then((r) => r.data ?? []),
+  });
+
   const [showForm, setShowForm] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -163,11 +172,17 @@ export default function ProjectsPage() {
     mutationFn: (payload: CreateProjectRequest) => projectService.create(payload),
     onSuccess: (res) => {
       const project = res.data.data;
-      setSelectedId(project.id);
+      if (project?.id) setSelectedId(project.id);
       setShowForm(false);
       setFormError(null);
       void qc.invalidateQueries({ queryKey: ["projects"] });
       void qc.invalidateQueries({ queryKey: ["dashboard", "stats"] });
+    },
+    onError: (err: unknown) => {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+        "Gagal menyimpan proyek. Periksa kembali data yang diisi.";
+      setFormError(msg);
     },
   });
 
@@ -176,12 +191,18 @@ export default function ProjectsPage() {
       projectService.update(id, payload),
     onSuccess: (res) => {
       const project = res.data.data;
-      setSelectedId(project.id);
+      if (project?.id) setSelectedId(project.id);
       setShowForm(false);
       setFormError(null);
       void qc.invalidateQueries({ queryKey: ["projects"] });
       void qc.invalidateQueries({ queryKey: ["projects", project.id] });
       void qc.invalidateQueries({ queryKey: ["dashboard", "stats"] });
+    },
+    onError: (err: unknown) => {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+        "Gagal memperbarui proyek. Periksa kembali data yang diisi.";
+      setFormError(msg);
     },
   });
 
@@ -211,22 +232,12 @@ export default function ProjectsPage() {
     setShowForm(true);
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  function handleSubmit(values: ProjectFormValues) {
     setFormError(null);
-
-    const parsed = projectFormSchema.safeParse(formValues(event.currentTarget));
-    if (!parsed.success) {
-      setFormError(parsed.error.issues[0]?.message ?? "Data proyek belum valid.");
-      return;
-    }
-
-    const values = parsed.data;
     if (formMode === "create") {
       createMutation.mutate(toCreatePayload(values));
       return;
     }
-
     if (!selectedProject) {
       setFormError("Pilih proyek sebelum menyimpan perubahan.");
       return;
@@ -286,6 +297,7 @@ export default function ProjectsPage() {
           sectors={sectors}
           regions={regions}
           riverBasins={riverBasins}
+          projectCategories={projectCategories}
           onSubmit={handleSubmit}
           onCancel={() => {
             setShowForm(false);
@@ -395,6 +407,7 @@ function ProjectForm({
   sectors,
   regions,
   riverBasins,
+  projectCategories,
   onSubmit,
   onCancel,
 }: {
@@ -407,12 +420,52 @@ function ProjectForm({
   sectors: Sector[];
   regions: Region[];
   riverBasins: RiverBasin[];
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  projectCategories: ProjectCategory[];
+  onSubmit: (values: ProjectFormValues) => void;
   onCancel: () => void;
 }) {
+  // ---- Local controlled state for rich fields + selects ----
+  const [description, setDescription] = useState(project?.description ?? "");
+  const [objectives, setObjectives] = useState(project?.objectives ?? "");
+  const [localError, setLocalError] = useState<string | null>(null);
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLocalError(null);
+
+    const data = new FormData(event.currentTarget);
+    const raw = {
+      code: (data.get("code") as string) ?? "",
+      name: (data.get("name") as string) ?? "",
+      description,
+      objectives,
+      priority: (data.get("priority") as string) ?? "",
+      category: (data.get("category") as string) ?? "",
+      start_date: (data.get("start_date") as string) ?? "",
+      end_date: (data.get("end_date") as string) ?? "",
+      budget_total: parseRupiahInput((data.get("budget_total") as string) ?? "0"),
+      currency: (data.get("currency") as string) || "IDR",
+      progress_pct: Number((data.get("progress_pct") as string) || 0),
+      org_unit_id: (data.get("org_unit_id") as string) ?? "",
+      program_id: (data.get("program_id") as string) ?? "",
+      sector_id: (data.get("sector_id") as string) ?? "",
+      region_id: (data.get("region_id") as string) ?? "",
+      river_basin_id: (data.get("river_basin_id") as string) ?? "",
+    };
+
+    const parsed = projectFormSchema.safeParse(raw);
+    if (!parsed.success) {
+      setLocalError(parsed.error.issues[0]?.message ?? "Data proyek belum valid.");
+      return;
+    }
+    onSubmit(parsed.data);
+  }
+
+  const displayedError = localError ?? error;
+
   return (
     <form
-      onSubmit={onSubmit}
+      onSubmit={handleSubmit}
       className="mb-6 rounded-lg border border-border bg-card p-5 shadow-sm"
     >
       <div className="mb-4 flex items-center justify-between">
@@ -434,9 +487,9 @@ function ProjectForm({
         </button>
       </div>
 
-      {error && (
+      {displayedError && (
         <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {error}
+          {displayedError}
         </div>
       )}
 
@@ -470,19 +523,26 @@ function ProjectForm({
         <Field label="Anggaran">
           <input
             name="budget_total"
-            type="number"
-            min="0"
-            defaultValue={project?.budget_total ?? 0}
+            inputMode="numeric"
+            defaultValue={formatRupiahInput(project?.budget_total ?? 0)}
             className={inputClassName}
+            placeholder="Rp. 100,000,000,-"
+            onInput={formatRupiahInputEvent}
           />
         </Field>
         <Field label="Kategori">
-          <input
+          <select
             name="category"
             defaultValue={project?.category ?? ""}
             className={inputClassName}
-            placeholder="Infrastruktur"
-          />
+          >
+            <option value="">— Pilih kategori —</option>
+            {projectCategories.map((cat) => (
+              <option key={cat.id} value={cat.code}>
+                {cat.code} – {cat.name}
+              </option>
+            ))}
+          </select>
         </Field>
         <Field label="Tanggal Mulai">
           <input
@@ -501,14 +561,20 @@ function ProjectForm({
           />
         </Field>
         <Field label="Progres">
-          <input
-            name="progress_pct"
-            type="number"
-            min="0"
-            max="100"
-            defaultValue={project?.progress_pct ?? 0}
-            className={inputClassName}
-          />
+          <div className="relative">
+            <input
+              name="progress_pct"
+              type="number"
+              min="0"
+              max="100"
+              step="0.1"
+              defaultValue={project?.progress_pct ?? 0}
+              className={cn(inputClassName, "pr-9")}
+            />
+            <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm font-medium text-muted-foreground">
+              %
+            </span>
+          </div>
         </Field>
         <Field label="Balai / Unit Pemilik">
           <select
@@ -584,19 +650,19 @@ function ProjectForm({
 
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Field label="Deskripsi">
-          <textarea
-            name="description"
-            defaultValue={project?.description ?? ""}
-            className={cn(inputClassName, "min-h-20 py-2")}
+          <RichTextEditor
+            value={description}
+            onChange={setDescription}
             placeholder="Deskripsi operasional singkat"
+            disabled={isSaving}
           />
         </Field>
         <Field label="Tujuan">
-          <textarea
-            name="objectives"
-            defaultValue={project?.objectives ?? ""}
-            className={cn(inputClassName, "min-h-20 py-2")}
+          <RichTextEditor
+            value={objectives}
+            onChange={setObjectives}
             placeholder="Hasil yang diharapkan"
+            disabled={isSaving}
           />
         </Field>
       </div>
@@ -854,7 +920,7 @@ function formValues(form: HTMLFormElement): ProjectFormValues {
     category: getString(data, "category"),
     start_date: getString(data, "start_date"),
     end_date: getString(data, "end_date"),
-    budget_total: Number(getString(data, "budget_total") || 0),
+    budget_total: parseRupiahInput(getString(data, "budget_total")),
     currency: getString(data, "currency") || "IDR",
     progress_pct: Number(getString(data, "progress_pct") || 0),
     org_unit_id: getString(data, "org_unit_id"),
@@ -882,6 +948,7 @@ function toCreatePayload(values: ProjectFormValues): CreateProjectRequest {
     end_date: optionalString(values.end_date),
     budget_total: values.budget_total,
     currency: values.currency,
+    progress_pct: values.progress_pct,
     org_unit_id: optionalString(values.org_unit_id),
     program_id: optionalString(values.program_id),
     sector_id: optionalString(values.sector_id),
@@ -913,6 +980,22 @@ function toUpdatePayload(values: ProjectFormValues): UpdateProjectRequest {
 function optionalString(value: string | undefined) {
   const trimmed = value?.trim();
   return trimmed ? trimmed : undefined;
+}
+
+function parseRupiahInput(value: string) {
+  return Number(value.replace(/[^\d]/g, "") || 0);
+}
+
+function formatRupiahInput(value: number) {
+  if (!Number.isFinite(value) || value <= 0) {
+    return "";
+  }
+  return `Rp. ${Math.round(value).toLocaleString("en-US")},-`;
+}
+
+function formatRupiahInputEvent(event: FormEvent<HTMLInputElement>) {
+  const input = event.currentTarget;
+  input.value = formatRupiahInput(parseRupiahInput(input.value));
 }
 
 function toDateInput(value: string | null | undefined) {

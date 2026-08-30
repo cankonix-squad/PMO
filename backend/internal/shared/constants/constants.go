@@ -98,6 +98,9 @@ const (
 	// P3-001: BIM/Digital Twin Integration
 	ResourceBIMIntegration = "bim_integration"
 
+	// PROJECT-FORM-002: Project Category master
+	ResourceProjectCategory = "project_category"
+
 	// P3-003: Data Governance — official validation & approval workflow
 	ResourceDataGovernance = "data_governance"
 

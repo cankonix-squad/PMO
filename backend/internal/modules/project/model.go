@@ -286,34 +286,43 @@ func (ProgressHistory) TableName() string {
 // --- DTOs ---
 
 type CreateProjectRequest struct {
-	OrgUnitID   *uuid.UUID      `json:"org_unit_id"`
-	Code        string          `json:"code" binding:"required,max=100"`
-	Name        string          `json:"name" binding:"required,max=500"`
-	Description string          `json:"description"`
-	Objectives  string          `json:"objectives"`
-	Priority    string          `json:"priority" binding:"max=50"`
-	Category    string          `json:"category" binding:"max=100"`
-	StartDate   *types.FlexTime `json:"start_date"`
-	EndDate     *types.FlexTime `json:"end_date"`
-	BudgetTotal float64         `json:"budget_total"`
-	Currency    string          `json:"currency" binding:"max=10"`
-	ManagerID   *uuid.UUID      `json:"manager_id"`
+	OrgUnitID    *uuid.UUID      `json:"org_unit_id" binding:"required"`
+	ProgramID    *uuid.UUID      `json:"program_id" binding:"required"`
+	SectorID     *uuid.UUID      `json:"sector_id" binding:"required"`
+	RegionID     *uuid.UUID      `json:"region_id" binding:"required"`
+	RiverBasinID *uuid.UUID      `json:"river_basin_id" binding:"required"`
+	Code         string          `json:"code" binding:"required,max=100"`
+	Name         string          `json:"name" binding:"required,max=500"`
+	Description  string          `json:"description" binding:"required"`
+	Objectives   string          `json:"objectives" binding:"required"`
+	Priority     string          `json:"priority" binding:"required,max=50"`
+	Category     string          `json:"category" binding:"required,max=100"`
+	StartDate    *types.FlexTime `json:"start_date" binding:"required"`
+	EndDate      *types.FlexTime `json:"end_date" binding:"required"`
+	BudgetTotal  float64         `json:"budget_total" binding:"required,min=1"`
+	Currency     string          `json:"currency" binding:"max=10"`
+	ManagerID    *uuid.UUID      `json:"manager_id"`
+	ProgressPct  *float64        `json:"progress_pct" binding:"required,min=0,max=100"`
 }
 
 type UpdateProjectRequest struct {
-	OrgUnitID   *uuid.UUID      `json:"org_unit_id"`
-	Name        string          `json:"name" binding:"max=500"`
-	Description string          `json:"description"`
-	Objectives  string          `json:"objectives"`
-	Status      string          `json:"status" binding:"max=50"`
-	Priority    string          `json:"priority" binding:"max=50"`
-	Category    string          `json:"category" binding:"max=100"`
-	StartDate   *types.FlexTime `json:"start_date"`
-	EndDate     *types.FlexTime `json:"end_date"`
-	BudgetTotal *float64        `json:"budget_total"`
-	Currency    string          `json:"currency" binding:"max=10"`
-	ManagerID   *uuid.UUID      `json:"manager_id"`
-	ProgressPct *float64        `json:"progress_pct"`
+	OrgUnitID    *uuid.UUID      `json:"org_unit_id"`
+	ProgramID    *uuid.UUID      `json:"program_id"`
+	SectorID     *uuid.UUID      `json:"sector_id"`
+	RegionID     *uuid.UUID      `json:"region_id"`
+	RiverBasinID *uuid.UUID      `json:"river_basin_id"`
+	Name         string          `json:"name" binding:"max=500"`
+	Description  string          `json:"description"`
+	Objectives   string          `json:"objectives"`
+	Status       string          `json:"status" binding:"max=50"`
+	Priority     string          `json:"priority" binding:"max=50"`
+	Category     string          `json:"category" binding:"max=100"`
+	StartDate    *types.FlexTime `json:"start_date"`
+	EndDate      *types.FlexTime `json:"end_date"`
+	BudgetTotal  *float64        `json:"budget_total"`
+	Currency     string          `json:"currency" binding:"max=10"`
+	ManagerID    *uuid.UUID      `json:"manager_id"`
+	ProgressPct  *float64        `json:"progress_pct"`
 }
 
 type TransitionRequest struct {

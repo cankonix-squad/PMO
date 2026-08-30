@@ -1,8 +1,8 @@
-# CANKORA — UAT Deployment Guide
+# PMO — UAT Deployment Guide
 
 **Versi**: 1.0.0  
 **Tanggal**: 2026-08-29  
-**Ticket**: CANKORA-UAT-010  
+**Ticket**: PMO-UAT-010  
 **Status**: Non-IoT UAT Candidate  
 **Audience**: QA engineer, DevOps, release manager
 
@@ -10,7 +10,7 @@
 
 ## 1. Scope
 
-Dokumen ini menjelaskan cara men-deploy CANKORA untuk sesi UAT (User Acceptance Testing) di lingkungan **lokal** atau **UAT server**. Target status: **Non-IoT UAT Candidate** — semua fitur P0–P3 non-IoT terverifikasi, IoT telemetry tetap Future/Last.
+Dokumen ini menjelaskan cara men-deploy PMO untuk sesi UAT (User Acceptance Testing) di lingkungan **lokal** atau **UAT server**. Target status: **Non-IoT UAT Candidate** — semua fitur P0–P3 non-IoT terverifikasi, IoT telemetry tetap Future/Last.
 
 Tidak untuk produksi. Gunakan prosedur ini hanya untuk UAT/demo.
 
@@ -44,7 +44,7 @@ brew services start postgresql@15
 
 ```bash
 # 1. Clone/buka workspace
-cd '/Users/harmanto/Documents/Code/DEV/Project Management/CANKORA'
+cd '/Users/harmanto/Documents/Code/DEV/Project Management/PMO'
 
 # 2. Run environment check
 bash scripts/uat-env-check.sh

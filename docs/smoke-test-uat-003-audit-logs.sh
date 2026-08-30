@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-# CANKORA — Smoke Test: UAT-003 Audit Log Viewer
+# PMO — Smoke Test: UAT-003 Audit Log Viewer
 # ============================================================
 # Usage:
 #   bash docs/smoke-test-uat-003-audit-logs.sh

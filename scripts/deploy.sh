@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# CANKORA PMO — Production Deployment Script
+# PMO — Production Deployment Script
 # Target: /root/cankonix-node/apps/cankonix-pmo on 187.77.127.202
 # Usage : ./scripts/deploy.sh [--skip-build]
 # =============================================================================
@@ -15,7 +15,7 @@ SKIP_BUILD="${1:-}"
 cd "$APP_DIR"
 
 echo "============================================================"
-echo " CANKORA PMO — Deployment $(date '+%Y-%m-%d %H:%M:%S %Z')"
+echo " PMO — Deployment $(date '+%Y-%m-%d %H:%M:%S %Z')"
 echo "============================================================"
 
 # ── 1. Show current commit ────────────────────────────────────────────────────

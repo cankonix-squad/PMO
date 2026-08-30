@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// Data Governance — Official Data Validation & Approval Workflow (CANKORA-P3-003)
+// Data Governance — Official Data Validation & Approval Workflow (PMO-P3-003)
 // ---------------------------------------------------------------------------
 
 export type GovernanceSourceType =

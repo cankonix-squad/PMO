@@ -1,5 +1,5 @@
 # PMO National Project Control Tower Analysis
-# CANKORA - Direktorat Jenderal Sumber Daya Air
+# PMO - Direktorat Jenderal Sumber Daya Air
 
 **Versi**: 0.2.2  
 **Tanggal Analisis**: 2026-08-21  
@@ -9,13 +9,13 @@
 
 ## 1. Tujuan Dokumen
 
-Dokumen ini menerjemahkan materi rencana pengembangan terbaru menjadi baseline kebutuhan CANKORA sebagai **PMO National Project Control Tower**. Dokumen ini menjadi penghubung antara materi bisnis, SRS, arsitektur, ERD, permission matrix, gap analysis, dan development backlog.
+Dokumen ini menerjemahkan materi rencana pengembangan terbaru menjadi baseline kebutuhan PMO sebagai **PMO National Project Control Tower**. Dokumen ini menjadi penghubung antara materi bisnis, SRS, arsitektur, ERD, permission matrix, gap analysis, dan development backlog.
 
 Strategi produk yang disepakati:
 
-- CANKORA adalah sistem operasional, workflow, audit, dan sumber data utama.
+- PMO adalah sistem operasional, workflow, audit, dan sumber data utama.
 - Power BI menjadi dashboard eksekutif tahap awal melalui dataset terkontrol.
-- Dashboard native CANKORA tetap digunakan untuk pekerjaan operasional dan dikembangkan bertahap.
+- Dashboard native PMO tetap digunakan untuk pekerjaan operasional dan dikembangkan bertahap.
 - Informasi disajikan dalam tiga level: nasional, program/sektor, dan detail proyek.
 
 ### 1.1 Current UI Translation Status (2026-08-21)
@@ -54,7 +54,7 @@ Pengguna utama adalah PM, project controller, Satker/Balai/BBWS/BWS, dan tim lap
 
 ## 4. Capability Map
 
-| Capability | Target | Status CANKORA 2026-08-20 |
+| Capability | Target | Status PMO 2026-08-20 |
 |------------|--------|----------------------------|
 | Executive Command Center | Level 1 nasional, decision queue, critical ranking | Planned |
 | Portfolio & Program Management | Program/sektor, wilayah, pipeline, target | Planned |
@@ -110,7 +110,7 @@ Minimum kontrol data:
 Input Manual / Field / External Systems
                  |
                  v
- CANKORA Operational API + PostgreSQL
+ PMO Operational API + PostgreSQL
                  |
        Validation & Rule Engine
                  |
@@ -137,7 +137,7 @@ IoT diparkir sebagai capability paling akhir: bentuk awalnya nanti adalah data g
 ## 9. Current State versus Target State
 
 - **Local operational MVP**: P0-001 sampai P0-014 sudah selesai dan terverifikasi lokal.
-- **PMO core process**: `CANKORA-P1-001` Issue Management sudah selesai; fase aktif berikutnya dimulai dari `CANKORA-P1-002` Risk Management.
+- **PMO core process**: `PMO-P1-001` Issue Management sudah selesai; fase aktif berikutnya dimulai dari `PMO-P1-002` Risk Management.
 - **Full PMO Control Tower**: belum terpenuhi. Power BI, GIS, progress snapshot resmi, data validation, full health score, program dashboard, field inspection, dan integrasi eksternal masih roadmap.
 - Status implementasi rinci harus selalu mengacu pada [Implementation Gap Analysis](./IMPLEMENTATION-GAP-ANALYSIS.md), sedangkan urutan delivery mengacu pada [Phased Implementation Plan](./PHASED-IMPLEMENTATION-PLAN.md), bukan pada visual mockup.
 

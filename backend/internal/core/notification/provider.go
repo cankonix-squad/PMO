@@ -33,8 +33,8 @@ type Templates struct{}
 func (t *Templates) PasswordReset(to, resetURL string) EmailMessage {
 	return EmailMessage{
 		To:      []string{to},
-		Subject: "Reset Your CANKORA Password",
-		HTMLBody: `<p>You requested a password reset for your CANKORA account.</p>
+		Subject: "Reset Your PMO Password",
+		HTMLBody: `<p>You requested a password reset for your PMO account.</p>
 <p><a href="` + resetURL + `">Click here to reset your password</a></p>
 <p>This link expires in 1 hour. If you did not request this, you can safely ignore this email.</p>`,
 		TextBody: "Reset your password at: " + resetURL + "\nThis link expires in 1 hour.",
@@ -45,11 +45,11 @@ func (t *Templates) PasswordReset(to, resetURL string) EmailMessage {
 func (t *Templates) WelcomeUser(to, firstName, loginURL string) EmailMessage {
 	return EmailMessage{
 		To:      []string{to},
-		Subject: "Welcome to CANKORA",
+		Subject: "Welcome to PMO",
 		HTMLBody: `<p>Hi ` + firstName + `,</p>
-<p>Your CANKORA account has been created. You can log in at:</p>
+<p>Your PMO account has been created. You can log in at:</p>
 <p><a href="` + loginURL + `">` + loginURL + `</a></p>
 <p>You will be prompted to change your password on first login.</p>`,
-		TextBody: "Hi " + firstName + ", your CANKORA account is ready. Login at: " + loginURL,
+		TextBody: "Hi " + firstName + ", your PMO account is ready. Login at: " + loginURL,
 	}
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# CANKORA UAT Stop Script
+# PMO UAT Stop Script
 # Menghentikan backend + frontend yang dijalankan oleh uat-start.sh
 # Usage: bash scripts/uat-stop.sh
 # =============================================================================
@@ -14,7 +14,7 @@ warn()  { echo -e "${YELLOW}[UAT-STOP]${NC} $1"; }
 error() { echo -e "${RED}[UAT-STOP]${NC} $1"; }
 
 echo
-echo "── Stopping CANKORA UAT Stack ──"
+echo "── Stopping PMO UAT Stack ──"
 
 STOPPED=0
 FAILED=0
@@ -50,11 +50,11 @@ else
     if [ -n "$PIDS" ]; then
       for P in $PIDS; do
         CMD=$(ps -p "$P" -o comm= 2>/dev/null || echo "?")
-        # Only kill known CANKORA processes
+        # Only kill known PMO processes
         if echo "$CMD" | grep -qE "go|node|next|api|cankora"; then
           kill "$P" 2>/dev/null && info "Killed $CMD PID $P (port $PORT)" && ((STOPPED++)) || warn "Failed to kill PID $P"
         else
-          warn "Port $PORT in use by $CMD (PID $P) — skipping (not a CANKORA process)"
+          warn "Port $PORT in use by $CMD (PID $P) — skipping (not a PMO process)"
         fi
       done
     fi

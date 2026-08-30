@@ -1,15 +1,15 @@
 # ERD Konseptual
-# CANKORA — Enterprise Operations Platform
+# PMO — Enterprise Operations Platform
 
 **Versi**: 0.2.4  
 **Tanggal**: 2026-08-29  
 **Dibuat oleh**: Cankonix  
 **Status**: Draft — conceptual data model
 
-> **Planning note 2026-08-29 — CANKORA-DASH-003: BALAI display source**
+> **Planning note 2026-08-29 — PMO-DASH-003: BALAI display source**
 > Kolom UI `BALAI` pada Dashboard "10 Proyek Prioritas" harus berasal dari relasi existing `projects.org_unit_id` → `org_units.id/name`. Tidak perlu migration/kolom database baru kecuali nanti business owner dipisahkan dari struktur org unit. `created_by` dan `manager_id` bukan sumber yang tepat untuk `BALAI`.
 
-> **Update 2026-08-29 — CANKORA-DASH-002: project_periodic_reports**
+> **Update 2026-08-29 — PMO-DASH-002: project_periodic_reports**
 > Tabel baru `project_periodic_reports` (migration 000038): `id UUID PK`, `organization_id UUID NOT NULL REFERENCES organizations(id)`, `project_id UUID NOT NULL REFERENCES projects(id)`, `period_year SMALLINT NOT NULL CHECK(2000..2100)`, `period_month SMALLINT NOT NULL CHECK(1..12)`, `physical_progress_pct NUMERIC(5,2) NOT NULL DEFAULT 0 CHECK(0..100)`, `financial_planned NUMERIC(20,2) NOT NULL DEFAULT 0 CHECK(>=0)`, `financial_actual NUMERIC(20,2) NOT NULL DEFAULT 0 CHECK(>=0)`, `financial_pct NUMERIC(8,4) NOT NULL DEFAULT 0` (backend-computed: `financial_actual/financial_planned*100`, 0 jika planned=0), `notes TEXT`, `reported_by UUID REFERENCES users(id)`, `reported_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`, `created_at`, `updated_at`, `deleted_at TIMESTAMPTZ`. Unique partial index `uq_periodic_report_active` pada `(organization_id, project_id, period_year, period_month) WHERE deleted_at IS NULL`. Index performa: `idx_periodic_report_org_period (organization_id, period_year, period_month) WHERE deleted_at IS NULL`, `idx_periodic_report_project (project_id, period_year, period_month) WHERE deleted_at IS NULL`. Klasifikasi data: **OPERATIONAL** (laporan periodik operasional — belum official-governed/validated). Dashboard trend `/api/v1/dashboard/trend` memprioritaskan data dari tabel ini (`data_type: "PERIODIC_REPORT"`) sebelum fallback ke `project_progress_history` + `project_budgets`. Tidak ada relasi FK ke `data_submissions` atau `data_lock_periods` — tabel ini berdiri sendiri sebagai input operasional.
 
 > **Update 2026-08-29 — REL-001 Data Governance tables**  

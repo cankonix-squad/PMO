@@ -1,5 +1,5 @@
 # Phased Implementation Plan
-# CANKORA - PMO National Project Control Tower
+# PMO - PMO National Project Control Tower
 
 **Versi**: 1.3  
 **Tanggal**: 2026-08-29  
@@ -8,15 +8,15 @@
 
 > **Planning update 2026-08-29 — DASH-003:** Sebelum staging/UAT lanjutan, lakukan polish kecil dashboard: tambah kolom `BALAI` pada "10 Proyek Prioritas" memakai relasi `projects.org_unit_id` → `org_units.name`, tanpa schema owner baru dan tanpa memulai IoT.
 
-> **Update 2026-08-29 — CANKORA-UAT-010 Done (Final Acceptance Review & Demo Polish):** Status: **Non-IoT UAT Candidate**. Semua fase non-IoT selesai. Dibuat: `scripts/` (uat-env-check/start/status/stop), `docs/smoke-test-uat-008-release-candidate.sh` (orchestrator 7 PASS + 1 WARN non-blocking), `docs/UAT-DEPLOYMENT-GUIDE.md`, `docs/RELEASE-CANDIDATE-RUNBOOK.md`, `docs/UAT-FINAL-CHECKLIST.md`, `backend/.gitignore`. Phase table diupdate untuk mencerminkan status aktual semua fase. `scripts/uat-env-check.sh` 15 PASS 2 WARN 0 FAIL. UAT-008 RC Orchestrator: 7/8 PASS (UAT-001 non-blocking WARN karena Playwright login timeout pre-existing). `go build`, `gofmt`, `npx tsc`, `npm run lint`, `npm run build` semua OK. IoT (`CANKORA-P3-004`) tetap Future/Last.
+> **Update 2026-08-29 — PMO-UAT-010 Done (Final Acceptance Review & Demo Polish):** Status: **Non-IoT UAT Candidate**. Semua fase non-IoT selesai. Dibuat: `scripts/` (uat-env-check/start/status/stop), `docs/smoke-test-uat-008-release-candidate.sh` (orchestrator 7 PASS + 1 WARN non-blocking), `docs/UAT-DEPLOYMENT-GUIDE.md`, `docs/RELEASE-CANDIDATE-RUNBOOK.md`, `docs/UAT-FINAL-CHECKLIST.md`, `backend/.gitignore`. Phase table diupdate untuk mencerminkan status aktual semua fase. `scripts/uat-env-check.sh` 15 PASS 2 WARN 0 FAIL. UAT-008 RC Orchestrator: 7/8 PASS (UAT-001 non-blocking WARN karena Playwright login timeout pre-existing). `go build`, `gofmt`, `npx tsc`, `npm run lint`, `npm run build` semua OK. IoT (`PMO-P3-004`) tetap Future/Last.
 
-> **Update 2026-08-29 — CANKORA-UAT-001 Done (Demo/UAT Packaging + Full UI Regression Gate):** Sistem non-IoT siap UAT/demo. Ditambahkan: `docs/smoke-test-uat-001-ui-full.sh` (18 routes full UI regression), `STRICT_FRONTEND=1` pada `docs/smoke-test-rel-001-regression.sh`, `docs/UAT-DEMO-GUIDE.md`, dan fix layout `DashboardLayout` pada 4 halaman integrasi/governance. IoT (`CANKORA-P3-004`) tetap **Future/Last**.
+> **Update 2026-08-29 — PMO-UAT-001 Done (Demo/UAT Packaging + Full UI Regression Gate):** Sistem non-IoT siap UAT/demo. Ditambahkan: `docs/smoke-test-uat-001-ui-full.sh` (18 routes full UI regression), `STRICT_FRONTEND=1` pada `docs/smoke-test-rel-001-regression.sh`, `docs/UAT-DEMO-GUIDE.md`, dan fix layout `DashboardLayout` pada 4 halaman integrasi/governance. IoT (`PMO-P3-004`) tetap **Future/Last**.
 
 ---
 
 ## 1. Tujuan
 
-Dokumen ini membagi roadmap CANKORA menjadi fase implementasi yang mengikuti dependency teknis dan bisnis. Status tiket tetap dikelola di `DEVELOPMENT-BACKLOG.md`; dokumen ini menentukan urutan, hasil fase, keputusan yang dibutuhkan, dan gate sebelum fase berikutnya dimulai.
+Dokumen ini membagi roadmap PMO menjadi fase implementasi yang mengikuti dependency teknis dan bisnis. Status tiket tetap dikelola di `DEVELOPMENT-BACKLOG.md`; dokumen ini menentukan urutan, hasil fase, keputusan yang dibutuhkan, dan gate sebelum fase berikutnya dimulai.
 
 Aturan eksekusi:
 
@@ -47,8 +47,8 @@ Aturan eksekusi:
 
 Tiket:
 
-- `CANKORA-P0-001` sampai `CANKORA-P0-014`.
-- `CANKORA-P1-001` Issue Management.
+- `PMO-P0-001` sampai `PMO-P0-014`.
+- `PMO-P1-001` Issue Management.
 
 Hasil yang sudah tersedia:
 
@@ -65,12 +65,12 @@ Gate fase: backend build/test, frontend type-check/build, migration/seed, API sm
 
 Urutan tiket:
 
-1. `CANKORA-P1-016` - Frontend visual/runtime stabilization untuk login, Dashboard, dan Command Center.
-2. `CANKORA-P1-002` - Risk Management.
-3. `CANKORA-P1-003` - Budget Monitoring.
-4. `CANKORA-P1-004` - Vendor, consultant, dan contract.
-5. `CANKORA-P1-005` - Document Management.
-6. `CANKORA-P1-006` - Corrective Action.
+1. `PMO-P1-016` - Frontend visual/runtime stabilization untuk login, Dashboard, dan Command Center.
+2. `PMO-P1-002` - Risk Management.
+3. `PMO-P1-003` - Budget Monitoring.
+4. `PMO-P1-004` - Vendor, consultant, dan contract.
+5. `PMO-P1-005` - Document Management.
+6. `PMO-P1-006` - Corrective Action.
 
 Status UI saat ini:
 
@@ -100,10 +100,10 @@ Phase gate:
 
 Urutan tiket:
 
-1. `CANKORA-P1-008` - Org Unit Satker/Balai/BBWS/BWS.
-2. `CANKORA-P1-010` - Program, sektor, wilayah, lokasi, dan DAS.
-3. `CANKORA-P1-009` - Gantt/timeline read-only.
-4. `CANKORA-P1-011` - Baseline dan periodic progress/financial snapshots.
+1. `PMO-P1-008` - Org Unit Satker/Balai/BBWS/BWS.
+2. `PMO-P1-010` - Program, sektor, wilayah, lokasi, dan DAS.
+3. `PMO-P1-009` - Gantt/timeline read-only.
+4. `PMO-P1-011` - Baseline dan periodic progress/financial snapshots.
 
 Phase gate:
 
@@ -119,10 +119,10 @@ Phase gate:
 
 Urutan tiket:
 
-1. `CANKORA-P1-012` - Data validation, completeness, freshness, lineage, dan SLA.
-2. `CANKORA-P1-013` - Field inspection dan evidence.
-3. `CANKORA-P1-007` - Weekly/monthly/quarterly reporting snapshots.
-4. `CANKORA-P2-001` - CSV/Excel import awal melalui validation pipeline. **Done** — migration 000024, module imports, 8 endpoints, ResourceImport permission, frontend /imports, smoke test 27/27 PASS.
+1. `PMO-P1-012` - Data validation, completeness, freshness, lineage, dan SLA.
+2. `PMO-P1-013` - Field inspection dan evidence.
+3. `PMO-P1-007` - Weekly/monthly/quarterly reporting snapshots.
+4. `PMO-P2-001` - CSV/Excel import awal melalui validation pipeline. **Done** — migration 000024, module imports, 8 endpoints, ResourceImport permission, frontend /imports, smoke test 27/27 PASS.
 
 Phase gate:
 
@@ -138,11 +138,11 @@ Phase gate:
 
 Urutan tiket:
 
-1. `CANKORA-P1-014` - Configurable Project Health Score.
-2. `CANKORA-P1-015` - PMO Command Center.
-3. `CANKORA-P2-003` - Level 3 Project Control.
-4. `CANKORA-P2-010` - Benefit/outcome indicators.
-5. `CANKORA-P2-004` - Priority scoring dan decision support.
+1. `PMO-P1-014` - Configurable Project Health Score.
+2. `PMO-P1-015` - PMO Command Center.
+3. `PMO-P2-003` - Level 3 Project Control.
+4. `PMO-P2-010` - Benefit/outcome indicators.
+5. `PMO-P2-004` - Priority scoring dan decision support.
 
 Keputusan wajib sebelum Health Score diaktifkan:
 
@@ -164,11 +164,11 @@ Phase gate:
 
 Urutan tiket:
 
-1. `CANKORA-P2-006` - Level 2 Program/Sector Dashboard.
-2. `CANKORA-P2-008` - GIS project distribution dan hotspot.
-3. `CANKORA-P2-009` - Analytics read model dan Power BI semantic contract.
-4. `CANKORA-P2-007` - Level 1 National Executive Dashboard.
-5. `CANKORA-P2-005` - Responsive/mobile QA seluruh workflow utama.
+1. `PMO-P2-006` - Level 2 Program/Sector Dashboard.
+2. `PMO-P2-008` - GIS project distribution dan hotspot.
+3. `PMO-P2-009` - Analytics read model dan Power BI semantic contract.
+4. `PMO-P2-007` - Level 1 National Executive Dashboard.
+5. `PMO-P2-005` - Responsive/mobile QA seluruh workflow utama.
 
 Phase gate:
 
@@ -185,8 +185,8 @@ Phase gate:
 
 Tiket:
 
-1. `CANKORA-P2-002` - Adapter SIRUP/SIMPONI/OM-SPAN atau connector lain yang disetujui.
-2. `CANKORA-P2-011` - Primavera P6 schedule integration.
+1. `PMO-P2-002` - Adapter SIRUP/SIMPONI/OM-SPAN atau connector lain yang disetujui.
+2. `PMO-P2-011` - Primavera P6 schedule integration.
 
 Entry criteria:
 
@@ -206,10 +206,10 @@ Phase gate:
 
 Urutan tiket:
 
-1. `CANKORA-P3-001` - BIM/digital twin reference integration. **Done** (2026-08-28): migration `000027_bim_models`, module `integration/bim`, 10 routes `/api/v1/integrations/bim/models`, `ResourceBIMIntegration`, frontend `/integrations/bim`, smoke 23/23 PASS.
-2. `CANKORA-P3-002` - Government Entity Resolution. **Done** (2026-08-28): PENDING_MATCH → MATCHED (migration `000029_government_resolution_metadata`, `resolver.go`, 6 routes, frontend tab "Resolusi Entitas", smoke 13 checks).
-3. `CANKORA-P3-003` - Data Governance — Official Data Validation & Approval Workflow. **Done** (2026-08-28): module `governance/`, migrations `000030`–`000033`, 12 routes `/api/v1/governance/`, `ResourceDataGovernance`, frontend `/governance`, smoke 17/17 PASS.
-4. `CANKORA-P3-004` - IoT/sensor telemetry ingestion pipeline. **Future / Last** — sengaja diparkir sebagai item advanced-integration paling akhir. Bentuk awal yang direncanakan adalah IoT data gateway + device/source registry + telemetry validation + alert foundation; MQTT, time-series optimization, alert rules engine, dan digital twin overlay baru setelah foundation stabil. Jangan mulai sebelum governance hardening, dashboard/GIS regression, reporting/read-model reconciliation, dan semua Phase 3 non-IoT yang lebih mendasar stabil.
+1. `PMO-P3-001` - BIM/digital twin reference integration. **Done** (2026-08-28): migration `000027_bim_models`, module `integration/bim`, 10 routes `/api/v1/integrations/bim/models`, `ResourceBIMIntegration`, frontend `/integrations/bim`, smoke 23/23 PASS.
+2. `PMO-P3-002` - Government Entity Resolution. **Done** (2026-08-28): PENDING_MATCH → MATCHED (migration `000029_government_resolution_metadata`, `resolver.go`, 6 routes, frontend tab "Resolusi Entitas", smoke 13 checks).
+3. `PMO-P3-003` - Data Governance — Official Data Validation & Approval Workflow. **Done** (2026-08-28): module `governance/`, migrations `000030`–`000033`, 12 routes `/api/v1/governance/`, `ResourceDataGovernance`, frontend `/governance`, smoke 17/17 PASS.
+4. `PMO-P3-004` - IoT/sensor telemetry ingestion pipeline. **Future / Last** — sengaja diparkir sebagai item advanced-integration paling akhir. Bentuk awal yang direncanakan adalah IoT data gateway + device/source registry + telemetry validation + alert foundation; MQTT, time-series optimization, alert rules engine, dan digital twin overlay baru setelah foundation stabil. Jangan mulai sebelum governance hardening, dashboard/GIS regression, reporting/read-model reconciliation, dan semua Phase 3 non-IoT yang lebih mendasar stabil.
 
 Entry criteria:
 
@@ -260,4 +260,4 @@ Pada awal sesi:
 3. Pilih tiket `Todo` pertama dalam fase aktif yang dependency-nya `Done`.
 4. Selesaikan, verifikasi, dokumentasikan, lalu lanjut hanya jika phase gate tetap hijau.
 
-Current resume point pada 2026-08-28: **jangan mulai IoT sebagai next ticket**. P3-001 BIM foundation, P3-002 Government Entity Resolution, dan P3-003 Data Governance (Official Data Validation & Approval Workflow) sudah lulus gate backend/frontend lokal, tetapi review terakhir menemukan governance validation hardening dan dashboard/GIS regression yang harus dibereskan lebih dulu. `CANKORA-P3-004` - IoT/sensor telemetry ingestion dipindah ke urutan paling akhir/future advanced integration setelah governance hardening, UI regression, reporting/read-model reconciliation, dan semua non-IoT Phase 3 work stabil.
+Current resume point pada 2026-08-28: **jangan mulai IoT sebagai next ticket**. P3-001 BIM foundation, P3-002 Government Entity Resolution, dan P3-003 Data Governance (Official Data Validation & Approval Workflow) sudah lulus gate backend/frontend lokal, tetapi review terakhir menemukan governance validation hardening dan dashboard/GIS regression yang harus dibereskan lebih dulu. `PMO-P3-004` - IoT/sensor telemetry ingestion dipindah ke urutan paling akhir/future advanced integration setelah governance hardening, UI regression, reporting/read-model reconciliation, dan semua non-IoT Phase 3 work stabil.

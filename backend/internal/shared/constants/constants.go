@@ -2,7 +2,7 @@ package constants
 
 // App
 const (
-	AppName    = "CANKORA"
+	AppName    = "PMO"
 	AppVersion = "0.1.0"
 	APIVersion = "v1"
 	APIPrefix  = "/api/v1"
@@ -108,7 +108,7 @@ const (
 	ResourceNotification  = "notification"
 	ResourceNotifications = ResourceNotification
 
-	// CANKORA-DASH-002: Periodic progress & financial report
+	// PMO-DASH-002: Periodic progress & financial report
 	ResourcePeriodicReport = "periodic_report"
 
 	// P1-011: Monitoring — baseline & snapshot

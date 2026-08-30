@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# CANKORA P2-008 — GIS Map smoke test
+# PMO P2-008 — GIS Map smoke test
 # Usage: bash docs/smoke-test-p2-008-gis.sh
 # Prereq: backend running on :8080, DB migrated + seeded (koordinat DEMO projects sudah diisi)
 # =============================================================================

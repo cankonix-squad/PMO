@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Smoke Test: CANKORA-P3-002 — Government Entity Resolution
+# Smoke Test: PMO-P3-002 — Government Entity Resolution
 # Tests the full PENDING_MATCH → MATCHED → UNMATCHED → REJECTED lifecycle.
 #
 # Prerequisites:
@@ -87,7 +87,7 @@ fi
 
 echo ""
 echo "========================================================"
-echo " CANKORA-P3-002 — Government Entity Resolution Smoke Test"
+echo " PMO-P3-002 — Government Entity Resolution Smoke Test"
 echo " API: $API"
 echo "========================================================"
 echo ""

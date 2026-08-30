@@ -913,7 +913,7 @@ export default function ReportingAnalyticsPage() {
         </div>
 
         <p className="text-xs text-slate-400 text-center">
-          Data bersumber dari database CANKORA secara real-time · Export request diproses secara asinkron
+          Data bersumber dari database PMO secara real-time · Export request diproses secara asinkron
         </p>
       </div>
     </DashboardLayout>

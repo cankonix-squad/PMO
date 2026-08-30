@@ -59,7 +59,7 @@ export default function ForgotPasswordPage() {
           </div>
           <h1 className="text-2xl font-bold text-[#082e63]">Reset Password</h1>
           <p className="mt-2 text-sm leading-6 text-slate-500">
-            Masukkan email akun CANKORA. Jika akun terdaftar, instruksi reset
+            Masukkan email akun PMO. Jika akun terdaftar, instruksi reset
             akan dikirim sesuai konfigurasi notifikasi sistem.
           </p>
         </div>

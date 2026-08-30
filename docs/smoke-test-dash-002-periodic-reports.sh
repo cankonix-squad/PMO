@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # smoke-test-dash-002-periodic-reports.sh
-# CANKORA-DASH-002 — Periodic Progress & Financial Realization Input
+# PMO-DASH-002 — Periodic Progress & Financial Realization Input
 # Usage: bash docs/smoke-test-dash-002-periodic-reports.sh
 set -euo pipefail
 
@@ -25,7 +25,7 @@ check() {
 
 skip() { echo -e "${ylw}SKIP${nc} $1 — $2"; SKIP=$((SKIP+1)); }
 
-echo "=== CANKORA-DASH-002 Smoke Test: Periodic Reports ==="
+echo "=== PMO-DASH-002 Smoke Test: Periodic Reports ==="
 echo "Base URL: $BASE_URL"
 echo ""
 
@@ -331,7 +331,7 @@ fi
 # ── Summary ───────────────────────────────────────────────────────────────────
 echo ""
 echo "=============================="
-echo " CANKORA-DASH-002 Smoke Results"
+echo " PMO-DASH-002 Smoke Results"
 echo "=============================="
 echo -e " ${grn}PASS${nc}: $PASS"
 echo -e " ${red}FAIL${nc}: $FAIL"

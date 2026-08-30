@@ -332,7 +332,7 @@ func New(deps *Dependencies) *gin.Engine {
 	documentsGroup.PUT("/:documentID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceDocuments, constants.ActionUpdate), deps.ProjectHandler.UpdateDocument)
 	documentsGroup.DELETE("/:documentID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceDocuments, constants.ActionDelete), deps.ProjectHandler.DeleteDocument)
 
-	// Periodic Reports — nested under projects (CANKORA-DASH-002)
+	// Periodic Reports — nested under projects (PMO-DASH-002)
 	periodicGroup := projectsGroup.Group("/:id/periodic-reports")
 	periodicGroup.GET("", middleware.RequirePermission(deps.RBACRepo, constants.ResourcePeriodicReport, constants.ActionView), deps.ProjectHandler.ListPeriodicReports)
 	periodicGroup.POST("", middleware.RequirePermission(deps.RBACRepo, constants.ResourcePeriodicReport, constants.ActionCreate), deps.ProjectHandler.CreatePeriodicReport)

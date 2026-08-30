@@ -50,7 +50,7 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // CANKORA brand
+        // PMO brand
         brand: {
           50:  "#eff6ff",
           100: "#dbeafe",

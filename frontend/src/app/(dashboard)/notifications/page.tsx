@@ -246,7 +246,7 @@ function NotificationRow({
 function TestModal({ onClose }: { onClose: () => void }) {
   const queryClient = useQueryClient();
   const [subject, setSubject] = useState("Test Notification");
-  const [body, setBody] = useState("Ini adalah test notification dari CANKORA UAT-004.");
+  const [body, setBody] = useState("Ini adalah test notification dari PMO UAT-004.");
   const [channel, setChannel] = useState<NotificationChannel>("IN_APP");
   const [priority, setPriority] = useState<NotificationPriority>("NORMAL");
 

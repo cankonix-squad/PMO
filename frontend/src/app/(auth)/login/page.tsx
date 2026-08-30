@@ -145,7 +145,7 @@ export default function LoginPage() {
 
         <div className="relative z-10 max-w-4xl px-12 xl:px-16">
           <p className="mb-4 text-sm font-semibold uppercase text-[#f6c515]">
-            CANKORA Control Tower
+            PMO Control Tower
           </p>
           <h1 className="text-5xl font-bold leading-tight text-white xl:text-6xl">
             PMO Digital Platform
@@ -199,7 +199,7 @@ export default function LoginPage() {
             </div>
             <div>
               <p className="text-2xl font-bold text-white">PMO Digital Platform</p>
-              <p className="mt-1 text-sm text-white/75">CANKORA National Project Control Tower</p>
+              <p className="mt-1 text-sm text-white/75">PMO National Project Control Tower</p>
             </div>
           </div>
         </div>
@@ -222,7 +222,7 @@ export default function LoginPage() {
               <h2 className="text-2xl font-bold text-[#082e63]">Masuk ke Sistem</h2>
               <div className="mx-auto mt-3 h-1 w-12 bg-[#f6c515]" />
               <p className="mt-4 text-sm text-slate-500">
-                Gunakan akun CANKORA Anda untuk melanjutkan
+                Gunakan akun PMO Anda untuk melanjutkan
               </p>
             </div>
 

@@ -1,5 +1,5 @@
 # =============================================================================
-# CANKORA Backend — Makefile
+# PMO Backend — Makefile
 # =============================================================================
 
 APP_NAME   := cankora
@@ -110,7 +110,7 @@ docker-down:
 
 help:
 	@echo ""
-	@echo "CANKORA Backend — Available targets:"
+	@echo "PMO Backend — Available targets:"
 	@echo "  make build          Build production binary"
 	@echo "  make run            Build and run"
 	@echo "  make dev            Run with go run (development)"

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# CANKORA — Smoke Test UAT-007: End-to-End Business Flow & Data Consistency
+# PMO — Smoke Test UAT-007: End-to-End Business Flow & Data Consistency
 # =============================================================================
 # Tests the full PMO business flow:
 #   A. Project Setup & Onboarding

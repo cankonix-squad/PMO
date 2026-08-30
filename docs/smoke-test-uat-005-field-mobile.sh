@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # smoke-test-uat-005-field-mobile.sh
-# CANKORA UAT-005 — Field Inspection Mobile View
+# PMO UAT-005 — Field Inspection Mobile View
 #
 # Tujuan:
 #   Verifikasi end-to-end field inspection workflow:
@@ -60,7 +60,7 @@ trap cleanup EXIT
 
 echo ""
 echo "========================================================"
-echo " CANKORA UAT-005 — Field Inspection Mobile View"
+echo " PMO UAT-005 — Field Inspection Mobile View"
 echo "========================================================"
 echo " BASE_URL   : $BASE_URL"
 echo " FRONTEND   : $FRONTEND_URL"

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Smoke Test: CANKORA-REL-001 — Non-IoT Stabilization Regression Gate
+# Smoke Test: PMO-REL-001 — Non-IoT Stabilization Regression Gate
 #
-# Tujuan: gate terpadu yang memverifikasi semua lapisan CANKORA (P0–P3 non-IoT)
+# Tujuan: gate terpadu yang memverifikasi semua lapisan PMO (P0–P3 non-IoT)
 # setelah stabilisasi. Script ini idempotent, tidak bergantung pada run sebelumnya,
 # dan memberikan PASS/FAIL count yang jelas.
 #
@@ -96,7 +96,7 @@ dbq() {
 
 echo ""
 echo "========================================================"
-echo " CANKORA REL-001 — Non-IoT Stabilization Regression Gate"
+echo " PMO REL-001 — Non-IoT Stabilization Regression Gate"
 echo "========================================================"
 echo " BASE_URL  : $BASE_URL"
 echo " FRONTEND  : $FRONTEND_URL"

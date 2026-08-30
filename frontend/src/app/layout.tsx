@@ -6,7 +6,7 @@ import { Providers } from "./providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "CANKORA — Enterprise Operations Platform",
+  title: "PMO — Enterprise Operations Platform",
   description: "Enterprise project management and operations monitoring platform by Cankonix",
   icons: {
     icon: "/images/logo-kemenpu.png",

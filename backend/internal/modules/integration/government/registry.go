@@ -16,7 +16,7 @@ var defaultConnectors = []ConnectorDefinition{
 		Description: "Ingests project reference data from the government project " +
 			"registry (SIRUP or equivalent). Provides procurement plan numbers, " +
 			"project codes, and linked budget references for matching against " +
-			"CANKORA projects.",
+			"PMO projects.",
 		DatasetTypes: []string{DatasetProjects},
 	},
 	{
@@ -40,7 +40,7 @@ var defaultConnectors = []ConnectorDefinition{
 		Key:  ConnectorVendorReference,
 		Name: "Government Vendor Reference",
 		Description: "Ingests registered vendor (rekanan) data from the government " +
-			"procurement system (SIRUP/e-Katalog). Used to cross-reference CANKORA " +
+			"procurement system (SIRUP/e-Katalog). Used to cross-reference PMO " +
 			"vendor records against official procurement registrations.",
 		DatasetTypes: []string{DatasetVendors},
 	},

@@ -1,37 +1,37 @@
 # Implementation Gap Analysis
-# CANKORA - PMO National Project Control Tower Alignment
+# PMO - PMO National Project Control Tower Alignment
 
 **Versi**: 0.2.9  
 **Tanggal Audit**: 2026-08-29  
 **Sumber Kebutuhan**: Grand Design PMO SDA, Deck PMO SDA, dan Grand Design PMO National Project Control Tower  
 **Status**: Living Document
 
-> **Update 2026-08-29 — CANKORA-DASH-003 Planned (BALAI Column):**
+> **Update 2026-08-29 — PMO-DASH-003 Planned (BALAI Column):**
 > Gap UI ditemukan pada Dashboard "10 Proyek Prioritas": user membutuhkan kolom `BALAI` di sebelah `KODE`. Analisa: sumber data sudah ada (`projects.org_unit_id`), tetapi response/UI belum meng-resolve nama org unit. Implementasi berikutnya harus enrich project response dengan `org_unit_name`/`org_unit`, menampilkan kolom `BALAI`, dan memperjelas label form project menjadi `Balai / Unit Pemilik`. Jangan tambah field owner baru sebelum ada kebutuhan bisnis yang memisahkan owner dari org hierarchy.
 
-> **Update 2026-08-29 — CANKORA-UAT-010 (Final Acceptance Review & Demo Polish):**
+> **Update 2026-08-29 — PMO-UAT-010 (Final Acceptance Review & Demo Polish):**
 > Status: **Non-IoT UAT Candidate**. Deliverables: (1) `scripts/` directory dibuat — `uat-env-check.sh` (15 PASS 2 WARN 0 FAIL), `uat-start.sh`, `uat-status.sh`, `uat-stop.sh`; (2) `docs/smoke-test-uat-008-release-candidate.sh` — RC orchestrator 7 PASS + 1 WARN (UAT-001 non-blocking) + 0 FAIL → RELEASE CANDIDATE: READY; (3) `docs/UAT-DEPLOYMENT-GUIDE.md`, `docs/RELEASE-CANDIDATE-RUNBOOK.md`, `docs/UAT-FINAL-CHECKLIST.md` dibuat; (4) `backend/.gitignore` dibuat; (5) Phase table `PHASED-IMPLEMENTATION-PLAN.md` diupdate — semua fase non-IoT status ✅ Done, Phase 8 UAT baru ditambahkan; (6) `PERMISSION-MATRIX.md` diupdate — `corrective_action` resource ditambahkan; (7) `IMPLEMENTATION-GAP-ANALYSIS.md` versi diupdate ke 0.2.8. Gap yang ditutup: scripts UAT tidak ada → ada; docs deployment/runbook/checklist tidak ada → ada; phase table stale → akurat. Known limitations: IoT Future/Last, gov connector sandbox, BIM metadata-only, storage lokal, SMTP NoopProvider jika unconfigured, UAT-001 Playwright login timeout pre-existing (non-blocking). `gofmt` clean · `go build ./...` OK · `go test ./...` OK · `npx tsc --noEmit` OK · `npm run lint` OK · `npm run build` OK.
 
-> **Update 2026-08-29 — CANKORA-UAT-007 (End-to-End Business Flow Smoke):**
+> **Update 2026-08-29 — PMO-UAT-007 (End-to-End Business Flow Smoke):**
 > End-to-end business process UAT selesai. Gap yang ditutup: (1) `docs/UAT-BUSINESS-FLOW-SCENARIOS.md` (11 flows A-K); (2) `docs/smoke-test-uat-007-business-flow.sh` **86/86 PASS** — full FSM transitions, budget thresholds, evidence upload/download, escalation+decision, governance duplicate period guard, cleanup cascade; (3) `cmd/seed/main.go` — `ResourceCorrectiveAction` ditambahkan ke resources slice (PMO/ADMIN sekarang punya corrective_action permission). API contracts yang diverifikasi: `TransitionRequest.to_status` (bukan `status`); CA FSM DRAFT→SUBMITTED→IN_PROGRESS; inspection multipart form + `inspected_at`; governance `dataset_type` UPPERCASE; decision status `IN_PROGRESS`/`COMPLETED`/`CANCELLED`; evidence ID di `data.evidence[0].id`.
 
-> **Update 2026-08-29 — CANKORA-UAT-006 (Role-Based UAT & Permission Scope Hardening):**
+> **Update 2026-08-29 — PMO-UAT-006 (Role-Based UAT & Permission Scope Hardening):**
 > RBAC hardening selesai untuk UAT. Gap yang ditutup: (1) demo users seeded per role (pmo/pm/officer/executive/auditor, semua `Demo@Cankora2024!`); (2) spatial routes `/sectors`/`/regions`/`/river-basins` ditambahkan `RequirePermission` guard; (3) `ResourceSector`, `ResourceRegion`, `ResourceRiverBasin` ditambahkan ke seed resources; (4) `Sidebar.tsx` role-filtered via `hasRole`. Smoke **65/65 PASS**.
 
-> **Update 2026-08-29 — CANKORA-UAT-005 (Field Inspection Mobile View):**
+> **Update 2026-08-29 — PMO-UAT-005 (Field Inspection Mobile View):**
 > Field inspection/evidence polished untuk UAT/demo mobile. Gap yang ditutup: (1) `FieldInspectionPanel` mobile-first — tidak ada horizontal overflow di 390px, sub-komponen `FilePicker`/`GeoInput`/`StatusBadge`, upload state jelas, geolocation browser optional + graceful fallback, evidence list padat dengan checksum/size/geotag. (2) Route `/projects/:id/inspections` dedicated untuk mobile. (3) Endpoint `POST /:inspectionID/evidence` baru — upload evidence ke inspeksi existing, per-evidence lat/lon, audit `field_inspection.evidence_added`. (4) Regression gate diperluas: section 16 (5 checks), UAT-001 21 routes. Smoke UAT-005 **28/28 PASS** (Playwright mobile 390x844 no overflow + desktop 1366x768). Backend: `gofmt` clean · `go build ./...` OK. Frontend: `npx tsc --noEmit` OK · `npm run lint` OK · `npm run build` OK (30 pages).
 
-> **Update 2026-08-29 — CANKORA-REL-001 (Non-IoT Stabilization):**
-> Regression gate terpadu `docs/smoke-test-rel-001-regression.sh` (15 kelompok check) selesai. Gap yang ditutup: (1) `actionRequiresEntityID()` — UPDATE/DELETE/UPSERT wajib `entity_id`, CREATE & VALIDATE_ONLY boleh omit; (2) MATCHED fixture di-seed idempotent; (3) smoke harden check 7 tidak lagi SKIP; (4) entity_id rules 5 sub-checks. Dashboard/reporting label audit: `/executive`=Level 1 (operational aggregate), `/programs`=Level 2 (operational aggregate), `/command-center`=operational current-state, `/reports/analytics`=read-model aggregate, `/governance`=official governed data — tidak ada mixing tanpa disclaimer. Docs di-sync ke versi 2026-08-29. IoT (`CANKORA-P3-004`) tetap Future/Last. Sistem siap UAT/demo packaging.
+> **Update 2026-08-29 — PMO-REL-001 (Non-IoT Stabilization):**
+> Regression gate terpadu `docs/smoke-test-rel-001-regression.sh` (15 kelompok check) selesai. Gap yang ditutup: (1) `actionRequiresEntityID()` — UPDATE/DELETE/UPSERT wajib `entity_id`, CREATE & VALIDATE_ONLY boleh omit; (2) MATCHED fixture di-seed idempotent; (3) smoke harden check 7 tidak lagi SKIP; (4) entity_id rules 5 sub-checks. Dashboard/reporting label audit: `/executive`=Level 1 (operational aggregate), `/programs`=Level 2 (operational aggregate), `/command-center`=operational current-state, `/reports/analytics`=read-model aggregate, `/governance`=official governed data — tidak ada mixing tanpa disclaimer. Docs di-sync ke versi 2026-08-29. IoT (`PMO-P3-004`) tetap Future/Last. Sistem siap UAT/demo packaging.
 
-> **Update 2026-08-28 — CANKORA-P3-003 (Data Governance):**
-> Official Data Validation & Approval Workflow selesai end-to-end. Modul `governance` menyediakan submission resmi (DRAFT→SUBMITTED→IN_REVIEW→APPROVED→LOCKED, +REJECTED dengan alasan wajib, CANCELLED), per-item validation (tenant ownership, soft-delete ditolak, mapping pemerintah `PENDING_MATCH` → `INVALID`), dan lock period (OPEN/LOCKED, unik per org+dataset+periode) yang memblokir penulisan pada periode terkunci. 12 route `/api/v1/governance/`, `ResourceDataGovernance`, audit `governance.*`, frontend `/governance`, smoke `docs/smoke-test-p3-003-data-governance.sh` 17/17 PASS. **Gap yang ditutup:** "Gap yang masih terbuka" PENDING_MATCH → MATCHED (dari HARDEN-001) telah diselesaikan oleh `CANKORA-P3-002` (Government Entity Resolution, 2026-08-28). **Planning update:** pipeline IoT telemetry (`CANKORA-P3-004`) dipindah ke urutan paling akhir/future advanced integration; jangan dimulai sebelum governance hardening, dashboard/GIS regression, reporting/read-model reconciliation, dan non-IoT Phase 3 work stabil.
+> **Update 2026-08-28 — PMO-P3-003 (Data Governance):**
+> Official Data Validation & Approval Workflow selesai end-to-end. Modul `governance` menyediakan submission resmi (DRAFT→SUBMITTED→IN_REVIEW→APPROVED→LOCKED, +REJECTED dengan alasan wajib, CANCELLED), per-item validation (tenant ownership, soft-delete ditolak, mapping pemerintah `PENDING_MATCH` → `INVALID`), dan lock period (OPEN/LOCKED, unik per org+dataset+periode) yang memblokir penulisan pada periode terkunci. 12 route `/api/v1/governance/`, `ResourceDataGovernance`, audit `governance.*`, frontend `/governance`, smoke `docs/smoke-test-p3-003-data-governance.sh` 17/17 PASS. **Gap yang ditutup:** "Gap yang masih terbuka" PENDING_MATCH → MATCHED (dari HARDEN-001) telah diselesaikan oleh `PMO-P3-002` (Government Entity Resolution, 2026-08-28). **Planning update:** pipeline IoT telemetry (`PMO-P3-004`) dipindah ke urutan paling akhir/future advanced integration; jangan dimulai sebelum governance hardening, dashboard/GIS regression, reporting/read-model reconciliation, dan non-IoT Phase 3 work stabil.
 
 ---
 
 ## 1. Ringkasan Eksekutif
 
-Status CANKORA harus dinilai menggunakan dua baseline yang berbeda:
+Status PMO harus dinilai menggunakan dua baseline yang berbeda:
 
 | Baseline | Status | Kesimpulan |
 |----------|--------|------------|
@@ -40,14 +40,14 @@ Status CANKORA harus dinilai menggunakan dua baseline yang berbeda:
 
 P0 selesai tidak berarti kebutuhan Control Tower selesai. Visual mockup juga tidak menjadi bukti implementasi. Angka, nama proyek, tanggal, nilai, dan persentase pada materi adalah ilustrasi.
 
-Known hardening gap setelah smoke P0-013: task anak dapat tetap aktif ketika project sudah soft-deleted. Gap ini dicatat sebagai `CANKORA-P0-014` dan **sudah diselesaikan pada 2026-08-21** (soft delete cascade transactional, dashboard exclusion, cleanup smoke, orphan soft cleanup — semua verified).
+Known hardening gap setelah smoke P0-013: task anak dapat tetap aktif ketika project sudah soft-deleted. Gap ini dicatat sebagai `PMO-P0-014` dan **sudah diselesaikan pada 2026-08-21** (soft delete cascade transactional, dashboard exclusion, cleanup smoke, orphan soft cleanup — semua verified).
 
 ## 2. Interpretasi Materi
 
 - Materi SDA menetapkan kebutuhan normatif: monitoring, corrective action, reporting, Control Tower Level 1-3, health score, GIS, evidence, dan roadmap integrasi.
 - Mockup UI menetapkan information architecture, bukan pixel-perfect design atau data produksi.
 - Slide BP3R hanya menjadi referensi pola PMO generik; proses dan data perumahan tidak dimasukkan sebagai requirement SDA.
-- Strategi yang dipilih adalah hybrid: CANKORA sebagai system of record dan Power BI sebagai dashboard eksekutif tahap awal.
+- Strategi yang dipilih adalah hybrid: PMO sebagai system of record dan Power BI sebagai dashboard eksekutif tahap awal.
 - Formula/bobot Project Health Score belum disetujui dan harus configurable, versioned, explainable, serta approved sebelum aktif.
 
 Detail interpretasi ada di [PMO Control Tower Analysis](./PMO-CONTROL-TOWER-ANALYSIS.md).

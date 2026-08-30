@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "CANKORA",
+  title: "PMO",
 };
 
 export default function DashboardGroupLayout({

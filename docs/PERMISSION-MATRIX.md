@@ -1,15 +1,15 @@
 # Permission Matrix
-# CANKORA — Enterprise Operations Platform
+# PMO — Enterprise Operations Platform
 
 **Versi**: 0.2.4  
 **Tanggal**: 2026-08-29  
 **Dibuat oleh**: Cankonix  
 **Status**: Draft — target permission model
 
-> **Planning note 2026-08-29 — CANKORA-DASH-003: BALAI column**
+> **Planning note 2026-08-29 — PMO-DASH-003: BALAI column**
 > Penambahan kolom `BALAI` di Dashboard "10 Proyek Prioritas" tidak membutuhkan resource/action RBAC baru. Data berasal dari `projects.org_unit_id` → `org_units.name`; akses mengikuti existing Project view dan Org Unit view. Jika nama org unit ikut di-embed pada response project, tetap tenant-scoped dan read-only.
 
-> **Update 2026-08-29 — CANKORA-DASH-002: ResourcePeriodicReport**
+> **Update 2026-08-29 — PMO-DASH-002: ResourcePeriodicReport**
 > `ResourcePeriodicReport` (`periodic_report`) ditambahkan ke `resources` slice di `cmd/seed/main.go` dan ke `constants.go`. Endpoints `GET/POST/GET/:id/PUT/:id/DELETE/:id` di `/api/v1/projects/:id/periodic-reports` dilindungi `RequirePermission(ResourcePeriodicReport, ActionView/Create/Update/Delete)`. Tenant guard via parent project ownership (`organization_id` + `project_id`). Duplicate period → 409. Soft delete → 204. Role yang mendapat akses secara default (via AllPerms/broad-resource): SUPER_ADMIN, ADMIN, PMO (all), PROJECT_MANAGER (semua action terkait project), PROJECT_OFFICER (view + create + update). EXECUTIVE_VIEWER dan AUDITOR hanya view.
 
 > **Update 2026-08-29 — UAT-007/010 Corrective Action Permission & Final Acceptance**

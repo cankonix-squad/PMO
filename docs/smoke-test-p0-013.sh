@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# CANKORA P0-013 — Local End-to-End Smoke Test (documented artifact)
+# PMO P0-013 — Local End-to-End Smoke Test (documented artifact)
 # Usage:  ./docs/smoke-test-p0-013.sh
 # Prereq: backend running on :8080, frontend on :3000, DB migrated + seeded
 # Result: all checks print "PASS"; exit code 0 = all green

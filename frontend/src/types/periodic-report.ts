@@ -1,4 +1,4 @@
-// CANKORA-DASH-002: Periodic Progress & Financial Report types
+// PMO-DASH-002: Periodic Progress & Financial Report types
 // Classification: OPERATIONAL (laporan periodik operasional — belum official-governed)
 
 export interface PeriodicReport {

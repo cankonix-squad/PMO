@@ -1,5 +1,5 @@
 # Software Requirement Specification (SRS)
-# CANKORA — Enterprise Operations Platform
+# PMO — Enterprise Operations Platform
 ## Modul: Project Management Monitoring & PMO National Project Control Tower
 
 **Versi**: 0.2.3  
@@ -8,28 +8,28 @@
 **Status**: Draft — perlu sinkronisasi implementasi
 
 > **Update 2026-08-29 — REL-001 Non-IoT Stabilization**  
-> Regression gate terpadu `docs/smoke-test-rel-001-regression.sh` tersedia. Data governance official validation (P3-003) diperkuat: UPDATE/DELETE/UPSERT submission item wajib `entity_id`; CREATE & VALIDATE_ONLY boleh tanpa. Semua P0–P3 non-IoT stable; IoT (`CANKORA-P3-004`) tetap Future/Last. Sistem siap UAT/demo packaging.
+> Regression gate terpadu `docs/smoke-test-rel-001-regression.sh` tersedia. Data governance official validation (P3-003) diperkuat: UPDATE/DELETE/UPSERT submission item wajib `entity_id`; CREATE & VALIDATE_ONLY boleh tanpa. Semua P0–P3 non-IoT stable; IoT (`PMO-P3-004`) tetap Future/Last. Sistem siap UAT/demo packaging.
 
 > **Update 2026-08-18 — Implementation Reality Check**  
 > Dokumen ini menggambarkan kebutuhan produk/MVP target untuk PMO. Kondisi kode saat ini belum memenuhi seluruh requirement. Gunakan [Implementation Gap Analysis](./IMPLEMENTATION-GAP-ANALYSIS.md) untuk melihat status `Implemented`, `Partial`, dan `Missing` sebelum menyatakan kebutuhan user sudah terpenuhi.
 
 > **Update 2026-08-20 — P0 Stabilization Verified**  
-> Semua tiket P0 (`CANKORA-P0-001` s.d. `CANKORA-P0-013`) sudah `Done` dan terverifikasi lokal end-to-end: migrate, seed, login admin, dashboard live, project CRUD + transition + progress history, task/milestone CRUD nested, user management, kanban task board, dan early warning dasar. Lihat `docs/DEVELOPMENT-BACKLOG.md` dan `CLAUDE.md` untuk status build/smoke terkini. Scope MVP inti (auth, RBAC awal, project monitoring dasar) sudah usable; gap terhadap Grand Design PMO tetap mengacu `IMPLEMENTATION-GAP-ANALYSIS.md`.
+> Semua tiket P0 (`PMO-P0-001` s.d. `PMO-P0-013`) sudah `Done` dan terverifikasi lokal end-to-end: migrate, seed, login admin, dashboard live, project CRUD + transition + progress history, task/milestone CRUD nested, user management, kanban task board, dan early warning dasar. Lihat `docs/DEVELOPMENT-BACKLOG.md` dan `CLAUDE.md` untuk status build/smoke terkini. Scope MVP inti (auth, RBAC awal, project monitoring dasar) sudah usable; gap terhadap Grand Design PMO tetap mengacu `IMPLEMENTATION-GAP-ANALYSIS.md`.
 
 > **Update 2026-08-20 — PMO National Project Control Tower Baseline**  
-> Materi terbaru memperluas target menjadi Control Tower Level 1 Nasional, Level 2 Program/Sektor, dan Level 3 Detail Proyek dengan strategi hybrid CANKORA + Power BI. Target ini masih roadmap dan tidak mengubah status P0 yang sudah terverifikasi. Lihat [PMO Control Tower Analysis](./PMO-CONTROL-TOWER-ANALYSIS.md).
+> Materi terbaru memperluas target menjadi Control Tower Level 1 Nasional, Level 2 Program/Sektor, dan Level 3 Detail Proyek dengan strategi hybrid PMO + Power BI. Target ini masih roadmap dan tidak mengubah status P0 yang sudah terverifikasi. Lihat [PMO Control Tower Analysis](./PMO-CONTROL-TOWER-ANALYSIS.md).
 
 > **Update 2026-08-21 — Native UI Shell dan Runtime Gate**  
-> Login PMO, dashboard eksekutif native, data demo SDA, dan route `/command-center` sudah tersedia. Per 2026-08-26, `CANKORA-P1-015` sudah memenuhi lifecycle API/UI dasar untuk aggregate alert, validation SLA, corrective action follow-up, persisted escalation, executive decision follow-up, tenant guard, dan audit. GIS aktual, Level 1/2 resmi, Power BI, dan advanced integrations tetap mengikuti tiket P2/P3.
+> Login PMO, dashboard eksekutif native, data demo SDA, dan route `/command-center` sudah tersedia. Per 2026-08-26, `PMO-P1-015` sudah memenuhi lifecycle API/UI dasar untuk aggregate alert, validation SLA, corrective action follow-up, persisted escalation, executive decision follow-up, tenant guard, dan audit. GIS aktual, Level 1/2 resmi, Power BI, dan advanced integrations tetap mengikuti tiket P2/P3.
 
 > **Update 2026-08-26 — Data Validation Queue**
-> `CANKORA-P1-012` sudah terverifikasi: submission snapshot tenant-scoped memiliki status lifecycle, completeness, freshness, SLA aging, lineage, validator, rejection reason, configurable segregation-of-duties, audit, protected API, dan UI `/validation`. Health Score serta Control Tower tetap roadmap.
+> `PMO-P1-012` sudah terverifikasi: submission snapshot tenant-scoped memiliki status lifecycle, completeness, freshness, SLA aging, lineage, validator, rejection reason, configurable segregation-of-duties, audit, protected API, dan UI `/validation`. Health Score serta Control Tower tetap roadmap.
 
 > **Update 2026-08-26 — Field Inspection and Evidence**
-> `CANKORA-P1-013` sudah terverifikasi: inspeksi lapangan tenant/project-scoped menyimpan waktu, koordinat, petugas, catatan, verification status, evidence metadata, checksum SHA-256, soft delete, dan authorized download. GIS map penuh serta offline/mobile workflow tetap roadmap.
+> `PMO-P1-013` sudah terverifikasi: inspeksi lapangan tenant/project-scoped menyimpan waktu, koordinat, petugas, catatan, verification status, evidence metadata, checksum SHA-256, soft delete, dan authorized download. GIS map penuh serta offline/mobile workflow tetap roadmap.
 
 > **Update 2026-08-28 — Official Data Validation & Approval Workflow (P3-003)**
-> `CANKORA-P3-003` Data Governance sudah terverifikasi: submission resmi (DRAFT→SUBMITTED→IN_REVIEW→APPROVED→LOCKED, +REJECTED dengan alasan wajib, CANCELLED) dengan item-level validation (tenant ownership, soft-delete, government `PENDING_MATCH` tidak bisa jadi official), lock period (OPEN/LOCKED) yang memblokir penulisan pada periode terkunci, audit `governance.*`, dan 12 route `/api/v1/governance/`. Resource RBAC `ResourceDataGovernance` tersedia; frontend `/governance` menampilkan list/filter, create submission modal dengan dynamic items, detail modal dengan status timeline + actions state-aware, dan lock period panel. **Planning update:** IoT telemetry tidak menjadi next ticket; P3-004 diparkir sebagai capability paling akhir/future setelah governance hardening, UI regression, read-model/reporting reconciliation, dan Phase 3 non-IoT stabil.
+> `PMO-P3-003` Data Governance sudah terverifikasi: submission resmi (DRAFT→SUBMITTED→IN_REVIEW→APPROVED→LOCKED, +REJECTED dengan alasan wajib, CANCELLED) dengan item-level validation (tenant ownership, soft-delete, government `PENDING_MATCH` tidak bisa jadi official), lock period (OPEN/LOCKED) yang memblokir penulisan pada periode terkunci, audit `governance.*`, dan 12 route `/api/v1/governance/`. Resource RBAC `ResourceDataGovernance` tersedia; frontend `/governance` menampilkan list/filter, create submission modal dengan dynamic items, detail modal dengan status timeline + actions state-aware, dan lock period panel. **Planning update:** IoT telemetry tidak menjadi next ticket; P3-004 diparkir sebagai capability paling akhir/future setelah governance hardening, UI regression, read-model/reporting reconciliation, dan Phase 3 non-IoT stabil.
 
 ---
 
@@ -67,7 +67,7 @@ Pengelolaan project di lingkungan kementerian saat ini menghadapi beberapa tanta
 
 ### 1.2 Tujuan Sistem
 
-CANKORA dibangun untuk menjadi **Enterprise Operations Platform** yang:
+PMO dibangun untuk menjadi **Enterprise Operations Platform** yang:
 
 1. Memberikan visibilitas penuh atas seluruh project secara real-time kepada management
 2. Menyediakan dashboard eksekutif yang langsung menjawab pertanyaan manajemen tingkat tinggi
@@ -96,7 +96,7 @@ CANKORA dibangun untuk menjadi **Enterprise Operations Platform** yang:
 Platform ini pada fase pertama mencakup:
 
 ```
-CANKORA v1 — Project Management Monitoring
+PMO v1 — Project Management Monitoring
 │
 ├── Core Platform
 │   ├── Identity & Access Management (IAM)
@@ -124,7 +124,7 @@ CANKORA v1 — Project Management Monitoring
 ### 2.2 Ruang Lingkup — Fase Berikutnya (Planned)
 
 ```
-CANKORA v2+ (Roadmap)
+PMO v2+ (Roadmap)
 ├── PMO Data Foundation & Core Process
 ├── Project Intelligence & Control Tower Level 3
 ├── Control Tower Level 2/Level 1, GIS & Power BI
@@ -136,7 +136,7 @@ CANKORA v2+ (Roadmap)
 
 ### 2.3 Di Luar Ruang Lingkup
 
-Hal-hal berikut **tidak** termasuk dalam scope CANKORA:
+Hal-hal berikut **tidak** termasuk dalam scope PMO:
 
 - Sistem penggajian atau HR management
 - Sistem pengadaan barang/jasa (e-procurement)
@@ -172,7 +172,7 @@ Hal-hal berikut **tidak** termasuk dalam scope CANKORA:
 
 ### 4.1 Struktur Hierarki
 
-CANKORA mendukung hierarki organisasi kementerian standar:
+PMO mendukung hierarki organisasi kementerian standar:
 
 ```
 Level 1: Kementerian
@@ -202,7 +202,7 @@ Setiap project harus terikat pada minimal satu org unit. Project dapat melibatka
 
 ### 5.1 Model Akses
 
-CANKORA menggunakan kombinasi **RBAC (Role-Based Access Control)** dan **Scope-Based Access Control**:
+PMO menggunakan kombinasi **RBAC (Role-Based Access Control)** dan **Scope-Based Access Control**:
 
 ```
 USER
@@ -452,7 +452,7 @@ Target Control Tower memperluas dimensi health menjadi schedule, physical progre
 
 ### 8.1 Project Information
 
-> **Planning note 2026-08-29 — DASH-003:** Field bisnis `BALAI` untuk tampilan dashboard tidak membutuhkan kolom database baru pada tahap ini. Sumber data resmi yang sudah tersedia adalah `projects.org_unit_id` yang mereferensi `org_units.name`. Dalam konteks CANKORA, org unit level Unit/Satker/Balai/BBWS/BWS berperan sebagai pemilik atau inisiator proyek. `created_by` hanya pembuat record dan `manager_id` adalah PIC personal, sehingga tidak boleh dipakai sebagai `BALAI`.
+> **Planning note 2026-08-29 — DASH-003:** Field bisnis `BALAI` untuk tampilan dashboard tidak membutuhkan kolom database baru pada tahap ini. Sumber data resmi yang sudah tersedia adalah `projects.org_unit_id` yang mereferensi `org_units.name`. Dalam konteks PMO, org unit level Unit/Satker/Balai/BBWS/BWS berperan sebagai pemilik atau inisiator proyek. `created_by` hanya pembuat record dan `manager_id` adalah PIC personal, sehingga tidak boleh dipakai sebagai `BALAI`.
 
 | ID | Requirement |
 |----|-------------|
@@ -503,7 +503,7 @@ Target Control Tower memperluas dimensi health menjadi schedule, physical progre
 | FR-TL-03 | Task yang terlambat tampil dengan indikator merah |
 | FR-TL-04 | PM dapat mengubah tanggal task langsung dari Gantt chart (drag) |
 
-> **Planning note 2026-08-18:** Kanban minimal dimasukkan ke `CANKORA-P0-010` sebagai bagian dari task UI nested. Gantt/timeline sederhana dimasukkan ke backlog P1 (`CANKORA-P1-009`); drag-edit tanggal tetap target lanjutan setelah timeline read-only stabil.
+> **Planning note 2026-08-18:** Kanban minimal dimasukkan ke `PMO-P0-010` sebagai bagian dari task UI nested. Gantt/timeline sederhana dimasukkan ke backlog P1 (`PMO-P1-009`); drag-edit tanggal tetap target lanjutan setelah timeline read-only stabil.
 
 ### 8.6 Progress Monitoring
 
@@ -659,13 +659,13 @@ Target Control Tower memperluas dimensi health menjadi schedule, physical progre
 | FR-CMD-03 | PMO dapat melakukan escalation dan mencatat keputusan/arahan pimpinan beserta owner, due date, serta tindak lanjut |
 | FR-CMD-04 | Command Center menampilkan alert aktif, validasi tertunda, corrective action overdue, top risk/issue, freshness, dan watchlist proyek prioritas |
 
-**Status implementasi 2026-08-26:** `CANKORA-P1-015` Done untuk lifecycle API/UI dasar. Command Center membaca aggregate backend, validation queue, corrective action, risk watchlist, persisted escalation, dan executive decision follow-up. Create escalation/decision memvalidasi ownership source/project/user agar tidak membuat referensi lintas tenant; status action tercatat di audit. Peta masih ilustratif sampai P2-008 dan Level 1/2 resmi tetap menunggu tiket P2.
+**Status implementasi 2026-08-26:** `PMO-P1-015` Done untuk lifecycle API/UI dasar. Command Center membaca aggregate backend, validation queue, corrective action, risk watchlist, persisted escalation, dan executive decision follow-up. Create escalation/decision memvalidasi ownership source/project/user agar tidak membuat referensi lintas tenant; status action tercatat di audit. Peta masih ilustratif sampai P2-008 dan Level 1/2 resmi tetap menunggu tiket P2.
 
 ### 8.20 Power BI dan Analytics Read Model
 
 | ID | Requirement |
 |----|-------------|
-| FR-BI-01 | CANKORA menyediakan read model/semantic dataset terdokumentasi untuk Power BI tanpa memberi akses tulis ke tabel operasional |
+| FR-BI-01 | PMO menyediakan read model/semantic dataset terdokumentasi untuk Power BI tanpa memberi akses tulis ke tabel operasional |
 | FR-BI-02 | Dataset menerapkan tenant filter, row-level security, data dictionary, metric definition, refresh schedule, dan refresh monitoring |
 | FR-BI-03 | Dashboard native dan Power BI menggunakan definisi KPI serta period cut-off yang sama |
 | FR-BI-04 | Kegagalan refresh terlihat oleh integration admin dan tidak boleh menyamarkan data lama sebagai data terkini |
@@ -793,7 +793,7 @@ Semua operasi berikut **wajib** dicatat:
 
 ### 12.1 Pendekatan Workflow
 
-CANKORA menggunakan **Finite State Machine (FSM) per entitas** yang transisinya dapat dikonfigurasi melalui tabel `workflow_definitions` dan `workflow_transitions`.
+PMO menggunakan **Finite State Machine (FSM) per entitas** yang transisinya dapat dikonfigurasi melalui tabel `workflow_definitions` dan `workflow_transitions`.
 
 Ini memberikan fleksibilitas konfigurasi tanpa kompleksitas full workflow engine.
 

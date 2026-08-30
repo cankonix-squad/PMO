@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Smoke Test: CANKORA-P3-003 — Official Data Validation & Approval Workflow
+# Smoke Test: PMO-P3-003 — Official Data Validation & Approval Workflow
 #
 # Covers:
 #   health/login
@@ -269,7 +269,7 @@ if [[ "$STATUS" == "409" ]]; then pass "create submission in locked period -> 40
 info "Audit events governance.* exist"
 AUDIT=$(curl -s "$API/governance/submissions" -H "Content-Type: application/json" \
   ${TOKEN:+-H "Authorization: Bearer $TOKEN"} > /dev/null; echo "ok")
-# Read audit directly from API if available (no dedicated audit-logs route in CANKORA)
+# Read audit directly from API if available (no dedicated audit-logs route in PMO)
 # Fallback: query DB via psql (local dev)
 GOV_EVENTS=$(PGPASSWORD=cankora_secret psql -h localhost -U cankora -d cankora_db -tAc \
   "SELECT count(*) FROM audit_logs WHERE action LIKE 'governance.%'" 2>/dev/null || echo "0")

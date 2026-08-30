@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-# CANKORA — Smoke Test: UAT-004 Notification Delivery Foundation
+# PMO — Smoke Test: UAT-004 Notification Delivery Foundation
 # ============================================================
 # Usage:
 #   bash docs/smoke-test-uat-004-notifications.sh

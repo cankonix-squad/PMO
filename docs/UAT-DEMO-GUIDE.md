@@ -1,8 +1,8 @@
-# CANKORA — UAT & Demo Guide
+# PMO — UAT & Demo Guide
 
 **Versi**: 1.6.0  
 **Tanggal**: 2026-08-29  
-**Ticket**: CANKORA-UAT-001, CANKORA-UAT-002, CANKORA-UAT-003, CANKORA-UAT-004, CANKORA-UAT-005, CANKORA-UAT-006, CANKORA-UAT-007  
+**Ticket**: PMO-UAT-001, PMO-UAT-002, PMO-UAT-003, PMO-UAT-004, PMO-UAT-005, PMO-UAT-006, PMO-UAT-007  
 **Audience**: QA, stakeholder PMO, product owner, demo facilitator
 
 ---
@@ -25,7 +25,7 @@ Port default: backend **:8080**, frontend **:3000**.
 
 ```bash
 # 1. Clone atau buka workspace
-cd '/Users/harmanto/Documents/Code/DEV/Project Management/CANKORA'
+cd '/Users/harmanto/Documents/Code/DEV/Project Management/PMO'
 
 # 2. Setup backend env (skip jika .env sudah ada)
 cp backend/.env.example backend/.env
@@ -43,7 +43,7 @@ make dev             # port 8080
 
 ```bash
 # Terminal baru — Frontend
-cd '/Users/harmanto/Documents/Code/DEV/Project Management/CANKORA/frontend'
+cd '/Users/harmanto/Documents/Code/DEV/Project Management/PMO/frontend'
 
 # PENTING: hapus .next sebelum dev jika ada build lama
 rm -rf .next
@@ -223,12 +223,12 @@ Semua seed bersifat **idempotent** — aman dijalankan berulang kali tanpa membu
 
 | Fitur | Status | Keterangan |
 |---|---|---|
-| **IoT Telemetry** (`CANKORA-P3-004`) | Future/Last | Sengaja diparkirkan. Jangan dimulai sebelum ada explicit sprint decision. |
+| **IoT Telemetry** (`PMO-P3-004`) | Future/Last | Sengaja diparkirkan. Jangan dimulai sebelum ada explicit sprint decision. |
 | Health Score formula aktif (P1-014) | Placeholder | Formula bobot/dimensi memerlukan approval PMO sebelum diaktifkan. |
 | Snapshot/validasi kontrak→budget (P1-011) | Partial | Contract value belum otomatis mengubah `project.budget_total`. |
 | Gantt timeline interactive (P1-009) | Partial | Timeline read-only sudah ada; drag editing deferred. |
 | MinIO / S3 document storage | Local only | Storage lokal `backend/storage/documents`; kode swap-ready. |
-| Power BI integration | Future | CANKORA sebagai read-model; koneksi BI belum dikonfigurasi. |
+| Power BI integration | Future | PMO sebagai read-model; koneksi BI belum dikonfigurasi. |
 | Field inspection & evidence mobile | Future | P2-003 partial; mobile-first view deferred. |
 | GIS koordinat proyek yang tervalidasi (P2-008) | Seed demo | Koordinat demo tersedia; validasi resmi dari sistem referensi menunggu. |
 | Notifikasi email/push | Future | Interface ada (`notification/`); hanya NoopProvider aktif. |
@@ -243,7 +243,7 @@ Semua seed bersifat **idempotent** — aman dijalankan berulang kali tanpa membu
    cd frontend && npm install --save-dev playwright && npx playwright install chromium
    ```
 
-2. **BIM viewer URL** — BIM model menunjuk ke external viewer URL; viewer tidak di-embed di dalam CANKORA (hanya metadata + link eksternal).
+2. **BIM viewer URL** — BIM model menunjuk ke external viewer URL; viewer tidak di-embed di dalam PMO (hanya metadata + link eksternal).
 
 3. **Government connectors = sandbox** — SIRUP/OM-SPAN adalah mock connectors; data yang disinkronkan adalah data demo, bukan data pemerintah asli.
 
@@ -261,7 +261,7 @@ Semua seed bersifat **idempotent** — aman dijalankan berulang kali tanpa membu
 
 ### Backend + API regression gate
 ```bash
-cd '/Users/harmanto/Documents/Code/DEV/Project Management/CANKORA'
+cd '/Users/harmanto/Documents/Code/DEV/Project Management/PMO'
 
 # Standard (frontend optional, SKIP jika tidak jalan)
 bash docs/smoke-test-rel-001-regression.sh
@@ -381,7 +381,7 @@ STORAGE_MAX_SIZE_BYTES=20971520
 
 ## 13. Kontak & Support
 
-- Repository: `/Users/harmanto/Documents/Code/DEV/Project Management/CANKORA`
+- Repository: `/Users/harmanto/Documents/Code/DEV/Project Management/PMO`
 - CLAUDE.md: konteks lengkap untuk AI assistant
 - docs/DEVELOPMENT-BACKLOG.md: ticket dan status implementasi
 - docs/ARCHITECTURE.md: arsitektur sistem

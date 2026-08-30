@@ -151,11 +151,31 @@ info "4. Projects CRUD"
 HTTP=$(api_get "/projects?page=1&page_size=5")
 [[ "$HTTP" == "200" ]] && pass "GET /projects → 200" || fail "GET /projects → $HTTP"
 
+# Lookup master data IDs required by the create-project endpoint
+_ORG_UNIT_ID=$(api_get "/org-units" > /dev/null && jq -r '.data[0].id // empty' "$RES_FILE" 2>/dev/null || echo "")
+_PROGRAM_ID=$(api_get "/programs" > /dev/null && jq -r '.data[0].id // empty' "$RES_FILE" 2>/dev/null || echo "")
+_SECTOR_ID=$(api_get "/sectors" > /dev/null && jq -r '.data[0].id // empty' "$RES_FILE" 2>/dev/null || echo "")
+_REGION_ID=$(api_get "/regions" > /dev/null && jq -r '.data[0].id // empty' "$RES_FILE" 2>/dev/null || echo "")
+_RIVER_BASIN_ID=$(api_get "/river-basins" > /dev/null && jq -r '.data[0].id // empty' "$RES_FILE" 2>/dev/null || echo "")
+
 REL_CODE="REL001-SMOKE-$(date +%s)"
 HTTP=$(api_post "/projects" "{
   \"name\": \"REL-001 Smoke Project\",
   \"code\": \"$REL_CODE\",
-  \"status\": \"DRAFT\"
+  \"description\": \"Smoke test project\",
+  \"objectives\": \"Verify create endpoint\",
+  \"priority\": \"MEDIUM\",
+  \"category\": \"BND\",
+  \"start_date\": \"2026-01-01\",
+  \"end_date\": \"2026-12-31\",
+  \"budget_total\": 100000000,
+  \"currency\": \"IDR\",
+  \"progress_pct\": 0,
+  \"org_unit_id\": \"$_ORG_UNIT_ID\",
+  \"program_id\": \"$_PROGRAM_ID\",
+  \"sector_id\": \"$_SECTOR_ID\",
+  \"region_id\": \"$_REGION_ID\",
+  \"river_basin_id\": \"$_RIVER_BASIN_ID\"
 }")
 if [[ "$HTTP" == "201" ]]; then
   pass "POST /projects → 201"

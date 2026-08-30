@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
@@ -9,9 +9,11 @@ import {
   Edit3,
   Filter,
   History,
+  Paperclip,
   Plus,
   Save,
   Search,
+  Trash2,
   X,
 } from "lucide-react";
 import { z } from "zod";
@@ -170,9 +172,12 @@ export default function ProjectsPage() {
 
   const createMutation = useMutation({
     mutationFn: (payload: CreateProjectRequest) => projectService.create(payload),
-    onSuccess: (res) => {
+    onSuccess: async (res) => {
       const project = res.data.data;
-      if (project?.id) setSelectedId(project.id);
+      if (project?.id) {
+        setSelectedId(project.id);
+        await uploadAttachments(project.id);
+      }
       setShowForm(false);
       setFormError(null);
       void qc.invalidateQueries({ queryKey: ["projects"] });
@@ -189,9 +194,12 @@ export default function ProjectsPage() {
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: UpdateProjectRequest }) =>
       projectService.update(id, payload),
-    onSuccess: (res) => {
+    onSuccess: async (res) => {
       const project = res.data.data;
-      if (project?.id) setSelectedId(project.id);
+      if (project?.id) {
+        setSelectedId(project.id);
+        await uploadAttachments(project.id);
+      }
       setShowForm(false);
       setFormError(null);
       void qc.invalidateQueries({ queryKey: ["projects"] });
@@ -230,6 +238,30 @@ export default function ProjectsPage() {
     setFormMode("edit");
     setFormError(null);
     setShowForm(true);
+  }
+
+  // Attachment queues: files waiting to be uploaded after project is saved
+  const [descAttachments, setDescAttachments] = useState<File[]>([]);
+  const [objAttachments, setObjAttachments] = useState<File[]>([]);
+
+  // Upload all queued attachments to the document store
+  async function uploadAttachments(projectId: string) {
+    const pairs: Array<{ file: File; category: string }> = [
+      ...descAttachments.map((f) => ({ file: f, category: "EVIDENCE" as const })),
+      ...objAttachments.map((f) => ({ file: f, category: "OTHER" as const })),
+    ];
+    await Promise.allSettled(
+      pairs.map(({ file, category }) =>
+        projectService.uploadDocument(projectId, {
+          file,
+          name: file.name,
+          category,
+          version: "1",
+        })
+      )
+    );
+    setDescAttachments([]);
+    setObjAttachments([]);
   }
 
   function handleSubmit(values: ProjectFormValues) {
@@ -298,10 +330,18 @@ export default function ProjectsPage() {
           regions={regions}
           riverBasins={riverBasins}
           projectCategories={projectCategories}
+          descAttachments={descAttachments}
+          objAttachments={objAttachments}
+          onDescAttach={(file) => setDescAttachments((prev) => [...prev, file])}
+          onObjAttach={(file) => setObjAttachments((prev) => [...prev, file])}
+          onDescRemove={(idx) => setDescAttachments((prev) => prev.filter((_, i) => i !== idx))}
+          onObjRemove={(idx) => setObjAttachments((prev) => prev.filter((_, i) => i !== idx))}
           onSubmit={handleSubmit}
           onCancel={() => {
             setShowForm(false);
             setFormError(null);
+            setDescAttachments([]);
+            setObjAttachments([]);
           }}
         />
       )}
@@ -408,6 +448,12 @@ function ProjectForm({
   regions,
   riverBasins,
   projectCategories,
+  descAttachments,
+  objAttachments,
+  onDescAttach,
+  onObjAttach,
+  onDescRemove,
+  onObjRemove,
   onSubmit,
   onCancel,
 }: {
@@ -421,6 +467,12 @@ function ProjectForm({
   regions: Region[];
   riverBasins: RiverBasin[];
   projectCategories: ProjectCategory[];
+  descAttachments: File[];
+  objAttachments: File[];
+  onDescAttach: (file: File) => void;
+  onObjAttach: (file: File) => void;
+  onDescRemove: (index: number) => void;
+  onObjRemove: (index: number) => void;
   onSubmit: (values: ProjectFormValues) => void;
   onCancel: () => void;
 }) {
@@ -428,6 +480,19 @@ function ProjectForm({
   const [description, setDescription] = useState(project?.description ?? "");
   const [objectives, setObjectives] = useState(project?.objectives ?? "");
   const [localError, setLocalError] = useState<string | null>(null);
+
+  // Hidden file input refs for attachment pickers
+  const descFileRef = useRef<HTMLInputElement>(null);
+  const objFileRef = useRef<HTMLInputElement>(null);
+
+  // Empty master data warnings
+  const emptyMasters: string[] = [];
+  if (orgUnits.length === 0) emptyMasters.push("Balai / Unit Pemilik");
+  if (programs.length === 0) emptyMasters.push("Program");
+  if (sectors.length === 0) emptyMasters.push("Sektor SDA");
+  if (regions.length === 0) emptyMasters.push("Wilayah");
+  if (riverBasins.length === 0) emptyMasters.push("DAS");
+  if (projectCategories.length === 0) emptyMasters.push("Kategori");
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -487,6 +552,14 @@ function ProjectForm({
         </button>
       </div>
 
+      {emptyMasters.length > 0 && (
+        <div className="mb-4 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+          <span className="font-medium">Data master belum tersedia:</span>{" "}
+          {emptyMasters.join(", ")}.
+          Lengkapi data master di menu Pengaturan sebelum membuat proyek.
+        </div>
+      )}
+
       {displayedError && (
         <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {displayedError}
@@ -494,7 +567,7 @@ function ProjectForm({
       )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
-        <Field label="Kode">
+        <Field label="Kode" required>
           <input
             name="code"
             defaultValue={project?.code ?? ""}
@@ -503,7 +576,7 @@ function ProjectForm({
             placeholder="PMO-001"
           />
         </Field>
-        <Field label="Nama">
+        <Field label="Nama" required>
           <input
             name="name"
             defaultValue={project?.name ?? ""}
@@ -511,7 +584,7 @@ function ProjectForm({
             placeholder="Nama proyek"
           />
         </Field>
-        <Field label="Prioritas">
+        <Field label="Prioritas" required>
           <select name="priority" defaultValue={project?.priority ?? "MEDIUM"} className={inputClassName}>
             {PRIORITIES.map((priority) => (
               <option key={priority} value={priority}>
@@ -520,7 +593,7 @@ function ProjectForm({
             ))}
           </select>
         </Field>
-        <Field label="Anggaran">
+        <Field label="Anggaran" required>
           <input
             name="budget_total"
             inputMode="numeric"
@@ -530,7 +603,7 @@ function ProjectForm({
             onInput={formatRupiahInputEvent}
           />
         </Field>
-        <Field label="Kategori">
+        <Field label="Kategori" required>
           <select
             name="category"
             defaultValue={project?.category ?? ""}
@@ -544,7 +617,7 @@ function ProjectForm({
             ))}
           </select>
         </Field>
-        <Field label="Tanggal Mulai">
+        <Field label="Tanggal Mulai" required>
           <input
             name="start_date"
             type="date"
@@ -552,7 +625,7 @@ function ProjectForm({
             className={inputClassName}
           />
         </Field>
-        <Field label="Tanggal Selesai">
+        <Field label="Tanggal Selesai" required>
           <input
             name="end_date"
             type="date"
@@ -649,22 +722,103 @@ function ProjectForm({
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Field label="Deskripsi">
-          <RichTextEditor
-            value={description}
-            onChange={setDescription}
-            placeholder="Deskripsi operasional singkat"
-            disabled={isSaving}
+        <div>
+          <Field label="Deskripsi" required>
+            <RichTextEditor
+              value={description}
+              onChange={setDescription}
+              placeholder="Deskripsi operasional singkat"
+              disabled={isSaving}
+              onAttachFile={() => descFileRef.current?.click()}
+              onAttachImage={(file) => onDescAttach(file)}
+            />
+          </Field>
+          {/* Hidden file input for description attachments */}
+          <input
+            ref={descFileRef}
+            type="file"
+            className="sr-only"
+            multiple
+            onChange={(e) => {
+              Array.from(e.target.files ?? []).forEach(onDescAttach);
+              e.target.value = "";
+            }}
           />
-        </Field>
-        <Field label="Tujuan">
-          <RichTextEditor
-            value={objectives}
-            onChange={setObjectives}
-            placeholder="Hasil yang diharapkan"
-            disabled={isSaving}
+          {/* Attachment queue for description */}
+          {descAttachments.length > 0 && (
+            <ul className="mt-2 space-y-1">
+              {descAttachments.map((file, idx) => (
+                <li
+                  key={idx}
+                  className="flex items-center justify-between rounded-md border border-border bg-muted/40 px-3 py-1.5 text-xs"
+                >
+                  <span className="flex items-center gap-1.5 truncate text-foreground">
+                    <Paperclip className="h-3 w-3 shrink-0 text-muted-foreground" />
+                    <span className="truncate">{file.name}</span>
+                    <span className="shrink-0 text-muted-foreground">({formatBytes(file.size)})</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => onDescRemove(idx)}
+                    className="ml-2 shrink-0 rounded p-0.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                    aria-label="Hapus lampiran"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div>
+          <Field label="Tujuan" required>
+            <RichTextEditor
+              value={objectives}
+              onChange={setObjectives}
+              placeholder="Hasil yang diharapkan"
+              disabled={isSaving}
+              onAttachFile={() => objFileRef.current?.click()}
+              onAttachImage={(file) => onObjAttach(file)}
+            />
+          </Field>
+          {/* Hidden file input for objectives attachments */}
+          <input
+            ref={objFileRef}
+            type="file"
+            className="sr-only"
+            multiple
+            onChange={(e) => {
+              Array.from(e.target.files ?? []).forEach(onObjAttach);
+              e.target.value = "";
+            }}
           />
-        </Field>
+          {/* Attachment queue for objectives */}
+          {objAttachments.length > 0 && (
+            <ul className="mt-2 space-y-1">
+              {objAttachments.map((file, idx) => (
+                <li
+                  key={idx}
+                  className="flex items-center justify-between rounded-md border border-border bg-muted/40 px-3 py-1.5 text-xs"
+                >
+                  <span className="flex items-center gap-1.5 truncate text-foreground">
+                    <Paperclip className="h-3 w-3 shrink-0 text-muted-foreground" />
+                    <span className="truncate">{file.name}</span>
+                    <span className="shrink-0 text-muted-foreground">({formatBytes(file.size)})</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => onObjRemove(idx)}
+                    className="ml-2 shrink-0 rounded p-0.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                    aria-label="Hapus lampiran"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
 
       <input name="currency" type="hidden" value={project?.currency ?? "IDR"} />
@@ -785,7 +939,20 @@ function ProjectDetail({
       </dl>
 
       {project.description && (
-        <p className="text-sm leading-relaxed text-muted-foreground">{project.description}</p>
+        <div
+          className="prose prose-sm max-w-none text-muted-foreground [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_hr]:my-2"
+          dangerouslySetInnerHTML={{ __html: project.description }}
+        />
+      )}
+
+      {project.objectives && (
+        <div>
+          <h4 className="mb-1 text-sm font-semibold text-foreground">Tujuan</h4>
+          <div
+            className="prose prose-sm max-w-none text-muted-foreground [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_hr]:my-2"
+            dangerouslySetInnerHTML={{ __html: project.objectives }}
+          />
+        </div>
       )}
 
       <div>
@@ -900,13 +1067,22 @@ function ProgressCell({ value }: { value: number }) {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-sm font-medium text-foreground">{label}</span>
+      <span className="mb-1 block text-sm font-medium text-foreground">
+        {label}
+        {required && <span className="ml-0.5 text-destructive" aria-hidden="true">*</span>}
+      </span>
       {children}
     </label>
   );
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 function formValues(form: HTMLFormElement): ProjectFormValues {

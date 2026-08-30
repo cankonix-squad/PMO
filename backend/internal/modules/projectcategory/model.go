@@ -45,6 +45,6 @@ type UpdateRequest struct {
 // ---- Sentinel errors --------------------------------------------------------
 
 var (
-	ErrNotFound   = errors.New("project category not found")
-	ErrCodeTaken  = errors.New("project category code already in use")
+	ErrNotFound  = errors.New("project category not found")
+	ErrCodeTaken = errors.New("project category code already in use")
 )

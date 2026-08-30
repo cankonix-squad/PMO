@@ -165,8 +165,12 @@ export function RichTextEditor({
         )}
       </div>
 
-      {/* Editor content area */}
-      <div onPaste={handlePaste}>
+      {/* Editor content area — clicking anywhere in this zone focuses the editor */}
+      <div
+        onPaste={handlePaste}
+        onClick={() => editor?.chain().focus().run()}
+        className="cursor-text"
+      >
         <EditorContent
           editor={editor}
           className={cn(

@@ -1,6 +1,7 @@
 name: Deploy Production — CANKORA PMO
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -81,6 +82,7 @@ jobs:
           port: 22
           timeout: 60s
           command_timeout: 2m
+          envs: PROD_SMOKE_EMAIL,PROD_SMOKE_PASSWORD
           script: |
             HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
               https://pmo.cankonix.com/api/health || echo "000")
@@ -89,4 +91,22 @@ jobs:
               echo "ERROR: Health check failed with HTTP $HTTP_STATUS"
               exit 1
             fi
+
+            if [ -n "${PROD_SMOKE_EMAIL:-}" ] && [ -n "${PROD_SMOKE_PASSWORD:-}" ]; then
+              LOGIN_PAYLOAD=$(printf '{"email":"%s","password":"%s"}' "$PROD_SMOKE_EMAIL" "$PROD_SMOKE_PASSWORD")
+              LOGIN_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+                -X POST https://pmo.cankonix.com/api/v1/auth/login \
+                -H "Content-Type: application/json" \
+                -d "$LOGIN_PAYLOAD" || echo "000")
+              echo "Smoke login HTTP status: $LOGIN_STATUS"
+              if [ "$LOGIN_STATUS" != "200" ]; then
+                echo "ERROR: Smoke login check failed with HTTP $LOGIN_STATUS"
+                exit 1
+              fi
+            else
+              echo "WARNING: PROD_SMOKE_EMAIL/PROD_SMOKE_PASSWORD not set; skipping smoke login check"
+            fi
             echo "Deployment verified: pmo.cankonix.com is healthy"
+        env:
+          PROD_SMOKE_EMAIL: ${{ secrets.PROD_SMOKE_EMAIL }}
+          PROD_SMOKE_PASSWORD: ${{ secrets.PROD_SMOKE_PASSWORD }}

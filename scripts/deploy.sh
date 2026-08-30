@@ -9,6 +9,7 @@ set -euo pipefail
 
 APP_DIR="/root/cankonix-node/apps/cankonix-pmo"
 COMPOSE_FILE="compose.yml"
+DEPLOY_REMOTE_URL="${DEPLOY_REMOTE_URL:-https://github.com/cankonix-squad/PMO.git}"
 SKIP_BUILD="${1:-}"
 
 cd "$APP_DIR"
@@ -25,6 +26,7 @@ git rev-parse HEAD
 # ── 2. Pull latest source ─────────────────────────────────────────────────────
 echo ""
 echo "[2/5] Fetching latest source from main..."
+git remote set-url origin "$DEPLOY_REMOTE_URL"
 git fetch origin
 git checkout main
 git reset --hard origin/main
@@ -75,6 +77,7 @@ if [[ "$API_HEALTHY" == "true" ]]; then
 else
   echo " ❌  Deployment WARNING: API health check timed out after ${MAX_WAIT}s"
   echo "     Check logs: docker compose -f $COMPOSE_FILE logs --tail=50 cankonix-pmo-api"
+  exit 1
 fi
 
 echo ""

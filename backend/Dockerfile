@@ -14,6 +14,10 @@ RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
     go build -ldflags="-s -w" -o /app/bin/cankora ./cmd/api/main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+    go build -ldflags="-s -w" -o /app/bin/seed ./cmd/seed/main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+    go build -ldflags="-s -w" -o /app/bin/seed-demo ./cmd/seed-demo/main.go
 
 # ---- Runtime image ----
 FROM alpine:3.19
@@ -25,6 +29,8 @@ RUN apk add --no-cache ca-certificates tzdata
 
 # Copy binary and migrations
 COPY --from=builder /app/bin/cankora ./cankora
+COPY --from=builder /app/bin/seed ./seed
+COPY --from=builder /app/bin/seed-demo ./seed-demo
 COPY --from=builder /app/migrations ./migrations
 
 # Create uploads directory

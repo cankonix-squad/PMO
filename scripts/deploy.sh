@@ -69,17 +69,28 @@ while [[ $ELAPSED -lt $MAX_WAIT ]]; do
   ELAPSED=$((ELAPSED + INTERVAL))
 done
 
-echo ""
-echo "============================================================"
-if [[ "$API_HEALTHY" == "true" ]]; then
-  echo " ✅  Deployment SUCCESSFUL"
-  echo "     API health: OK"
-else
+if [[ "$API_HEALTHY" != "true" ]]; then
+  echo ""
+  echo "============================================================"
   echo " ❌  Deployment WARNING: API health check timed out after ${MAX_WAIT}s"
   echo "     Check logs: docker compose -f $COMPOSE_FILE logs --tail=50 cankonix-pmo-api"
+  echo "============================================================"
   exit 1
 fi
 
+# ── 6. Run seed (idempotent — safe on every deploy) ───────────────────────────
+echo ""
+echo "[6/6] Running seed (idempotent)..."
+if docker compose -f "$COMPOSE_FILE" exec -T cankonix-pmo-api ./seed; then
+  echo "      ✅  Seed completed"
+else
+  echo "      ⚠️   Seed exited with error — check logs but continuing"
+fi
+
+echo ""
+echo "============================================================"
+echo " ✅  Deployment SUCCESSFUL"
+echo "     API health: OK"
 echo ""
 echo "Container status:"
 docker compose -f "$COMPOSE_FILE" ps

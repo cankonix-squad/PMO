@@ -48,7 +48,7 @@ const (
 // BIMModel — registered BIM model (metadata only, no binary storage)
 // ---------------------------------------------------------------------------
 
-// BIMModel represents the registration of an external BIM model in CANKORA.
+// BIMModel represents the registration of an external BIM model in PMO.
 // Binary files are never stored in database rows; only metadata and viewer URIs.
 type BIMModel struct {
 	ID              uuid.UUID  `gorm:"type:uuid;primaryKey"  json:"id"`
@@ -95,7 +95,7 @@ func (BIMModelVersion) TableName() string { return "bim_model_versions" }
 // BIMProjectMapping — links a BIM model to a project
 // ---------------------------------------------------------------------------
 
-// BIMProjectMapping records the association between a BIM model and a CANKORA
+// BIMProjectMapping records the association between a BIM model and a PMO
 // project, including the role the model plays within that project.
 type BIMProjectMapping struct {
 	ID             uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`

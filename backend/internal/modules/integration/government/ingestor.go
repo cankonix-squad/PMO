@@ -204,7 +204,7 @@ func upsertMapping(ctx context.Context, db *gorm.DB, run *SyncRun, rec sampleRec
 		// CREATE
 		// InternalEntityID is intentionally nil: the government sync creates a
 		// PENDING_MATCH record because no automated resolution to an internal
-		// CANKORA entity has taken place yet.  A separate matching/reconciliation
+		// PMO entity has taken place yet.  A separate matching/reconciliation
 		// step must set InternalEntityID and promote MatchStatus to MATCHED.
 		// NEVER use uuid.New() as a placeholder — that would fabricate a lineage link.
 		mapping := ExternalMapping{

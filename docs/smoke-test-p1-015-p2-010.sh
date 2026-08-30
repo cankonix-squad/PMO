@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# CANKORA P1-015 / P2-010 — Command Center + Benefit smoke
+# PMO P1-015 / P2-010 — Command Center + Benefit smoke
 # Usage: bash docs/smoke-test-p1-015-p2-010.sh
 # Prereq: backend running on :8080, DB migrated + seeded
 # =============================================================================

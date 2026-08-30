@@ -96,7 +96,7 @@ func (s *Service) ListPendingMappings(ctx context.Context, orgID uuid.UUID, f Li
 // GetCandidates — suggest internal entities for a pending mapping
 // ---------------------------------------------------------------------------
 
-// GetCandidates returns a ranked list of internal CANKORA entities that are
+// GetCandidates returns a ranked list of internal PMO entities that are
 // plausible matches for the given ExternalMapping. The candidates come from
 // the projects or vendors table depending on the mapping's dataset_type.
 //

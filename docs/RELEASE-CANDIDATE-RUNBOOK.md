@@ -1,8 +1,8 @@
-# CANKORA — Release Candidate Runbook
+# PMO — Release Candidate Runbook
 
 **Versi**: 1.0.0  
 **Tanggal**: 2026-08-29  
-**Ticket**: CANKORA-UAT-010  
+**Ticket**: PMO-UAT-010  
 **Status**: Non-IoT UAT Candidate  
 **Audience**: Release manager, tech lead, QA
 
@@ -10,7 +10,7 @@
 
 ## 1. Status RC
 
-**CANKORA Non-IoT UAT Candidate** — semua fitur P0–P3 non-IoT terverifikasi lokal.
+**PMO Non-IoT UAT Candidate** — semua fitur P0–P3 non-IoT terverifikasi lokal.
 
 | Fase | Status | Tiket |
 |---|---|---|
@@ -149,7 +149,7 @@ Berikut adalah batasan yang diketahui dan **tidak** menghalangi status "Non-IoT 
 | **BIM Viewer** | Metadata + link saja. Belum embedded 3D viewer. | User tidak bisa melihat model 3D in-app |
 | **Document Storage** | Local filesystem. Belum S3/MinIO production. | File hilang jika server restart di deployment baru |
 | **SMTP Email** | Fungsional jika env dikonfigurasi. NoopProvider fallback jika kosong. | Email notifikasi tidak terkirim jika SMTP tidak dikonfigurasi |
-| **Power BI** | Arsitektur documented. Belum live connection. | Executive dashboard = CANKORA native, bukan Power BI embedded |
+| **Power BI** | Arsitektur documented. Belum live connection. | Executive dashboard = PMO native, bukan Power BI embedded |
 | **Multi-Organization** | Single org per instance untuk UAT | Tidak simulasi multi-tenant production |
 | **UAT-001 Playwright** | Login timeout pada beberapa run (81/101 checks). Curl-mode PASS. | Playwright sidebar checks flaky jika Next.js dev server lambat |
 

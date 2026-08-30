@@ -486,7 +486,7 @@ func (h *Handler) trendData(ctx context.Context, orgID uuid.UUID, nMonths int) (
 	}
 	startMonth := currentMonth.AddDate(0, -(nMonths - 1), 0)
 
-	// ---- 1. Try periodic reports first (CANKORA-DASH-002) ----------------
+	// ---- 1. Try periodic reports first (PMO-DASH-002) ----------------
 	// Aggregate per month: avg physical, sum(financial_actual)/sum(financial_planned)*100.
 	// Only include reports whose parent project is active (not soft-deleted).
 	type periodicRow struct {

@@ -124,7 +124,7 @@ func Load() (*Config, error) {
 	cfg.SMTP.Port = getEnv("SMTP_PORT", "587")
 	cfg.SMTP.User = getEnv("SMTP_USER", "")
 	cfg.SMTP.Password = getEnv("SMTP_PASSWORD", "")
-	cfg.SMTP.From = getEnv("SMTP_FROM", "CANKORA <noreply@cankora.local>")
+	cfg.SMTP.From = getEnv("SMTP_FROM", "PMO <noreply@cankora.local>")
 
 	return cfg, nil
 }

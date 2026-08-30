@@ -1,8 +1,8 @@
-# CANKORA — UAT Final Checklist
+# PMO — UAT Final Checklist
 
 **Versi**: 1.0.0  
 **Tanggal**: 2026-08-29  
-**Ticket**: CANKORA-UAT-010  
+**Ticket**: PMO-UAT-010  
 **Status**: Non-IoT UAT Candidate  
 **Audience**: Demo facilitator, QA, product owner, stakeholder
 
@@ -207,7 +207,7 @@ Sampaikan limitasi berikut dengan jelas kepada stakeholder sebelum demo:
 
 | Item | Value |
 |---|---|
-| CANKORA Version | 0.1.0-uat-candidate |
+| PMO Version | 0.1.0-uat-candidate |
 | Tanggal UAT | 2026-08-29 |
 | Smoke UAT-007 | 86/86 PASS |
 | Smoke REL-001 | 44/44 PASS |

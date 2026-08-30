@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# Smoke Test — CANKORA P2-011 Primavera P6 Adapter
+# Smoke Test — PMO P2-011 Primavera P6 Adapter
 # =============================================================================
 # Usage: bash docs/smoke-test-p2-011-primavera.sh
 # Requires: curl, jq, psql (for project ID lookup)
@@ -283,7 +283,7 @@ assert_eq "No token returns 401" "401" "$AUTH401"
 # 16. tsc check (frontend)
 # ---------------------------------------------------------------------------
 section "16. Frontend tsc"
-TSC_OUT=$(cd "/Users/harmanto/Documents/Code/DEV/Project Management/CANKORA/frontend" && npx tsc --noEmit 2>&1 || true)
+TSC_OUT=$(cd "/Users/harmanto/Documents/Code/DEV/Project Management/PMO/frontend" && npx tsc --noEmit 2>&1 || true)
 if [ -z "$TSC_OUT" ]; then
   green "Frontend tsc --noEmit clean"
   ((PASS++))

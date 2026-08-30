@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # =============================================================================
 # smoke-test-harden-001-integrations.sh
-# CANKORA-HARDEN-001 — Integration/BIM/Government clean code & data integrity
+# PMO-HARDEN-001 — Integration/BIM/Government clean code & data integrity
 # =============================================================================
 # Tests:
 #   1.  go build ./... passes
@@ -20,9 +20,9 @@
 # =============================================================================
 set -euo pipefail
 
-BASE_URL="${CANKORA_BASE_URL:-http://localhost:8080}"
-ADMIN_EMAIL="${CANKORA_ADMIN_EMAIL:-admin@cankora.local}"
-ADMIN_PASS="${CANKORA_ADMIN_PASS:-Admin@Cankora2024!}"
+BASE_URL="${PMO_BASE_URL:-http://localhost:8080}"
+ADMIN_EMAIL="${PMO_ADMIN_EMAIL:-admin@cankora.local}"
+ADMIN_PASS="${PMO_ADMIN_PASS:-Admin@Cankora2024!}"
 
 # Colour helpers
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
@@ -38,7 +38,7 @@ require_cmd jq
 
 echo ""
 echo "======================================================================"
-echo " CANKORA-HARDEN-001 smoke test — $(date '+%Y-%m-%d %H:%M:%S')"
+echo " PMO-HARDEN-001 smoke test — $(date '+%Y-%m-%d %H:%M:%S')"
 echo " BASE_URL: $BASE_URL"
 echo "======================================================================"
 

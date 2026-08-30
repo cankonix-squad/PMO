@@ -58,7 +58,7 @@ const (
 )
 
 // MatchStatus describes whether an external mapping has been resolved
-// to a known internal CANKORA entity.
+// to a known internal PMO entity.
 const (
 	MatchStatusPendingMatch = "PENDING_MATCH" // external record not yet linked to an internal entity
 	MatchStatusMatched      = "MATCHED"       // external record resolved to a real internal entity
@@ -138,11 +138,11 @@ type SyncRecord struct {
 func (SyncRecord) TableName() string { return "government_sync_records" }
 
 // ---------------------------------------------------------------------------
-// ExternalMapping — external_id → internal CANKORA entity lineage
+// ExternalMapping — external_id → internal PMO entity lineage
 // ---------------------------------------------------------------------------
 
 // ExternalMapping tracks the link between a government external ID and an
-// internal CANKORA entity. Provides idempotency for repeated ingestion.
+// internal PMO entity. Provides idempotency for repeated ingestion.
 type ExternalMapping struct {
 	ID                 uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
 	OrganizationID     uuid.UUID `gorm:"type:uuid;not null"   json:"organization_id"`
@@ -151,7 +151,7 @@ type ExternalMapping struct {
 	ExternalID         string    `gorm:"size:500;not null"    json:"external_id"`
 	InternalEntityType string    `gorm:"size:100;not null"    json:"internal_entity_type"`
 	// InternalEntityID is NULL when the external record has not yet been matched
-	// to a known CANKORA entity (MatchStatus = PENDING_MATCH).
+	// to a known PMO entity (MatchStatus = PENDING_MATCH).
 	// It is populated only after a real resolution step sets MatchStatus = MATCHED.
 	// Never write a random uuid.New() placeholder here.
 	InternalEntityID *uuid.UUID `gorm:"type:uuid"            json:"internal_entity_id"`
@@ -245,7 +245,7 @@ type ListMappingsFilter struct {
 // Resolution DTOs (P3-002)
 // ---------------------------------------------------------------------------
 
-// ResolutionCandidate is an internal CANKORA entity suggested as a match target.
+// ResolutionCandidate is an internal PMO entity suggested as a match target.
 type ResolutionCandidate struct {
 	EntityID   string `json:"entity_id"`
 	EntityType string `json:"entity_type"`

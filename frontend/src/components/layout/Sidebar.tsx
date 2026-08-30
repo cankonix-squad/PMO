@@ -25,6 +25,7 @@ import {
   Settings,
   ShieldAlert,
   ShieldCheck,
+  Tag,
   X,
 } from "lucide-react";
 import { authService } from "@/services/auth.service";
@@ -111,6 +112,7 @@ const settingsItems: NavItem[] = [
   { label: "Sektor SDA", href: "/settings/sectors", icon: BarChart3, roles: PMO_AND_ABOVE },
   { label: "Wilayah", href: "/settings/regions", icon: MapPinned, roles: PMO_AND_ABOVE },
   { label: "DAS", href: "/settings/river-basins", icon: MapPinned, roles: PMO_AND_ABOVE },
+  { label: "Kategori Proyek", href: "/settings/project-categories", icon: Tag, roles: PMO_AND_ABOVE },
 ];
 
 const defaultOpenSections: Record<string, boolean> = {
@@ -226,7 +228,7 @@ export function Sidebar({ mobileOpen, onClose, desktopOpen }: SidebarProps) {
 
         <div className="px-5 pb-3 pt-5">
           <p className="text-[10px] font-semibold uppercase text-blue-300">PMO Control Tower</p>
-          <p className="mt-1 text-sm font-semibold">CANKORA</p>
+          <p className="mt-1 text-sm font-semibold">PMO</p>
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 py-2" aria-label="Navigasi utama">

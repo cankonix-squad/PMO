@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
@@ -9,19 +9,24 @@ import {
   Edit3,
   Filter,
   History,
+  Paperclip,
   Plus,
   Save,
   Search,
+  Trash2,
   X,
 } from "lucide-react";
 import { z } from "zod";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { RichTextEditor } from "@/components/editor/RichTextEditor";
 import { projectService } from "@/services/project.service";
 import { orgUnitService } from "@/services/org-unit.service";
 import type { OrgUnit } from "@/types/org-unit";
 import { OrgUnitLevelLabel } from "@/types/org-unit";
 import { programService } from "@/services/portfolio.service";
 import { sectorService, regionService, riverBasinService } from "@/services/spatial.service";
+import { projectCategoryService } from "@/services/project-category.service";
+import type { ProjectCategory } from "@/types/project-category";
 import type { Program } from "@/types/portfolio";
 import type { Sector, Region, RiverBasin } from "@/types/spatial";
 import { cn, formatDate, formatIDR } from "@/lib/utils";
@@ -73,20 +78,20 @@ const NEXT_STATUS: Record<ProjectStatus, ProjectStatus[]> = {
 const projectFormSchema = z.object({
   code: z.string().trim().min(1, "Kode wajib diisi").max(100),
   name: z.string().trim().min(1, "Nama proyek wajib diisi").max(500),
-  description: z.string().trim().optional(),
-  objectives: z.string().trim().optional(),
+  description: z.string().trim().min(1, "Deskripsi wajib diisi"),
+  objectives: z.string().trim().min(1, "Tujuan wajib diisi"),
   priority: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
-  category: z.string().trim().optional(),
-  start_date: z.string().trim().optional(),
-  end_date: z.string().trim().optional(),
-  budget_total: z.coerce.number().min(0, "Anggaran tidak boleh negatif"),
+  category: z.string().trim().min(1, "Kategori wajib dipilih"),
+  start_date: z.string().trim().min(1, "Tanggal mulai wajib diisi"),
+  end_date: z.string().trim().min(1, "Tanggal selesai wajib diisi"),
+  budget_total: z.coerce.number().min(1, "Anggaran wajib lebih dari 0"),
   currency: z.string().trim().min(1).max(10),
   progress_pct: z.coerce.number().min(0).max(100),
-  org_unit_id: z.string().trim().optional(),
-  program_id: z.string().trim().optional(),
-  sector_id: z.string().trim().optional(),
-  region_id: z.string().trim().optional(),
-  river_basin_id: z.string().trim().optional(),
+  org_unit_id: z.string().trim().min(1, "Balai / Unit Pemilik wajib dipilih"),
+  program_id: z.string().trim().min(1, "Program wajib dipilih"),
+  sector_id: z.string().trim().min(1, "Sektor SDA wajib dipilih"),
+  region_id: z.string().trim().min(1, "Wilayah wajib dipilih"),
+  river_basin_id: z.string().trim().min(1, "DAS wajib dipilih"),
 });
 
 type ProjectFormValues = z.infer<typeof projectFormSchema>;
@@ -122,6 +127,12 @@ export default function ProjectsPage() {
     queryKey: ["river-basins", false],
     queryFn: () => riverBasinService.list(false),
   });
+
+  const { data: projectCategories = [] } = useQuery({
+    queryKey: ["project-categories", false],
+    queryFn: () => projectCategoryService.list(false).then((r) => r.data ?? []),
+  });
+
   const [showForm, setShowForm] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -161,27 +172,45 @@ export default function ProjectsPage() {
 
   const createMutation = useMutation({
     mutationFn: (payload: CreateProjectRequest) => projectService.create(payload),
-    onSuccess: (res) => {
+    onSuccess: async (res) => {
       const project = res.data.data;
-      setSelectedId(project.id);
+      if (project?.id) {
+        setSelectedId(project.id);
+        await uploadAttachments(project.id);
+      }
       setShowForm(false);
       setFormError(null);
       void qc.invalidateQueries({ queryKey: ["projects"] });
       void qc.invalidateQueries({ queryKey: ["dashboard", "stats"] });
+    },
+    onError: (err: unknown) => {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+        "Gagal menyimpan proyek. Periksa kembali data yang diisi.";
+      setFormError(msg);
     },
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: UpdateProjectRequest }) =>
       projectService.update(id, payload),
-    onSuccess: (res) => {
+    onSuccess: async (res) => {
       const project = res.data.data;
-      setSelectedId(project.id);
+      if (project?.id) {
+        setSelectedId(project.id);
+        await uploadAttachments(project.id);
+      }
       setShowForm(false);
       setFormError(null);
       void qc.invalidateQueries({ queryKey: ["projects"] });
       void qc.invalidateQueries({ queryKey: ["projects", project.id] });
       void qc.invalidateQueries({ queryKey: ["dashboard", "stats"] });
+    },
+    onError: (err: unknown) => {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+        "Gagal memperbarui proyek. Periksa kembali data yang diisi.";
+      setFormError(msg);
     },
   });
 
@@ -211,22 +240,36 @@ export default function ProjectsPage() {
     setShowForm(true);
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  // Attachment queues: files waiting to be uploaded after project is saved
+  const [descAttachments, setDescAttachments] = useState<File[]>([]);
+  const [objAttachments, setObjAttachments] = useState<File[]>([]);
+
+  // Upload all queued attachments to the document store
+  async function uploadAttachments(projectId: string) {
+    const pairs: Array<{ file: File; category: string }> = [
+      ...descAttachments.map((f) => ({ file: f, category: "EVIDENCE" as const })),
+      ...objAttachments.map((f) => ({ file: f, category: "OTHER" as const })),
+    ];
+    await Promise.allSettled(
+      pairs.map(({ file, category }) =>
+        projectService.uploadDocument(projectId, {
+          file,
+          name: file.name,
+          category,
+          version: "1",
+        })
+      )
+    );
+    setDescAttachments([]);
+    setObjAttachments([]);
+  }
+
+  function handleSubmit(values: ProjectFormValues) {
     setFormError(null);
-
-    const parsed = projectFormSchema.safeParse(formValues(event.currentTarget));
-    if (!parsed.success) {
-      setFormError(parsed.error.issues[0]?.message ?? "Data proyek belum valid.");
-      return;
-    }
-
-    const values = parsed.data;
     if (formMode === "create") {
       createMutation.mutate(toCreatePayload(values));
       return;
     }
-
     if (!selectedProject) {
       setFormError("Pilih proyek sebelum menyimpan perubahan.");
       return;
@@ -286,10 +329,19 @@ export default function ProjectsPage() {
           sectors={sectors}
           regions={regions}
           riverBasins={riverBasins}
+          projectCategories={projectCategories}
+          descAttachments={descAttachments}
+          objAttachments={objAttachments}
+          onDescAttach={(file) => setDescAttachments((prev) => [...prev, file])}
+          onObjAttach={(file) => setObjAttachments((prev) => [...prev, file])}
+          onDescRemove={(idx) => setDescAttachments((prev) => prev.filter((_, i) => i !== idx))}
+          onObjRemove={(idx) => setObjAttachments((prev) => prev.filter((_, i) => i !== idx))}
           onSubmit={handleSubmit}
           onCancel={() => {
             setShowForm(false);
             setFormError(null);
+            setDescAttachments([]);
+            setObjAttachments([]);
           }}
         />
       )}
@@ -395,6 +447,13 @@ function ProjectForm({
   sectors,
   regions,
   riverBasins,
+  projectCategories,
+  descAttachments,
+  objAttachments,
+  onDescAttach,
+  onObjAttach,
+  onDescRemove,
+  onObjRemove,
   onSubmit,
   onCancel,
 }: {
@@ -407,12 +466,71 @@ function ProjectForm({
   sectors: Sector[];
   regions: Region[];
   riverBasins: RiverBasin[];
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  projectCategories: ProjectCategory[];
+  descAttachments: File[];
+  objAttachments: File[];
+  onDescAttach: (file: File) => void;
+  onObjAttach: (file: File) => void;
+  onDescRemove: (index: number) => void;
+  onObjRemove: (index: number) => void;
+  onSubmit: (values: ProjectFormValues) => void;
   onCancel: () => void;
 }) {
+  // ---- Local controlled state for rich fields + selects ----
+  const [description, setDescription] = useState(project?.description ?? "");
+  const [objectives, setObjectives] = useState(project?.objectives ?? "");
+  const [localError, setLocalError] = useState<string | null>(null);
+
+  // Hidden file input refs for attachment pickers
+  const descFileRef = useRef<HTMLInputElement>(null);
+  const objFileRef = useRef<HTMLInputElement>(null);
+
+  // Empty master data warnings
+  const emptyMasters: string[] = [];
+  if (orgUnits.length === 0) emptyMasters.push("Balai / Unit Pemilik");
+  if (programs.length === 0) emptyMasters.push("Program");
+  if (sectors.length === 0) emptyMasters.push("Sektor SDA");
+  if (regions.length === 0) emptyMasters.push("Wilayah");
+  if (riverBasins.length === 0) emptyMasters.push("DAS");
+  if (projectCategories.length === 0) emptyMasters.push("Kategori");
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLocalError(null);
+
+    const data = new FormData(event.currentTarget);
+    const raw = {
+      code: (data.get("code") as string) ?? "",
+      name: (data.get("name") as string) ?? "",
+      description,
+      objectives,
+      priority: (data.get("priority") as string) ?? "",
+      category: (data.get("category") as string) ?? "",
+      start_date: (data.get("start_date") as string) ?? "",
+      end_date: (data.get("end_date") as string) ?? "",
+      budget_total: parseRupiahInput((data.get("budget_total") as string) ?? "0"),
+      currency: (data.get("currency") as string) || "IDR",
+      progress_pct: Number((data.get("progress_pct") as string) || 0),
+      org_unit_id: (data.get("org_unit_id") as string) ?? "",
+      program_id: (data.get("program_id") as string) ?? "",
+      sector_id: (data.get("sector_id") as string) ?? "",
+      region_id: (data.get("region_id") as string) ?? "",
+      river_basin_id: (data.get("river_basin_id") as string) ?? "",
+    };
+
+    const parsed = projectFormSchema.safeParse(raw);
+    if (!parsed.success) {
+      setLocalError(parsed.error.issues[0]?.message ?? "Data proyek belum valid.");
+      return;
+    }
+    onSubmit(parsed.data);
+  }
+
+  const displayedError = localError ?? error;
+
   return (
     <form
-      onSubmit={onSubmit}
+      onSubmit={handleSubmit}
       className="mb-6 rounded-lg border border-border bg-card p-5 shadow-sm"
     >
       <div className="mb-4 flex items-center justify-between">
@@ -434,14 +552,22 @@ function ProjectForm({
         </button>
       </div>
 
-      {error && (
+      {emptyMasters.length > 0 && (
+        <div className="mb-4 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+          <span className="font-medium">Data master belum tersedia:</span>{" "}
+          {emptyMasters.join(", ")}.
+          Lengkapi data master di menu Pengaturan sebelum membuat proyek.
+        </div>
+      )}
+
+      {displayedError && (
         <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {error}
+          {displayedError}
         </div>
       )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
-        <Field label="Kode">
+        <Field label="Kode" required>
           <input
             name="code"
             defaultValue={project?.code ?? ""}
@@ -450,7 +576,7 @@ function ProjectForm({
             placeholder="PMO-001"
           />
         </Field>
-        <Field label="Nama">
+        <Field label="Nama" required>
           <input
             name="name"
             defaultValue={project?.name ?? ""}
@@ -458,7 +584,7 @@ function ProjectForm({
             placeholder="Nama proyek"
           />
         </Field>
-        <Field label="Prioritas">
+        <Field label="Prioritas" required>
           <select name="priority" defaultValue={project?.priority ?? "MEDIUM"} className={inputClassName}>
             {PRIORITIES.map((priority) => (
               <option key={priority} value={priority}>
@@ -467,24 +593,31 @@ function ProjectForm({
             ))}
           </select>
         </Field>
-        <Field label="Anggaran">
+        <Field label="Anggaran" required>
           <input
             name="budget_total"
-            type="number"
-            min="0"
-            defaultValue={project?.budget_total ?? 0}
+            inputMode="numeric"
+            defaultValue={formatRupiahInput(project?.budget_total ?? 0)}
             className={inputClassName}
+            placeholder="Rp. 100,000,000,-"
+            onInput={formatRupiahInputEvent}
           />
         </Field>
-        <Field label="Kategori">
-          <input
+        <Field label="Kategori" required>
+          <select
             name="category"
             defaultValue={project?.category ?? ""}
             className={inputClassName}
-            placeholder="Infrastruktur"
-          />
+          >
+            <option value="">— Pilih kategori —</option>
+            {projectCategories.map((cat) => (
+              <option key={cat.id} value={cat.code}>
+                {cat.code} – {cat.name}
+              </option>
+            ))}
+          </select>
         </Field>
-        <Field label="Tanggal Mulai">
+        <Field label="Tanggal Mulai" required>
           <input
             name="start_date"
             type="date"
@@ -492,7 +625,7 @@ function ProjectForm({
             className={inputClassName}
           />
         </Field>
-        <Field label="Tanggal Selesai">
+        <Field label="Tanggal Selesai" required>
           <input
             name="end_date"
             type="date"
@@ -501,14 +634,20 @@ function ProjectForm({
           />
         </Field>
         <Field label="Progres">
-          <input
-            name="progress_pct"
-            type="number"
-            min="0"
-            max="100"
-            defaultValue={project?.progress_pct ?? 0}
-            className={inputClassName}
-          />
+          <div className="relative">
+            <input
+              name="progress_pct"
+              type="number"
+              min="0"
+              max="100"
+              step="0.1"
+              defaultValue={project?.progress_pct ?? 0}
+              className={cn(inputClassName, "pr-9")}
+            />
+            <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm font-medium text-muted-foreground">
+              %
+            </span>
+          </div>
         </Field>
         <Field label="Balai / Unit Pemilik">
           <select
@@ -583,22 +722,103 @@ function ProjectForm({
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Field label="Deskripsi">
-          <textarea
-            name="description"
-            defaultValue={project?.description ?? ""}
-            className={cn(inputClassName, "min-h-20 py-2")}
-            placeholder="Deskripsi operasional singkat"
+        <div>
+          <Field label="Deskripsi" required>
+            <RichTextEditor
+              value={description}
+              onChange={setDescription}
+              placeholder="Deskripsi operasional singkat"
+              disabled={isSaving}
+              onAttachFile={() => descFileRef.current?.click()}
+              onAttachImage={(file) => onDescAttach(file)}
+            />
+          </Field>
+          {/* Hidden file input for description attachments */}
+          <input
+            ref={descFileRef}
+            type="file"
+            className="sr-only"
+            multiple
+            onChange={(e) => {
+              Array.from(e.target.files ?? []).forEach(onDescAttach);
+              e.target.value = "";
+            }}
           />
-        </Field>
-        <Field label="Tujuan">
-          <textarea
-            name="objectives"
-            defaultValue={project?.objectives ?? ""}
-            className={cn(inputClassName, "min-h-20 py-2")}
-            placeholder="Hasil yang diharapkan"
+          {/* Attachment queue for description */}
+          {descAttachments.length > 0 && (
+            <ul className="mt-2 space-y-1">
+              {descAttachments.map((file, idx) => (
+                <li
+                  key={idx}
+                  className="flex items-center justify-between rounded-md border border-border bg-muted/40 px-3 py-1.5 text-xs"
+                >
+                  <span className="flex items-center gap-1.5 truncate text-foreground">
+                    <Paperclip className="h-3 w-3 shrink-0 text-muted-foreground" />
+                    <span className="truncate">{file.name}</span>
+                    <span className="shrink-0 text-muted-foreground">({formatBytes(file.size)})</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => onDescRemove(idx)}
+                    className="ml-2 shrink-0 rounded p-0.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                    aria-label="Hapus lampiran"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div>
+          <Field label="Tujuan" required>
+            <RichTextEditor
+              value={objectives}
+              onChange={setObjectives}
+              placeholder="Hasil yang diharapkan"
+              disabled={isSaving}
+              onAttachFile={() => objFileRef.current?.click()}
+              onAttachImage={(file) => onObjAttach(file)}
+            />
+          </Field>
+          {/* Hidden file input for objectives attachments */}
+          <input
+            ref={objFileRef}
+            type="file"
+            className="sr-only"
+            multiple
+            onChange={(e) => {
+              Array.from(e.target.files ?? []).forEach(onObjAttach);
+              e.target.value = "";
+            }}
           />
-        </Field>
+          {/* Attachment queue for objectives */}
+          {objAttachments.length > 0 && (
+            <ul className="mt-2 space-y-1">
+              {objAttachments.map((file, idx) => (
+                <li
+                  key={idx}
+                  className="flex items-center justify-between rounded-md border border-border bg-muted/40 px-3 py-1.5 text-xs"
+                >
+                  <span className="flex items-center gap-1.5 truncate text-foreground">
+                    <Paperclip className="h-3 w-3 shrink-0 text-muted-foreground" />
+                    <span className="truncate">{file.name}</span>
+                    <span className="shrink-0 text-muted-foreground">({formatBytes(file.size)})</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => onObjRemove(idx)}
+                    className="ml-2 shrink-0 rounded p-0.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                    aria-label="Hapus lampiran"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
 
       <input name="currency" type="hidden" value={project?.currency ?? "IDR"} />
@@ -719,7 +939,20 @@ function ProjectDetail({
       </dl>
 
       {project.description && (
-        <p className="text-sm leading-relaxed text-muted-foreground">{project.description}</p>
+        <div
+          className="prose prose-sm max-w-none text-muted-foreground [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_hr]:my-2"
+          dangerouslySetInnerHTML={{ __html: project.description }}
+        />
+      )}
+
+      {project.objectives && (
+        <div>
+          <h4 className="mb-1 text-sm font-semibold text-foreground">Tujuan</h4>
+          <div
+            className="prose prose-sm max-w-none text-muted-foreground [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_hr]:my-2"
+            dangerouslySetInnerHTML={{ __html: project.objectives }}
+          />
+        </div>
       )}
 
       <div>
@@ -834,13 +1067,22 @@ function ProgressCell({ value }: { value: number }) {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-sm font-medium text-foreground">{label}</span>
+      <span className="mb-1 block text-sm font-medium text-foreground">
+        {label}
+        {required && <span className="ml-0.5 text-destructive" aria-hidden="true">*</span>}
+      </span>
       {children}
     </label>
   );
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 function formValues(form: HTMLFormElement): ProjectFormValues {
@@ -854,7 +1096,7 @@ function formValues(form: HTMLFormElement): ProjectFormValues {
     category: getString(data, "category"),
     start_date: getString(data, "start_date"),
     end_date: getString(data, "end_date"),
-    budget_total: Number(getString(data, "budget_total") || 0),
+    budget_total: parseRupiahInput(getString(data, "budget_total")),
     currency: getString(data, "currency") || "IDR",
     progress_pct: Number(getString(data, "progress_pct") || 0),
     org_unit_id: getString(data, "org_unit_id"),
@@ -882,6 +1124,7 @@ function toCreatePayload(values: ProjectFormValues): CreateProjectRequest {
     end_date: optionalString(values.end_date),
     budget_total: values.budget_total,
     currency: values.currency,
+    progress_pct: values.progress_pct,
     org_unit_id: optionalString(values.org_unit_id),
     program_id: optionalString(values.program_id),
     sector_id: optionalString(values.sector_id),
@@ -913,6 +1156,22 @@ function toUpdatePayload(values: ProjectFormValues): UpdateProjectRequest {
 function optionalString(value: string | undefined) {
   const trimmed = value?.trim();
   return trimmed ? trimmed : undefined;
+}
+
+function parseRupiahInput(value: string) {
+  return Number(value.replace(/[^\d]/g, "") || 0);
+}
+
+function formatRupiahInput(value: number) {
+  if (!Number.isFinite(value) || value <= 0) {
+    return "";
+  }
+  return `Rp. ${Math.round(value).toLocaleString("en-US")},-`;
+}
+
+function formatRupiahInputEvent(event: FormEvent<HTMLInputElement>) {
+  const input = event.currentTarget;
+  input.value = formatRupiahInput(parseRupiahInput(input.value));
 }
 
 function toDateInput(value: string | null | undefined) {

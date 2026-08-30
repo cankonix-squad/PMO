@@ -84,10 +84,10 @@ type SyncRun struct {
 func (SyncRun) TableName() string { return "primavera_sync_runs" }
 
 // ---------------------------------------------------------------------------
-// ActivityMapping — P6 activity_id → CANKORA entity link
+// ActivityMapping — P6 activity_id → PMO entity link
 // ---------------------------------------------------------------------------
 
-// ActivityMapping links a Primavera P6 activity to a CANKORA entity.
+// ActivityMapping links a Primavera P6 activity to a PMO entity.
 type ActivityMapping struct {
 	ID               uuid.UUID  `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
 	OrganizationID   uuid.UUID  `gorm:"type:uuid;not null;index"                       json:"organization_id"`

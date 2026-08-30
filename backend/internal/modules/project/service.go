@@ -22,6 +22,10 @@ var ErrProjectNotFound = errors.New("project not found")
 // ErrCodeTaken is returned when the project code is already used.
 var ErrCodeTaken = errors.New("project code already in use")
 
+// ErrInvalidProjectMasterData is returned when a project references master data
+// outside the caller organization, soft-deleted rows, or unknown IDs.
+var ErrInvalidProjectMasterData = errors.New("invalid project master data")
+
 // ErrTaskNotFound is returned when a task lookup yields no result.
 var ErrTaskNotFound = errors.New("task not found")
 
@@ -94,6 +98,7 @@ type Repository interface {
 	// Progress
 	RecordProgress(ctx context.Context, h *ProgressHistory) error
 	GetProgressHistory(ctx context.Context, projectID uuid.UUID) ([]ProgressHistory, error)
+	MasterDataExists(ctx context.Context, table string, id, orgID uuid.UUID) (bool, error)
 
 	// Tasks
 	CreateTask(ctx context.Context, t *Task) error
@@ -290,6 +295,26 @@ func (r *postgresRepository) List(ctx context.Context, filter ProjectListFilter)
 
 func (r *postgresRepository) Update(ctx context.Context, p *Project) error {
 	return r.db.WithContext(ctx).Save(p).Error
+}
+
+func (r *postgresRepository) MasterDataExists(ctx context.Context, table string, id, orgID uuid.UUID) (bool, error) {
+	allowed := map[string]bool{
+		"org_units":    true,
+		"programs":     true,
+		"sectors":      true,
+		"regions":      true,
+		"river_basins": true,
+	}
+	if !allowed[table] {
+		return false, fmt.Errorf("project: unsupported master table %s", table)
+	}
+
+	var count int64
+	err := r.db.WithContext(ctx).
+		Table(table).
+		Where("id = ? AND organization_id = ? AND deleted_at IS NULL", id, orgID).
+		Count(&count).Error
+	return count > 0, err
 }
 
 func (r *postgresRepository) Delete(ctx context.Context, id, orgID uuid.UUID) error {
@@ -964,10 +989,18 @@ func (s *Service) ConfigureDocumentStorage(root string, maxBytes int64) {
 
 // Create creates a new project.
 func (s *Service) Create(ctx context.Context, req *CreateProjectRequest, orgID, createdBy uuid.UUID) (*Project, error) {
+	if err := s.validateProjectMasterData(ctx, orgID, req.OrgUnitID, req.ProgramID, req.SectorID, req.RegionID, req.RiverBasinID); err != nil {
+		return nil, err
+	}
+
 	p := &Project{
 		ID:             uuid.New(),
 		OrganizationID: orgID,
 		OrgUnitID:      req.OrgUnitID,
+		ProgramID:      req.ProgramID,
+		SectorID:       req.SectorID,
+		RegionID:       req.RegionID,
+		RiverBasinID:   req.RiverBasinID,
 		Code:           req.Code,
 		Name:           req.Name,
 		Description:    req.Description,
@@ -979,6 +1012,7 @@ func (s *Service) Create(ctx context.Context, req *CreateProjectRequest, orgID, 
 		EndDate:        req.EndDate,
 		BudgetTotal:    req.BudgetTotal,
 		Currency:       req.Currency,
+		ProgressPct:    *req.ProgressPct,
 		ManagerID:      req.ManagerID,
 		CreatedBy:      createdBy,
 	}
@@ -1020,6 +1054,9 @@ func (s *Service) Update(ctx context.Context, id, orgID uuid.UUID, req *UpdatePr
 	if err != nil {
 		return nil, err
 	}
+	if err := s.validateProjectMasterData(ctx, orgID, req.OrgUnitID, req.ProgramID, req.SectorID, req.RegionID, req.RiverBasinID); err != nil {
+		return nil, err
+	}
 
 	if req.Name != "" {
 		p.Name = req.Name
@@ -1057,12 +1094,51 @@ func (s *Service) Update(ctx context.Context, id, orgID uuid.UUID, req *UpdatePr
 	if req.OrgUnitID != nil {
 		p.OrgUnitID = req.OrgUnitID
 	}
+	if req.ProgramID != nil {
+		p.ProgramID = req.ProgramID
+	}
+	if req.SectorID != nil {
+		p.SectorID = req.SectorID
+	}
+	if req.RegionID != nil {
+		p.RegionID = req.RegionID
+	}
+	if req.RiverBasinID != nil {
+		p.RiverBasinID = req.RiverBasinID
+	}
 
 	if err := s.repo.Update(ctx, p); err != nil {
 		return nil, fmt.Errorf("project: update: %w", err)
 	}
 
 	return s.repo.FindByID(ctx, p.ID, orgID)
+}
+
+func (s *Service) validateProjectMasterData(ctx context.Context, orgID uuid.UUID, orgUnitID, programID, sectorID, regionID, riverBasinID *uuid.UUID) error {
+	checks := []struct {
+		table string
+		id    *uuid.UUID
+	}{
+		{table: "org_units", id: orgUnitID},
+		{table: "programs", id: programID},
+		{table: "sectors", id: sectorID},
+		{table: "regions", id: regionID},
+		{table: "river_basins", id: riverBasinID},
+	}
+
+	for _, check := range checks {
+		if check.id == nil {
+			continue
+		}
+		exists, err := s.repo.MasterDataExists(ctx, check.table, *check.id, orgID)
+		if err != nil {
+			return fmt.Errorf("project: validate master data: %w", err)
+		}
+		if !exists {
+			return ErrInvalidProjectMasterData
+		}
+	}
+	return nil
 }
 
 // Transition moves a project to a new status via the FSM.

@@ -2,7 +2,7 @@ package constants
 
 // App
 const (
-	AppName    = "CANKORA"
+	AppName    = "PMO"
 	AppVersion = "0.1.0"
 	APIVersion = "v1"
 	APIPrefix  = "/api/v1"
@@ -98,6 +98,9 @@ const (
 	// P3-001: BIM/Digital Twin Integration
 	ResourceBIMIntegration = "bim_integration"
 
+	// PROJECT-FORM-002: Project Category master
+	ResourceProjectCategory = "project_category"
+
 	// P3-003: Data Governance — official validation & approval workflow
 	ResourceDataGovernance = "data_governance"
 
@@ -105,7 +108,7 @@ const (
 	ResourceNotification  = "notification"
 	ResourceNotifications = ResourceNotification
 
-	// CANKORA-DASH-002: Periodic progress & financial report
+	// PMO-DASH-002: Periodic progress & financial report
 	ResourcePeriodicReport = "periodic_report"
 
 	// P1-011: Monitoring — baseline & snapshot

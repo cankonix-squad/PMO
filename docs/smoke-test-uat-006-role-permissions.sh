@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# CANKORA — Smoke Test UAT-006: Role-Based Permissions & Navigation Hardening
+# PMO — Smoke Test UAT-006: Role-Based Permissions & Navigation Hardening
 # =============================================================================
 # Tests:
 #   1. Demo users login (pmo, pm, officer, executive, auditor)

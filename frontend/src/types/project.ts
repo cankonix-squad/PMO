@@ -55,6 +55,7 @@ export interface CreateProjectRequest {
   end_date?: string;
   budget_total?: number;
   currency?: string;
+  progress_pct?: number;
   org_unit_id?: string;
   program_id?: string;
   sector_id?: string;

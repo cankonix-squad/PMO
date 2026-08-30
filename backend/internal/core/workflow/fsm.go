@@ -34,7 +34,7 @@ type FSM struct {
 	transitions map[EntityType][]Transition
 }
 
-// New creates an FSM pre-loaded with all CANKORA business transitions.
+// New creates an FSM pre-loaded with all PMO business transitions.
 func New() *FSM {
 	fsm := &FSM{
 		transitions: make(map[EntityType][]Transition),

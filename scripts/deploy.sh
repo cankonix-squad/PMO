@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# CANKORA PMO — Production Deployment Script
+# PMO — Production Deployment Script
 # Target: /root/cankonix-node/apps/cankonix-pmo on 187.77.127.202
 # Usage : ./scripts/deploy.sh [--skip-build]
 # =============================================================================
@@ -9,12 +9,13 @@ set -euo pipefail
 
 APP_DIR="/root/cankonix-node/apps/cankonix-pmo"
 COMPOSE_FILE="compose.yml"
+DEPLOY_REMOTE_URL="${DEPLOY_REMOTE_URL:-https://github.com/cankonix-squad/PMO.git}"
 SKIP_BUILD="${1:-}"
 
 cd "$APP_DIR"
 
 echo "============================================================"
-echo " CANKORA PMO — Deployment $(date '+%Y-%m-%d %H:%M:%S %Z')"
+echo " PMO — Deployment $(date '+%Y-%m-%d %H:%M:%S %Z')"
 echo "============================================================"
 
 # ── 1. Show current commit ────────────────────────────────────────────────────
@@ -25,6 +26,7 @@ git rev-parse HEAD
 # ── 2. Pull latest source ─────────────────────────────────────────────────────
 echo ""
 echo "[2/5] Fetching latest source from main..."
+git remote set-url origin "$DEPLOY_REMOTE_URL"
 git fetch origin
 git checkout main
 git reset --hard origin/main
@@ -57,26 +59,38 @@ ELAPSED=0
 API_HEALTHY=false
 
 while [[ $ELAPSED -lt $MAX_WAIT ]]; do
-  HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/health || echo "000")
-  if [[ "$HTTP_STATUS" == "200" ]]; then
+  if docker compose -f "$COMPOSE_FILE" exec -T cankonix-pmo-api \
+    wget -qO- http://localhost:8080/health >/dev/null 2>&1; then
     API_HEALTHY=true
     break
   fi
-  echo "    API not ready yet (HTTP $HTTP_STATUS), retrying in ${INTERVAL}s... (${ELAPSED}s elapsed)"
+  echo "    API not ready yet, retrying in ${INTERVAL}s... (${ELAPSED}s elapsed)"
   sleep "$INTERVAL"
   ELAPSED=$((ELAPSED + INTERVAL))
 done
 
-echo ""
-echo "============================================================"
-if [[ "$API_HEALTHY" == "true" ]]; then
-  echo " ✅  Deployment SUCCESSFUL"
-  echo "     API health: OK"
-else
+if [[ "$API_HEALTHY" != "true" ]]; then
+  echo ""
+  echo "============================================================"
   echo " ❌  Deployment WARNING: API health check timed out after ${MAX_WAIT}s"
   echo "     Check logs: docker compose -f $COMPOSE_FILE logs --tail=50 cankonix-pmo-api"
+  echo "============================================================"
+  exit 1
 fi
 
+# ── 6. Run seed (idempotent — safe on every deploy) ───────────────────────────
+echo ""
+echo "[6/6] Running seed (idempotent)..."
+if docker compose -f "$COMPOSE_FILE" exec -T cankonix-pmo-api ./seed; then
+  echo "      ✅  Seed completed"
+else
+  echo "      ⚠️   Seed exited with error — check logs but continuing"
+fi
+
+echo ""
+echo "============================================================"
+echo " ✅  Deployment SUCCESSFUL"
+echo "     API health: OK"
 echo ""
 echo "Container status:"
 docker compose -f "$COMPOSE_FILE" ps

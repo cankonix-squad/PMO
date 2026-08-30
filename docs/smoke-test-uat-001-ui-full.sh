@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # smoke-test-uat-001-ui-full.sh
-# CANKORA UAT-001 — Full UI Regression Gate
+# PMO UAT-001 — Full UI Regression Gate
 #
 # Tujuan:
 #   Verifikasi penuh semua route frontend yang wajib lolos sebelum UAT/demo.
@@ -91,7 +91,7 @@ trap cleanup EXIT
 
 echo ""
 echo "========================================================"
-echo " CANKORA UAT-001 — Full UI Regression Gate"
+echo " PMO UAT-001 — Full UI Regression Gate"
 echo "========================================================"
 echo " FRONTEND   : $BASE_URL"
 echo " API        : $API_URL"

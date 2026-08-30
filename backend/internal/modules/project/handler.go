@@ -229,6 +229,10 @@ func (h *Handler) Create(c *gin.Context) {
 			response.Conflict(c, "Project code already in use")
 			return
 		}
+		if errors.Is(err, ErrInvalidProjectMasterData) {
+			response.BadRequest(c, "Invalid project master data")
+			return
+		}
 		response.InternalError(c)
 		return
 	}
@@ -289,6 +293,10 @@ func (h *Handler) Update(c *gin.Context) {
 	if err != nil {
 		if errors.Is(err, ErrProjectNotFound) {
 			response.NotFound(c, "Project not found")
+			return
+		}
+		if errors.Is(err, ErrInvalidProjectMasterData) {
+			response.BadRequest(c, "Invalid project master data")
 			return
 		}
 		response.InternalError(c)

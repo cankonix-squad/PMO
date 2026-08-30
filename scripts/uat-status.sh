@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# CANKORA UAT Status Script
+# PMO UAT Status Script
 # Cek status backend + frontend
 # Usage: bash scripts/uat-status.sh
 # =============================================================================
@@ -15,7 +15,7 @@ warn() { echo -e "${YELLOW}~ WARN${NC}  $1"; }
 
 echo
 echo "═══════════════════════════════════════════════════"
-echo " CANKORA UAT Stack Status"
+echo " PMO UAT Stack Status"
 echo "═══════════════════════════════════════════════════"
 
 # Backend health

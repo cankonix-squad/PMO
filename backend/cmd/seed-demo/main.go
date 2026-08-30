@@ -214,7 +214,7 @@ func upsertChildren(db *gorm.DB, orgID, adminID uuid.UUID, project *projectmodul
 			MilestoneID:    &milestone.ID,
 			WBSCode:        "DEMO-" + seed.Code + "-" + string(rune('A'+taskIndex)),
 			Title:          []string{"Penyelesaian pekerjaan konstruksi utama", "Verifikasi dokumen dan bukti lapangan"}[taskIndex],
-			Description:    "Task demo CANKORA untuk monitoring delivery.",
+			Description:    "Task demo PMO untuk monitoring delivery.",
 			Status:         status,
 			Priority:       seed.Priority,
 			Type:           "TASK",

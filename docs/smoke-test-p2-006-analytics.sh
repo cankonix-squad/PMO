@@ -43,7 +43,7 @@ check_num() {
 }
 
 echo "========================================"
-echo " CANKORA Smoke Test — P2-006 Analytics"
+echo " PMO Smoke Test — P2-006 Analytics"
 echo "========================================"
 echo ""
 

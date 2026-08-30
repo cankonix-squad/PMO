@@ -39,6 +39,7 @@ import (
 	"github.com/harmanto-49/cankora/internal/modules/portfolio"
 	"github.com/harmanto-49/cankora/internal/modules/priority"
 	"github.com/harmanto-49/cankora/internal/modules/project"
+	projectcategory "github.com/harmanto-49/cankora/internal/modules/projectcategory"
 	"github.com/harmanto-49/cankora/internal/modules/report"
 	"github.com/harmanto-49/cankora/internal/modules/spatial"
 	"github.com/harmanto-49/cankora/internal/platform/config"
@@ -102,6 +103,7 @@ type Dependencies struct {
 	GovernanceHandler         *governance.Handler
 	AuditLogHandler           *auditlog.Handler
 	NotificationHandler       *notifications.Handler
+	ProjectCategoryHandler    *projectcategory.Handler
 }
 
 // Wire initialises all dependencies and returns a populated Dependencies struct.
@@ -167,6 +169,7 @@ func Wire(cfg *config.Config, log *zap.Logger) (*Dependencies, error) {
 	notifRepo := notification.NewRepository(db)
 	notifSvc := notification.NewService(notifRepo, notifProvider, log, cfg.SMTP.From)
 	notificationHandler := notifications.NewHandler(notifSvc)
+	projectCategoryHandler := projectcategory.NewHandler(db, log)
 
 	_ = auditWriter
 
@@ -213,6 +216,7 @@ func Wire(cfg *config.Config, log *zap.Logger) (*Dependencies, error) {
 		GovernanceHandler:         governanceHandler,
 		AuditLogHandler:           auditLogHandler,
 		NotificationHandler:       notificationHandler,
+		ProjectCategoryHandler:    projectCategoryHandler,
 	}, nil
 }
 
@@ -235,16 +239,18 @@ func New(deps *Dependencies) *gin.Engine {
 	r.Use(middleware.Logger(deps.Log))
 	r.Use(gin.Recovery())
 
-	// Health check — no auth required
-	healthCheck := func(c *gin.Context) {
+	// Health check — no auth required.
+	// /api/health is used by production reverse proxy checks where /api routes
+	// are forwarded to the backend service.
+	healthHandler := func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"status":  "ok",
 			"version": deps.Config.App.Version,
 			"env":     deps.Config.App.Env,
 		})
 	}
-	r.GET("/health", healthCheck)
-	r.GET("/api/health", healthCheck)
+	r.GET("/health", healthHandler)
+	r.GET("/api/health", healthHandler)
 
 	// API v1
 	v1 := r.Group("/api/v1")
@@ -326,7 +332,7 @@ func New(deps *Dependencies) *gin.Engine {
 	documentsGroup.PUT("/:documentID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceDocuments, constants.ActionUpdate), deps.ProjectHandler.UpdateDocument)
 	documentsGroup.DELETE("/:documentID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceDocuments, constants.ActionDelete), deps.ProjectHandler.DeleteDocument)
 
-	// Periodic Reports — nested under projects (CANKORA-DASH-002)
+	// Periodic Reports — nested under projects (PMO-DASH-002)
 	periodicGroup := projectsGroup.Group("/:id/periodic-reports")
 	periodicGroup.GET("", middleware.RequirePermission(deps.RBACRepo, constants.ResourcePeriodicReport, constants.ActionView), deps.ProjectHandler.ListPeriodicReports)
 	periodicGroup.POST("", middleware.RequirePermission(deps.RBACRepo, constants.ResourcePeriodicReport, constants.ActionCreate), deps.ProjectHandler.CreatePeriodicReport)
@@ -618,6 +624,15 @@ func New(deps *Dependencies) *gin.Engine {
 	notifGroup.Use(middleware.AuthRequired(deps.TokenSvc, deps.AuthSvc))
 	notifGroup.Use(middleware.RequirePermission(deps.RBACRepo, constants.ResourceNotification, constants.ActionView))
 	deps.NotificationHandler.RegisterRoutes(notifGroup)
+
+	// Project Categories — PROJECT-FORM-002
+	projectCategoryGroup := v1.Group("/project-categories")
+	projectCategoryGroup.Use(middleware.AuthRequired(deps.TokenSvc, deps.AuthSvc))
+	projectCategoryGroup.GET("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceProjectCategory, constants.ActionView), deps.ProjectCategoryHandler.List)
+	projectCategoryGroup.POST("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceProjectCategory, constants.ActionCreate), deps.ProjectCategoryHandler.Create)
+	projectCategoryGroup.GET("/:id", middleware.RequirePermission(deps.RBACRepo, constants.ResourceProjectCategory, constants.ActionView), deps.ProjectCategoryHandler.GetByID)
+	projectCategoryGroup.PUT("/:id", middleware.RequirePermission(deps.RBACRepo, constants.ResourceProjectCategory, constants.ActionUpdate), deps.ProjectCategoryHandler.Update)
+	projectCategoryGroup.DELETE("/:id", middleware.RequirePermission(deps.RBACRepo, constants.ResourceProjectCategory, constants.ActionDelete), deps.ProjectCategoryHandler.Delete)
 
 	return r
 }

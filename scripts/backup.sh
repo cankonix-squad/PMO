@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# CANKORA PMO — Database Backup Script
+# PMO — Database Backup Script
 # Target: /root/cankonix-node/backups/cankonix-pmo/
 # Usage : ./scripts/backup.sh
 # =============================================================================
@@ -25,7 +25,7 @@ DB_NAME="${DB_NAME:-cankora_db}"
 mkdir -p "$BACKUP_DIR"
 
 echo "============================================================"
-echo " CANKORA PMO — Database Backup $(date '+%Y-%m-%d %H:%M:%S %Z')"
+echo " PMO — Database Backup $(date '+%Y-%m-%d %H:%M:%S %Z')"
 echo "============================================================"
 echo ""
 echo "Target: $BACKUP_DIR/$BACKUP_FILE"

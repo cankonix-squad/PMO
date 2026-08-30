@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# CANKORA UAT Environment Check
+# PMO UAT Environment Check
 # Verifikasi prasyarat lokal sebelum menjalankan UAT
 # Usage: bash scripts/uat-env-check.sh
 # =============================================================================

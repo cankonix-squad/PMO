@@ -1,16 +1,16 @@
-# CANKORA — UAT Business Flow Scenarios
+# PMO — UAT Business Flow Scenarios
 # End-to-End Business Process Validation
 
 **Versi**: 1.0.0
 **Tanggal**: 2026-08-29
-**Ticket**: CANKORA-UAT-007
+**Ticket**: PMO-UAT-007
 **Audience**: QA, stakeholder PMO, product owner, demo facilitator, tech lead
 
 ---
 
 ## 1. Tujuan Dokumen
 
-Dokumen ini mendefinisikan alur bisnis end-to-end yang harus diuji selama UAT CANKORA sebagai PMO National Project Control Tower. Fokus validasi adalah memastikan proses PMO nyambung dari:
+Dokumen ini mendefinisikan alur bisnis end-to-end yang harus diuji selama UAT PMO sebagai PMO National Project Control Tower. Fokus validasi adalah memastikan proses PMO nyambung dari:
 
 **Input Operasional → Validasi/Governance → Dashboard/Reporting → Audit/Notification**
 
@@ -328,7 +328,7 @@ Semua data UAT menggunakan prefix `UAT-BF-007` agar bisa diidentifikasi dan di-c
 | Lock period + budget write block | Implemented | Governance lock period memblokir create submission baru di periode sama; belum memblokir langsung penulisan tabel operasional |
 | Official governed snapshot untuk dashboard | Not yet | `/executive` dan `/programs` masih operational aggregate, bukan dari official governed data; disclaimer ada di label |
 | Power BI actual integration | Not yet | Embed config tersedia tapi Power BI workspace nyata belum terhubung |
-| IoT telemetry | Future/Last | `CANKORA-P3-004` diparkirkan sebagai item terakhir |
+| IoT telemetry | Future/Last | `PMO-P3-004` diparkirkan sebagai item terakhir |
 | Assigned-only task access | Partial | PROJECT_OFFICER tidak memiliki filter "hanya task yang di-assign ke dia" |
 
 ---

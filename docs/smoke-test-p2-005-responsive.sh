@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# CANKORA — Smoke Test P2-005: Mobile/Responsive QA
+# PMO — Smoke Test P2-005: Mobile/Responsive QA
 # =============================================================================
 # Verifikasi bahwa semua 18 halaman dashboard:
 #   1. Return HTTP 200 dari backend (API endpoints yang relevan)
@@ -11,7 +11,7 @@
 # Visual QA manual tetap diperlukan untuk memverifikasi tampilan di viewport mobile.
 #
 # Usage:
-#   cd /path/to/CANKORA
+#   cd /path/to/PMO
 #   bash docs/smoke-test-p2-005-responsive.sh
 #
 # Prerequisites:
@@ -65,7 +65,7 @@ curl_req() {
 # =============================================================================
 echo ""
 echo "=================================================================="
-echo " CANKORA P2-005 — Responsive QA Smoke Test"
+echo " PMO P2-005 — Responsive QA Smoke Test"
 echo "=================================================================="
 echo ""
 
@@ -199,7 +199,7 @@ check_api_allow_403 "GET /programs (portfolio)" "$BASE_URL/programs?page=1&page_
 echo ""
 echo -e "${CYAN}[3/5] Frontend source checks — responsive fixes${NC}"
 
-FRONTEND_SRC="/Users/harmanto/Documents/Code/DEV/Project Management/CANKORA/frontend/src"
+FRONTEND_SRC="/Users/harmanto/Documents/Code/DEV/Project Management/PMO/frontend/src"
 
 check_source() {
   local label="$1"
@@ -318,7 +318,7 @@ check_source \
 echo ""
 echo -e "${CYAN}[4/5] TypeScript — npx tsc --noEmit${NC}"
 
-FRONTEND_DIR="/Users/harmanto/Documents/Code/DEV/Project Management/CANKORA/frontend"
+FRONTEND_DIR="/Users/harmanto/Documents/Code/DEV/Project Management/PMO/frontend"
 tsc_output=$(cd "$FRONTEND_DIR" && npx tsc --noEmit 2>&1)
 if [ -z "$tsc_output" ]; then
   log_pass "tsc --noEmit: 0 errors"

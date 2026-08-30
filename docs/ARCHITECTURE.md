@@ -1,12 +1,12 @@
 # Technical Architecture
-# CANKORA — Enterprise Operations Platform
+# PMO — Enterprise Operations Platform
 
 **Versi**: 0.2.4  
 **Tanggal**: 2026-08-29  
 **Dibuat oleh**: Cankonix  
 **Status**: Draft — target architecture, not full implementation proof
 
-> **Update 2026-08-29 — CANKORA-DASH-002: Periodic Reports Data Source**
+> **Update 2026-08-29 — PMO-DASH-002: Periodic Reports Data Source**
 > Dashboard trend `/api/v1/dashboard/trend` data source diprioritaskan dari `project_periodic_reports` (migration `000038`). Logika: (1) Jika ada data periodik dalam 12 bulan terakhir → `data_type: "PERIODIC_REPORT"` — aggregate per bulan: `AVG(physical_progress_pct)` across active projects, `SUM(financial_actual)/SUM(financial_planned)*100`; (2) Fallback ke `project_progress_history` + `project_budgets` (`data_type: "OPERATIONAL"`); (3) Fallback terakhir: operational ramp dari current progress/budget aggregate. Tenant-safe: semua query JOIN ke `projects p ON p.organization_id = ? AND p.deleted_at IS NULL`. Frontend disclaimer berbeda per `data_type`: biru untuk PERIODIC_REPORT, amber untuk OPERATIONAL. Handler pattern baru: `Handler.WithDB(db *gorm.DB) *Handler` untuk akses DB langsung di project package tanpa bloating Repository interface.
 
 > **Update 2026-08-29 — UAT-002 Report Export Real File**  
@@ -65,7 +65,7 @@
 
 ### 1.1 Modular Monolith (bukan Microservices)
 
-**Keputusan**: CANKORA dibangun sebagai **Modular Monolith**.
+**Keputusan**: PMO dibangun sebagai **Modular Monolith**.
 
 **Rationale**:
 
@@ -509,7 +509,7 @@ frontend/
 - `next dev` dan `next build` tidak boleh berjalan bersamaan dengan direktori output `.next` yang sama.
 - Untuk production build verification: hentikan semua dev server, jalankan type-check/lint/build, lalu hentikan artefak build sebelum kembali ke satu dev server bersih.
 - Gejala gambar `fill` memenuhi viewport atau HTML tanpa styling harus ditangani sebagai CSS/build asset mismatch sebelum mengubah layout.
-- Recovery lokal: hentikan seluruh proses Next.js CANKORA, hapus hanya generated `frontend/.next`, jalankan satu `npm run dev`, lalu pastikan `/_next/static/css/app/layout.css` merespons HTTP 200.
+- Recovery lokal: hentikan seluruh proses Next.js PMO, hapus hanya generated `frontend/.next`, jalankan satu `npm run dev`, lalu pastikan `/_next/static/css/app/layout.css` merespons HTTP 200.
 - Komponen `next/image` dengan `fill` wajib memiliki parent `position: relative` dan dimensi stabil (`height`, `min-height`, atau `aspect-ratio`).
 - Visual gate wajib menguji minimal 1366x768, 1920x1080, 2560x1440, dan mobile tanpa overlap/text clipping.
 
@@ -860,7 +860,7 @@ Middleware `AuditInterceptor` otomatis mencatat semua mutasi (POST, PUT, PATCH, 
 
 ### 11.1 FSM-Based Approach
 
-CANKORA menggunakan **Finite State Machine per entitas** yang konfigurasi transisinya disimpan di database.
+PMO menggunakan **Finite State Machine per entitas** yang konfigurasi transisinya disimpan di database.
 
 ```sql
 -- workflow_definitions: mendefinisikan FSM untuk setiap tipe entitas
@@ -992,7 +992,7 @@ SMTP_HOST=smtp.example.com
 SMTP_PORT=587
 SMTP_USER=noreply@cankora.kemxxx.go.id
 SMTP_PASSWORD=<password>
-SMTP_FROM=CANKORA <noreply@cankora.kemxxx.go.id>
+SMTP_FROM=PMO <noreply@cankora.kemxxx.go.id>
 
 # App URL (untuk email link, file URL)
 APP_URL=https://cankora.kemxxx.go.id
@@ -1058,7 +1058,7 @@ Planned metadata enrichment (2026-08-29 — DASH-003): Dashboard "10 Proyek Prio
 
 ### 15.1 Keputusan Arsitektur Hybrid
 
-CANKORA tetap menjadi system of record operasional. Power BI menjadi kanal dashboard eksekutif tahap awal dan hanya membaca analytics read model. Dashboard native CANKORA melayani workflow operasional, detail proyek, validation queue, command center, serta drill-down yang memerlukan transaksi.
+PMO tetap menjadi system of record operasional. Power BI menjadi kanal dashboard eksekutif tahap awal dan hanya membaca analytics read model. Dashboard native PMO melayani workflow operasional, detail proyek, validation queue, command center, serta drill-down yang memerlukan transaksi.
 
 ```text
 Manual Entry / Field Evidence / External Systems
@@ -1070,7 +1070,7 @@ Manual Entry / Field Evidence / External Systems
           Validation + Data Quality Pipeline
                        |
                        v
-  CANKORA API -> PostgreSQL Operational Store
+  PMO API -> PostgreSQL Operational Store
        |                   |
        |                   v
        |          Rules / Health Engine
@@ -1174,4 +1174,4 @@ Background processing diperlukan untuk import besar, data-quality scan, health r
 - IoT: parked as the final/future advanced integration; tahap awal nanti adalah data gateway + device/source registry + telemetry validation + alert foundation. Telemetry wajib dipisahkan dari tabel transaksi; retention dan sampling harus ditetapkan sebelum implementasi.
 - AI/ML: tidak menggantikan rules yang dapat dijelaskan; prediction menyimpan model version, feature timestamp, confidence, dan explanation.
 
-> **Update 2026-08-28 (IoT planning):** IoT telemetry (`CANKORA-P3-004`) dipindah ke urutan paling akhir/future advanced integration. Bentuk awal yang disetujui untuk nanti adalah IoT data gateway + device/source registry + telemetry validation + alert foundation; MQTT, time-series optimization, alert rules engine, dan digital twin overlay baru menyusul setelah foundation stabil. Modul `governance` tetap menjadi prasyarat: telemetry tidak boleh langsung menjadi data official, dapat dibuat sebagai draft submission per device/period, dan dilarang menulis ke dataset yang sudah LOCKED. Jangan mulai IoT sebelum governance hardening, dashboard/GIS regression, reporting/read-model reconciliation, dan Phase 3 non-IoT work stabil.
+> **Update 2026-08-28 (IoT planning):** IoT telemetry (`PMO-P3-004`) dipindah ke urutan paling akhir/future advanced integration. Bentuk awal yang disetujui untuk nanti adalah IoT data gateway + device/source registry + telemetry validation + alert foundation; MQTT, time-series optimization, alert rules engine, dan digital twin overlay baru menyusul setelah foundation stabil. Modul `governance` tetap menjadi prasyarat: telemetry tidak boleh langsung menjadi data official, dapat dibuat sebagai draft submission per device/period, dan dilarang menulis ke dataset yang sudah LOCKED. Jangan mulai IoT sebelum governance hardening, dashboard/GIS regression, reporting/read-model reconciliation, dan Phase 3 non-IoT work stabil.

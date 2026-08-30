@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Smoke Test: CANKORA-P3-003-HARDEN — Data Governance Official Validation Hardening
+# Smoke Test: PMO-P3-003-HARDEN — Data Governance Official Validation Hardening
 #
 # Covers:
 #   1. unknown entity_type ditolak saat create (400)

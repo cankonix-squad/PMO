@@ -1,4 +1,4 @@
-// CANKORA-DASH-002: Periodic report API service
+// PMO-DASH-002: Periodic report API service
 import { api } from "@/lib/axios";
 import type {
   PeriodicReport,

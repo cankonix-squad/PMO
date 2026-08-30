@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# CANKORA UAT Start Script
+# PMO UAT Start Script
 # Menjalankan backend + frontend untuk sesi UAT
 # Usage: bash scripts/uat-start.sh
 # =============================================================================
@@ -88,7 +88,7 @@ info "Frontend ready ✓ (took ${WAITED}s)"
 
 echo
 echo "═══════════════════════════════════════════════════"
-echo " CANKORA UAT Stack READY"
+echo " PMO UAT Stack READY"
 echo "═══════════════════════════════════════════════════"
 echo " Backend:  http://localhost:8080/health"
 echo " Frontend: http://localhost:3000"

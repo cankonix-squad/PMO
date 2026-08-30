@@ -65,6 +65,7 @@ func main() {
 		constants.ResourceCommandCenter,
 		constants.ResourceBenefit,
 		constants.ResourcePriority,
+		constants.ResourceProgram,
 		constants.ResourceProgramDashboard,
 		constants.ResourceExecutiveDashboard,
 		constants.ResourceGISMap,
@@ -80,6 +81,7 @@ func main() {
 		constants.ResourceCorrectiveAction,
 		constants.ResourcePeriodicReport,
 		constants.ResourceOrgUnit,
+		constants.ResourceProjectCategory,
 	}
 	actions := []string{
 		constants.ActionView, constants.ActionCreate, constants.ActionUpdate,
@@ -365,6 +367,76 @@ func main() {
 	}
 	logger.Info("sectors seeded", zap.Int("count", len(sectorDefs)))
 
+	// ── Regions ──────────────────────────────────────────────────────────────
+	regionDefs := []struct {
+		Code string
+		Name string
+		Desc string
+	}{
+		{"WIL-SUM", "Sumatera", "Wilayah Sumatera"},
+		{"WIL-JAW", "Jawa", "Wilayah Jawa"},
+		{"WIL-KAL", "Kalimantan", "Wilayah Kalimantan"},
+		{"WIL-SUL", "Sulawesi", "Wilayah Sulawesi"},
+		{"WIL-NTT", "Nusa Tenggara & Papua", "Wilayah Nusa Tenggara, Maluku, dan Papua"},
+	}
+	regionIDs := make([]uuid.UUID, len(regionDefs))
+	for i, rd := range regionDefs {
+		var existing struct{ ID uuid.UUID }
+		err := db.WithContext(ctx).Table("regions").
+			Select("id").
+			Where("organization_id = ? AND code = ? AND deleted_at IS NULL", org.ID, rd.Code).
+			First(&existing).Error
+		if err == nil {
+			regionIDs[i] = existing.ID
+			continue
+		}
+		newID := uuid.New()
+		regionIDs[i] = newID
+		if err := db.WithContext(ctx).Exec(`
+			INSERT INTO regions (id, organization_id, code, name, level, is_active, sort_order)
+			VALUES (?, ?, ?, ?, 1, true, ?)`,
+			newID, org.ID, rd.Code, rd.Name, i+1,
+		).Error; err != nil {
+			log.Fatalf("seed: create region %s: %v", rd.Code, err)
+		}
+	}
+	logger.Info("regions seeded", zap.Int("count", len(regionDefs)))
+
+	// ── River Basins ──────────────────────────────────────────────────────────
+	riverBasinDefs := []struct {
+		Code string
+		Name string
+		Desc string
+	}{
+		{"DAS-CLS", "Ciliwung-Cisadane", "DAS Ciliwung dan Cisadane"},
+		{"DAS-CTD", "Citanduy", "DAS Citanduy"},
+		{"DAS-BRN", "Brantas", "DAS Brantas"},
+		{"DAS-BNS", "Bengawan Solo", "DAS Bengawan Solo"},
+		{"DAS-WAY", "Way Seputih-Sekampung", "DAS Way Seputih dan Sekampung"},
+	}
+	riverBasinIDs := make([]uuid.UUID, len(riverBasinDefs))
+	for i, rb := range riverBasinDefs {
+		var existing struct{ ID uuid.UUID }
+		err := db.WithContext(ctx).Table("river_basins").
+			Select("id").
+			Where("organization_id = ? AND code = ? AND deleted_at IS NULL", org.ID, rb.Code).
+			First(&existing).Error
+		if err == nil {
+			riverBasinIDs[i] = existing.ID
+			continue
+		}
+		newID := uuid.New()
+		riverBasinIDs[i] = newID
+		if err := db.WithContext(ctx).Exec(`
+			INSERT INTO river_basins (id, organization_id, code, name, description, is_active, sort_order)
+			VALUES (?, ?, ?, ?, ?, true, ?)`,
+			newID, org.ID, rb.Code, rb.Name, rb.Desc, i+1,
+		).Error; err != nil {
+			log.Fatalf("seed: create river_basin %s: %v", rb.Code, err)
+		}
+	}
+	logger.Info("river basins seeded", zap.Int("count", len(riverBasinDefs)))
+
 	// Link existing projects to programs & sectors (round-robin, only if not already set)
 	var projectIDs []uuid.UUID
 	db.WithContext(ctx).Table("projects").
@@ -440,6 +512,47 @@ func main() {
 		}
 		logger.Info("demo user seeded", zap.String("email", du.Email), zap.String("role", du.RoleCode))
 	}
+
+	// ------------------------------------------------------------------
+	// 7. Project Categories (PROJECT-FORM-002 — idempotent)
+	// ------------------------------------------------------------------
+	categoryDefs := []struct {
+		Code string
+		Name string
+		Desc string
+	}{
+		{"BND", "Bendungan", "Pembangunan dan rehabilitasi bendungan"},
+		{"IRG", "Irigasi", "Pengembangan dan rehabilitasi jaringan irigasi"},
+		{"SNP", "Sungai dan Pantai", "Normalisasi sungai dan pengamanan pantai"},
+		{"ABK", "Air Baku", "Penyediaan air baku untuk kebutuhan domestik dan industri"},
+		{"ATN", "Air Tanah", "Pengelolaan dan konservasi air tanah"},
+		{"BNJ", "Pengendalian Banjir", "Pengendalian banjir dan drainase perkotaan"},
+		{"OP", "Operasi dan Pemeliharaan", "Kegiatan operasi dan pemeliharaan infrastruktur SDA"},
+	}
+
+	for i, cd := range categoryDefs {
+		desc := cd.Desc
+		var existing struct{ ID uuid.UUID }
+		err := db.WithContext(ctx).Table("project_categories").
+			Select("id").
+			Where("organization_id = ? AND code = ? AND deleted_at IS NULL", org.ID, cd.Code).
+			First(&existing).Error
+		if err == nil {
+			continue // already seeded
+		}
+		newID := uuid.New()
+		adminID := adminUser.ID
+		sortOrder := i + 1
+		if err := db.WithContext(ctx).Exec(`
+			INSERT INTO project_categories
+				(id, organization_id, code, name, description, is_active, sort_order, created_by)
+			VALUES (?, ?, ?, ?, ?, true, ?, ?)`,
+			newID, org.ID, cd.Code, cd.Name, desc, sortOrder, adminID,
+		).Error; err != nil {
+			log.Fatalf("seed: create project_category %s: %v", cd.Code, err)
+		}
+	}
+	logger.Info("project categories seeded", zap.Int("count", len(categoryDefs)))
 
 	logger.Info("seed completed successfully")
 }

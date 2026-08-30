@@ -1,4 +1,4 @@
-# CANKORA — Enterprise Operations Platform by Cankonix
+# PMO — Enterprise Operations Platform by Cankonix
 
 > Modular enterprise platform for government operations management. Phase 1: Project Management Monitoring.
 
@@ -21,7 +21,7 @@
 
 | Document | Purpose |
 |----------|---------|
-| [SRS](docs/SRS.md) | Target product requirements for CANKORA PMO |
+| [SRS](docs/SRS.md) | Target product requirements for PMO |
 | [Architecture](docs/ARCHITECTURE.md) | Target technical architecture and implementation notes |
 | [Conceptual ERD](docs/ERD-CONCEPTUAL.md) | Conceptual data model |
 | [Permission Matrix](docs/PERMISSION-MATRIX.md) | Target role/resource/action model |
@@ -54,8 +54,8 @@
 
 ```bash
 # 1. Clone
-git clone https://github.com/harmanto-49/CANKORA.git
-cd CANKORA
+git clone https://github.com/harmanto-49/PMO.git
+cd PMO
 
 # 2. Backend
 cd backend
@@ -99,7 +99,7 @@ docker-compose exec backend ./cankora seed
 ## Architecture
 
 ```
-CANKORA/
+PMO/
 ├── backend/               # Go Modular Monolith
 │   ├── cmd/
 │   │   ├── api/           # HTTP server entry point

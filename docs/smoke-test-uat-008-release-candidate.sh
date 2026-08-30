@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# CANKORA UAT-008 — Release Candidate Smoke Test (Orchestrator)
+# PMO UAT-008 — Release Candidate Smoke Test (Orchestrator)
 # Runs all UAT smoke gates in sequence and reports aggregated results.
 # UAT-001 (UI Full) is non-blocking — Playwright login timeout is a known
 # environment issue; all API checks still pass.

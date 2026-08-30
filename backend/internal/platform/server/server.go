@@ -236,13 +236,15 @@ func New(deps *Dependencies) *gin.Engine {
 	r.Use(gin.Recovery())
 
 	// Health check — no auth required
-	r.GET("/health", func(c *gin.Context) {
+	healthCheck := func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"status":  "ok",
 			"version": deps.Config.App.Version,
 			"env":     deps.Config.App.Env,
 		})
-	})
+	}
+	r.GET("/health", healthCheck)
+	r.GET("/api/health", healthCheck)
 
 	// API v1
 	v1 := r.Group("/api/v1")

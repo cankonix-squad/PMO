@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/harmanto-49/cankora/internal/core/audit"
 	"github.com/harmanto-49/cankora/internal/core/auth"
 	"github.com/harmanto-49/cankora/internal/core/notification"
@@ -81,6 +82,7 @@ type Dependencies struct {
 	DashboardHandler          *dashboard.Handler
 	ReportHandler             *report.Handler
 	OrgHandler                *organization.Handler
+	OrgCRUDHandler            *organization.OrgCRUDHandler
 	PortfolioHandler          *portfolio.Handler
 	SpatialHandler            *spatial.Handler
 	MonitoringHandler         *monitoring.Handler
@@ -145,6 +147,7 @@ func Wire(cfg *config.Config, log *zap.Logger) (*Dependencies, error) {
 	dashboardHandler := dashboard.NewHandler(db, log)
 	reportHandler := report.NewHandler(db, log)
 	orgHandler := organization.NewHandler(db, log)
+	orgCRUDHandler := organization.NewOrgCRUDHandler(db, log)
 	portfolioHandler := portfolio.NewHandler(db, log)
 	spatialHandler := spatial.NewHandler(db, log)
 	monitoringHandler := monitoring.NewHandler(db, log)
@@ -191,6 +194,7 @@ func Wire(cfg *config.Config, log *zap.Logger) (*Dependencies, error) {
 		AuthHandler:               authHandler,
 		ProjectHandler:            projectHandler,
 		OrgHandler:                orgHandler,
+		OrgCRUDHandler:            orgCRUDHandler,
 		UserHandler:               userHandler,
 		DashboardHandler:          dashboardHandler,
 		ReportHandler:             reportHandler,
@@ -386,6 +390,156 @@ func New(deps *Dependencies) *gin.Engine {
 		middleware.RequirePermission(deps.RBACRepo, constants.ResourceReports, constants.ActionView),
 	)
 	deps.ReportHandler.RegisterRoutes(reportsGroup)
+
+	// Organizations (protected) — top-level org CRUD
+	orgsGroup := v1.Group("/organizations")
+	orgsGroup.Use(middleware.AuthRequired(deps.TokenSvc, deps.AuthSvc))
+	orgsGroup.GET("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceOrganization, constants.ActionView), deps.OrgCRUDHandler.List)
+	orgsGroup.POST("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceOrganization, constants.ActionCreate), deps.OrgCRUDHandler.Create)
+	orgsGroup.GET("/:orgID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceOrganization, constants.ActionView), deps.OrgCRUDHandler.Get)
+	orgsGroup.PUT("/:orgID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceOrganization, constants.ActionUpdate), deps.OrgCRUDHandler.Update)
+
+	// Roles (protected) — list roles for current org (closure avoids rbac→auth import cycle)
+	rolesGroup := v1.Group("/roles")
+	rolesGroup.Use(middleware.AuthRequired(deps.TokenSvc, deps.AuthSvc))
+	rolesGroup.GET("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceRole, constants.ActionView), func(c *gin.Context) {
+		val, exists := c.Get(string(auth.ContextKeyClaims))
+		if !exists {
+			c.JSON(http.StatusUnauthorized, gin.H{"success": false, "message": "unauthorized"})
+			return
+		}
+		claims, ok := val.(*auth.Claims)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"success": false, "message": "unauthorized"})
+			return
+		}
+		roles, err := deps.RBACRepo.ListRoles(c.Request.Context(), claims.OrganizationID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "internal error"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"success": true, "message": "roles retrieved", "data": roles})
+	})
+	rolesGroup.POST("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceRole, constants.ActionCreate), func(c *gin.Context) {
+		val, exists := c.Get(string(auth.ContextKeyClaims))
+		if !exists {
+			c.JSON(http.StatusUnauthorized, gin.H{"success": false, "message": "unauthorized"})
+			return
+		}
+		claims, ok := val.(*auth.Claims)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"success": false, "message": "unauthorized"})
+			return
+		}
+		var req struct {
+			Code        string `json:"code" binding:"required"`
+			Name        string `json:"name" binding:"required"`
+			Description string `json:"description"`
+		}
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": err.Error()})
+			return
+		}
+		// Check duplicate code within org
+		if _, err := deps.RBACRepo.FindRoleByCode(c.Request.Context(), claims.OrganizationID, req.Code); err == nil {
+			c.JSON(http.StatusConflict, gin.H{"success": false, "message": "role code already exists"})
+			return
+		}
+		role := &rbac.Role{
+			OrganizationID: claims.OrganizationID,
+			Code:           req.Code,
+			Name:           req.Name,
+			Description:    req.Description,
+		}
+		if err := deps.RBACRepo.CreateRole(c.Request.Context(), role); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "internal error"})
+			return
+		}
+		c.JSON(http.StatusCreated, gin.H{"success": true, "message": "role created", "data": role})
+	})
+	rolesGroup.PUT("/:roleID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceRole, constants.ActionUpdate), func(c *gin.Context) {
+		val, exists := c.Get(string(auth.ContextKeyClaims))
+		if !exists {
+			c.JSON(http.StatusUnauthorized, gin.H{"success": false, "message": "unauthorized"})
+			return
+		}
+		claims, ok := val.(*auth.Claims)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"success": false, "message": "unauthorized"})
+			return
+		}
+		roleID, err := uuid.Parse(c.Param("roleID"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "invalid role id"})
+			return
+		}
+		role, err := deps.RBACRepo.FindRoleByID(c.Request.Context(), roleID)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"success": false, "message": "role not found"})
+			return
+		}
+		// Tenant guard
+		if role.OrganizationID != claims.OrganizationID {
+			c.JSON(http.StatusNotFound, gin.H{"success": false, "message": "role not found"})
+			return
+		}
+		if role.IsSystem {
+			c.JSON(http.StatusForbidden, gin.H{"success": false, "message": "system roles cannot be modified"})
+			return
+		}
+		var req struct {
+			Name        string `json:"name"`
+			Description string `json:"description"`
+		}
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": err.Error()})
+			return
+		}
+		if req.Name != "" {
+			role.Name = req.Name
+		}
+		role.Description = req.Description
+		if err := deps.RBACRepo.UpdateRole(c.Request.Context(), role); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "internal error"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"success": true, "message": "role updated", "data": role})
+	})
+	rolesGroup.DELETE("/:roleID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceRole, constants.ActionDelete), func(c *gin.Context) {
+		val, exists := c.Get(string(auth.ContextKeyClaims))
+		if !exists {
+			c.JSON(http.StatusUnauthorized, gin.H{"success": false, "message": "unauthorized"})
+			return
+		}
+		claims, ok := val.(*auth.Claims)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"success": false, "message": "unauthorized"})
+			return
+		}
+		roleID, err := uuid.Parse(c.Param("roleID"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "invalid role id"})
+			return
+		}
+		role, err := deps.RBACRepo.FindRoleByID(c.Request.Context(), roleID)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"success": false, "message": "role not found"})
+			return
+		}
+		if role.OrganizationID != claims.OrganizationID {
+			c.JSON(http.StatusNotFound, gin.H{"success": false, "message": "role not found"})
+			return
+		}
+		if role.IsSystem {
+			c.JSON(http.StatusForbidden, gin.H{"success": false, "message": "system roles cannot be deleted"})
+			return
+		}
+		if err := deps.RBACRepo.DeleteRole(c.Request.Context(), roleID); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "internal error"})
+			return
+		}
+		c.JSON(http.StatusNoContent, nil)
+	})
 
 	// Org Units (protected) — P1-008
 	orgUnitsGroup := v1.Group("/org-units")

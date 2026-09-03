@@ -26,6 +26,7 @@ import {
   ShieldAlert,
   ShieldCheck,
   Tag,
+  Users,
   X,
 } from "lucide-react";
 import { authService } from "@/services/auth.service";
@@ -107,6 +108,9 @@ const navSections: NavSection[] = [
 ];
 
 const settingsItems: NavItem[] = [
+  { label: "Pengguna", href: "/settings/users", icon: Users, roles: ADMIN_ROLES },
+  { label: "Organisasi", href: "/settings/organizations", icon: Building2, roles: [R_SUPER_ADMIN] },
+  { label: "Role", href: "/settings/roles", icon: ShieldCheck, roles: ADMIN_ROLES },
   { label: "Org Unit", href: "/settings/org-units", icon: Settings, roles: ADMIN_ROLES },
   { label: "Program", href: "/settings/programs", icon: Layers3, roles: PMO_AND_ABOVE },
   { label: "Sektor SDA", href: "/settings/sectors", icon: BarChart3, roles: PMO_AND_ABOVE },
@@ -138,10 +142,12 @@ export function Sidebar({ mobileOpen, onClose, desktopOpen }: SidebarProps) {
     );
 
     if (activeSection) {
-      setOpenSections((current) => ({
-        ...current,
-        [activeSection.label]: true,
-      }));
+      // Close all sections except the one containing the active route
+      const next: Record<string, boolean> = {};
+      allSections.forEach((s) => {
+        next[s.label] = s.label === activeSection.label;
+      });
+      setOpenSections(next);
     }
   }, [pathname]);
 

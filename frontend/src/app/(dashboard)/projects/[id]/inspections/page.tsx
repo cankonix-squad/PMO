@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { FieldInspectionPanel } from "@/components/project/FieldInspectionPanel";
+import { FieldInspectionPanel } from "@/features/projects/components/FieldInspectionPanel";
 import { projectService } from "@/services/project.service";
 
 export default function ProjectInspectionsPage() {

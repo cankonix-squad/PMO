@@ -5,9 +5,9 @@ import (
 	"log"
 
 	"github.com/google/uuid"
-	"github.com/harmanto-49/cankora/internal/core/auth"
-	"github.com/harmanto-49/cankora/internal/core/organization"
-	"github.com/harmanto-49/cankora/internal/core/rbac"
+	"github.com/harmanto-49/cankora/internal/identity/auth"
+	"github.com/harmanto-49/cankora/internal/identity/organization"
+	"github.com/harmanto-49/cankora/internal/identity/rbac"
 	"github.com/harmanto-49/cankora/internal/platform/config"
 	"github.com/harmanto-49/cankora/internal/platform/database"
 	"github.com/harmanto-49/cankora/internal/shared/constants"

@@ -2,11 +2,11 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/harmanto-49/cankora/internal/modules/project"
+	"github.com/harmanto-49/cankora/internal/identity/auth"
+	"github.com/harmanto-49/cankora/internal/identity/rbac"
 	"github.com/harmanto-49/cankora/internal/platform/http/middleware"
+	"github.com/harmanto-49/cankora/internal/project"
 	"github.com/harmanto-49/cankora/internal/shared/constants"
-	"github.com/harmanto-49/cankora/internal/core/rbac"
-	"github.com/harmanto-49/cankora/internal/core/auth"
 )
 
 // RegisterProjects mounts the project aggregate's top-level HTTP endpoints.

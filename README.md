@@ -102,33 +102,37 @@ docker-compose exec backend ./cankora seed
 
 ```
 PMO/
-├── backend/               # Go Modular Monolith
-│   ├── cmd/
-│   │   ├── api/           # HTTP server entry point
-│   │   ├── migrate/       # Migration runner
-│   │   └── seed/          # Database seeder
+├── backend/
+│   ├── cmd/                # API, migration, and seed entry points
 │   ├── internal/
-│   │   ├── platform/      # config, database, middleware, server, response
-│   │   ├── shared/        # constants, types, utils
-│   │   ├── core/          # auth, audit, organization, rbac, notification, user, workflow
-│   │   └── modules/       # project, asset (stub), inventory (stub), cmms (stub)
-│   └── migrations/        # SQL migration files (golang-migrate)
-├── frontend/              # Next.js 14 App Router
-│   └── src/
-│       ├── app/           # Routes (App Router)
-│       ├── components/    # Reusable UI components
-│       ├── services/      # API service layer
-│       ├── store/         # Zustand stores
-│       ├── lib/           # Axios instance, query client
-│       └── types/         # TypeScript types
-├── docs/                  # Documentation (see docs/README.md)
-│   ├── architecture/      # Requirements, architecture, ERD, permissions
-│   ├── planning/          # Backlog, roadmap, implementation analysis
-│   ├── uat/               # UAT guides, checklists, release runbook
-│   └── references/        # Source decks, PDF, reference images
-├── scripts/               # Deployment, backup, local UAT helpers
-│   └── smoke/             # Smoke and regression test scripts
-├── archives/              # Starter ZIP archives
+│   │   ├── bootstrap/      # Dependency wiring and application lifecycle
+│   │   ├── identity/       # Auth, users, RBAC, organizations
+│   │   ├── project/        # Project services, repositories, related modules
+│   │   ├── governance/     # Audit, workflow, validation
+│   │   ├── analytics/      # Dashboards, reporting, read models
+│   │   ├── integrations/   # Imports, government, BIM, Primavera
+│   │   ├── notifications/  # Notification API and delivery
+│   │   ├── platform/       # HTTP router/middleware, config, database
+│   │   ├── modules/        # Future asset/inventory/CMMS stubs
+│   │   └── shared/         # Shared constants, types, utilities
+│   ├── tests/              # Contract, security, permission, tenant tests
+│   └── migrations/         # Existing SQL migrations
+├── frontend/src/
+│   ├── app/                # Next.js routes
+│   ├── features/projects/  # Project layouts, components, schemas, hooks
+│   ├── components/         # Shared application UI
+│   ├── services/           # Shared API layer
+│   ├── store/              # Authentication/UI state
+│   ├── lib/                # Shared infrastructure/utilities
+│   └── types/              # API contracts
+├── docs/
+│   ├── architecture/
+│   ├── planning/
+│   ├── uat/
+│   └── references/
+├── scripts/
+│   └── smoke/              # Existing smoke/UAT scripts
+├── archives/
 ├── compose.yml
 └── docker-compose.yml
 ```

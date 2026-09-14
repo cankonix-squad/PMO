@@ -2,8 +2,9 @@ package router
 
 import (
 	"time"
+
 	"github.com/gin-gonic/gin"
-	coreauth "github.com/harmanto-49/cankora/internal/core/auth"
+	coreauth "github.com/harmanto-49/cankora/internal/identity/auth"
 	"github.com/harmanto-49/cankora/internal/platform/http/middleware"
 )
 

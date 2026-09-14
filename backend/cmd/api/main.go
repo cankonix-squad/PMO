@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
+	"github.com/harmanto-49/cankora/internal/bootstrap"
 	"github.com/harmanto-49/cankora/internal/platform/config"
-	"github.com/harmanto-49/cankora/internal/platform/server"
 	"go.uber.org/zap"
 )
 
@@ -30,7 +30,7 @@ func main() {
 		zapLog = devLog
 	}
 
-	if err := server.Start(cfg, zapLog); err != nil {
+	if err := bootstrap.Start(cfg, zapLog); err != nil {
 		zapLog.Fatal("server error", zap.Error(err))
 	}
 }

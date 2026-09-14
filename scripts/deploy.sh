@@ -78,15 +78,6 @@ if [[ "$API_HEALTHY" != "true" ]]; then
   exit 1
 fi
 
-# ── 6. Run seed (idempotent — safe on every deploy) ───────────────────────────
-echo ""
-echo "[6/6] Running seed (idempotent)..."
-if docker compose -f "$COMPOSE_FILE" exec -T cankonix-pmo-api ./seed; then
-  echo "      ✅  Seed completed"
-else
-  echo "      ⚠️   Seed exited with error — check logs but continuing"
-fi
-
 echo ""
 echo "============================================================"
 echo " ✅  Deployment SUCCESSFUL"

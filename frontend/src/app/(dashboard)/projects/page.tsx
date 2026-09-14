@@ -39,6 +39,17 @@ import type {
   UpdateProjectRequest,
 } from "@/types/project";
 
+function sanitizeRichText(html: string): string {
+  if (typeof window === "undefined") return "";
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const allowed = new Set(["P", "BR", "STRONG", "EM", "UL", "OL", "LI", "HR"]);
+  doc.body.querySelectorAll("*").forEach((node) => {
+    if (!allowed.has(node.tagName)) { node.replaceWith(...Array.from(node.childNodes)); return; }
+    Array.from(node.attributes).forEach((attr) => node.removeAttribute(attr.name));
+  });
+  return doc.body.innerHTML;
+}
+
 const STATUS_COLORS: Record<ProjectStatus, string> = {
   DRAFT: "bg-gray-100 text-gray-700",
   PLANNING: "bg-blue-100 text-blue-700",
@@ -941,7 +952,7 @@ function ProjectDetail({
       {project.description && (
         <div
           className="prose prose-sm max-w-none text-muted-foreground [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_hr]:my-2"
-          dangerouslySetInnerHTML={{ __html: project.description }}
+          dangerouslySetInnerHTML={{ __html: sanitizeRichText(project.description) }}
         />
       )}
 
@@ -950,7 +961,7 @@ function ProjectDetail({
           <h4 className="mb-1 text-sm font-semibold text-foreground">Tujuan</h4>
           <div
             className="prose prose-sm max-w-none text-muted-foreground [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_hr]:my-2"
-            dangerouslySetInnerHTML={{ __html: project.objectives }}
+            dangerouslySetInnerHTML={{ __html: sanitizeRichText(project.objectives) }}
           />
         </div>
       )}

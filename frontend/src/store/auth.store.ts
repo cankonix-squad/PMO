@@ -44,12 +44,12 @@ function writeAuthCookie(value: string, rememberMe: boolean) {
   if (typeof document === "undefined") return;
 
   const maxAge = rememberMe ? "; Max-Age=604800" : "";
-  document.cookie = `${STORAGE_KEY}=${encodeURIComponent(value)}; Path=/; SameSite=Lax${maxAge}`;
+  document.cookie = `${STORAGE_KEY}=${encodeURIComponent(value)}; Path=/; SameSite=Lax; Secure${maxAge}`;
 }
 
 function clearAuthCookie() {
   if (typeof document === "undefined") return;
-  document.cookie = `${STORAGE_KEY}=; Path=/; Max-Age=0; SameSite=Lax`;
+  document.cookie = `${STORAGE_KEY}=; Path=/; Max-Age=0; SameSite=Lax; Secure`;
 }
 
 const authStorage: StateStorage = {

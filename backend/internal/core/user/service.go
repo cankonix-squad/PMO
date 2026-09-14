@@ -244,7 +244,11 @@ func (s *Service) Deactivate(ctx context.Context, id, orgID uuid.UUID) error {
 		return auth.ErrUserNotFound
 	}
 	user.IsActive = false
-	return s.repo.UpdateUser(ctx, user)
+	if err := s.repo.UpdateUser(ctx, user); err != nil {
+		return err
+	}
+	// Immediately invalidate every active access/refresh session for the account.
+	return s.repo.RevokeAllUserSessions(ctx, user.ID)
 }
 
 // --- helpers ---

@@ -46,7 +46,8 @@ import (
 	"github.com/harmanto-49/cankora/internal/platform/config"
 	"github.com/harmanto-49/cankora/internal/platform/dashboard"
 	"github.com/harmanto-49/cankora/internal/platform/database"
-	"github.com/harmanto-49/cankora/internal/platform/middleware"
+	"github.com/harmanto-49/cankora/internal/platform/http/middleware"
+	httprouter "github.com/harmanto-49/cankora/internal/platform/http/router"
 	"github.com/harmanto-49/cankora/internal/shared/constants"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -243,124 +244,24 @@ func New(deps *Dependencies) *gin.Engine {
 	r.Use(middleware.Logger(deps.Log))
 	r.Use(gin.Recovery())
 
-	// Health check — no auth required.
-	// /api/health is used by production reverse proxy checks where /api routes
-	// are forwarded to the backend service.
-	healthHandler := func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"status":  "ok",
-			"version": deps.Config.App.Version,
-			"env":     deps.Config.App.Env,
-		})
-	}
-	r.GET("/health", healthHandler)
-	r.GET("/api/health", healthHandler)
+	// Health checks are infrastructure routes, independent from domain wiring.
+	httprouter.RegisterHealth(r, deps.Config.App.Version, deps.Config.App.Env)
 
 	// API v1
 	v1 := r.Group("/api/v1")
 
-	// Auth routes (public)
-	authPublic := v1.Group("/auth")
-	deps.AuthHandler.RegisterRoutes(authPublic)
+	// Authentication routes and controls are owned by the HTTP router layer.
+	httprouter.RegisterAuth(v1, deps.AuthHandler, deps.TokenSvc, deps.AuthSvc)
 
-	// Auth routes (protected)
-	authProtected := v1.Group("/auth")
-	authProtected.Use(middleware.AuthRequired(deps.TokenSvc, deps.AuthSvc))
-	deps.AuthHandler.RegisterProtectedRoutes(authProtected)
-
-	// Projects (protected)
+	// Project aggregate routes are registered by the HTTP router boundary.
+	httprouter.RegisterProjects(v1, deps.ProjectHandler, deps.TokenSvc, deps.AuthSvc, deps.RBACRepo)
 	projectsGroup := v1.Group("/projects")
 	projectsGroup.Use(middleware.AuthRequired(deps.TokenSvc, deps.AuthSvc))
-	projectsGroup.GET("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceProjects, constants.ActionView), deps.ProjectHandler.List)
-	projectsGroup.POST("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceProjects, constants.ActionCreate), deps.ProjectHandler.Create)
-	projectsGroup.GET("/:id", middleware.RequirePermission(deps.RBACRepo, constants.ResourceProjects, constants.ActionView), deps.ProjectHandler.GetByID)
-	projectsGroup.PUT("/:id", middleware.RequirePermission(deps.RBACRepo, constants.ResourceProjects, constants.ActionUpdate), deps.ProjectHandler.Update)
-	projectsGroup.DELETE("/:id", middleware.RequirePermission(deps.RBACRepo, constants.ResourceProjects, constants.ActionDelete), deps.ProjectHandler.Delete)
-	projectsGroup.POST("/:id/transition", middleware.RequirePermission(deps.RBACRepo, constants.ResourceProjects, constants.ActionUpdate), deps.ProjectHandler.Transition)
-	projectsGroup.GET("/:id/progress-history", middleware.RequirePermission(deps.RBACRepo, constants.ResourceProjects, constants.ActionView), deps.ProjectHandler.GetProgressHistory)
-
-	// Tasks — nested under projects
-	tasksGroup := projectsGroup.Group("/:id/tasks")
-	tasksGroup.GET("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceTasks, constants.ActionView), deps.ProjectHandler.ListTasks)
-	tasksGroup.POST("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceTasks, constants.ActionCreate), deps.ProjectHandler.CreateTask)
-	tasksGroup.GET("/:taskID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceTasks, constants.ActionView), deps.ProjectHandler.GetTask)
-	tasksGroup.PUT("/:taskID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceTasks, constants.ActionUpdate), deps.ProjectHandler.UpdateTask)
-	tasksGroup.DELETE("/:taskID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceTasks, constants.ActionDelete), deps.ProjectHandler.DeleteTask)
-
-	// Milestones — nested under projects
-	milestonesGroup := projectsGroup.Group("/:id/milestones")
-	milestonesGroup.GET("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceMilestones, constants.ActionView), deps.ProjectHandler.ListMilestones)
-	milestonesGroup.POST("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceMilestones, constants.ActionCreate), deps.ProjectHandler.CreateMilestone)
-	milestonesGroup.GET("/:milestoneID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceMilestones, constants.ActionView), deps.ProjectHandler.GetMilestone)
-	milestonesGroup.PUT("/:milestoneID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceMilestones, constants.ActionUpdate), deps.ProjectHandler.UpdateMilestone)
-	milestonesGroup.DELETE("/:milestoneID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceMilestones, constants.ActionDelete), deps.ProjectHandler.DeleteMilestone)
-
-	// Issues — nested under projects
-	issuesGroup := projectsGroup.Group("/:id/issues")
-	issuesGroup.GET("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceIssues, constants.ActionView), deps.ProjectHandler.ListIssues)
-	issuesGroup.POST("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceIssues, constants.ActionCreate), deps.ProjectHandler.CreateIssue)
-	issuesGroup.GET("/:issueID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceIssues, constants.ActionView), deps.ProjectHandler.GetIssue)
-	issuesGroup.PUT("/:issueID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceIssues, constants.ActionUpdate), deps.ProjectHandler.UpdateIssue)
-	issuesGroup.DELETE("/:issueID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceIssues, constants.ActionDelete), deps.ProjectHandler.DeleteIssue)
-
-	// Risks — nested under projects
-	risksGroup := projectsGroup.Group("/:id/risks")
-	risksGroup.GET("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceRisks, constants.ActionView), deps.ProjectHandler.ListRisks)
-	risksGroup.POST("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceRisks, constants.ActionCreate), deps.ProjectHandler.CreateRisk)
-	risksGroup.GET("/:riskID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceRisks, constants.ActionView), deps.ProjectHandler.GetRisk)
-	risksGroup.PUT("/:riskID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceRisks, constants.ActionUpdate), deps.ProjectHandler.UpdateRisk)
-	risksGroup.DELETE("/:riskID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceRisks, constants.ActionDelete), deps.ProjectHandler.DeleteRisk)
-
-	// Budgets — nested under projects
-	budgetsGroup := projectsGroup.Group("/:id/budgets")
-	budgetsGroup.GET("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceBudgets, constants.ActionView), deps.ProjectHandler.ListBudgets)
-	budgetsGroup.POST("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceBudgets, constants.ActionCreate), deps.ProjectHandler.CreateBudget)
-	budgetsGroup.GET("/:budgetID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceBudgets, constants.ActionView), deps.ProjectHandler.GetBudget)
-	budgetsGroup.PUT("/:budgetID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceBudgets, constants.ActionUpdate), deps.ProjectHandler.UpdateBudget)
-	budgetsGroup.DELETE("/:budgetID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceBudgets, constants.ActionDelete), deps.ProjectHandler.DeleteBudget)
-
-	// Contracts — nested under projects
-	contractsGroup := projectsGroup.Group("/:id/contracts")
-	contractsGroup.GET("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceContracts, constants.ActionView), deps.ProjectHandler.ListContracts)
-	contractsGroup.POST("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceContracts, constants.ActionCreate), deps.ProjectHandler.CreateContract)
-	contractsGroup.GET("/:contractID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceContracts, constants.ActionView), deps.ProjectHandler.GetContract)
-	contractsGroup.PUT("/:contractID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceContracts, constants.ActionUpdate), deps.ProjectHandler.UpdateContract)
-	contractsGroup.DELETE("/:contractID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceContracts, constants.ActionDelete), deps.ProjectHandler.DeleteContract)
-
-	// Documents — nested under projects (P1-005)
-	documentsGroup := projectsGroup.Group("/:id/documents")
-	documentsGroup.GET("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceDocuments, constants.ActionView), deps.ProjectHandler.ListDocuments)
-	documentsGroup.POST("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceDocuments, constants.ActionCreate), deps.ProjectHandler.UploadDocument)
-	documentsGroup.GET("/:documentID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceDocuments, constants.ActionView), deps.ProjectHandler.GetDocument)
-	documentsGroup.GET("/:documentID/download", middleware.RequirePermission(deps.RBACRepo, constants.ResourceDocuments, constants.ActionView), deps.ProjectHandler.DownloadDocument)
-	documentsGroup.PUT("/:documentID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceDocuments, constants.ActionUpdate), deps.ProjectHandler.UpdateDocument)
-	documentsGroup.DELETE("/:documentID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceDocuments, constants.ActionDelete), deps.ProjectHandler.DeleteDocument)
-
-	// Periodic Reports — nested under projects (PMO-DASH-002)
-	periodicGroup := projectsGroup.Group("/:id/periodic-reports")
-	periodicGroup.GET("", middleware.RequirePermission(deps.RBACRepo, constants.ResourcePeriodicReport, constants.ActionView), deps.ProjectHandler.ListPeriodicReports)
-	periodicGroup.POST("", middleware.RequirePermission(deps.RBACRepo, constants.ResourcePeriodicReport, constants.ActionCreate), deps.ProjectHandler.CreatePeriodicReport)
-	periodicGroup.GET("/:reportID", middleware.RequirePermission(deps.RBACRepo, constants.ResourcePeriodicReport, constants.ActionView), deps.ProjectHandler.GetPeriodicReport)
-	periodicGroup.PUT("/:reportID", middleware.RequirePermission(deps.RBACRepo, constants.ResourcePeriodicReport, constants.ActionUpdate), deps.ProjectHandler.UpdatePeriodicReport)
-	periodicGroup.DELETE("/:reportID", middleware.RequirePermission(deps.RBACRepo, constants.ResourcePeriodicReport, constants.ActionDelete), deps.ProjectHandler.DeletePeriodicReport)
-
-	// Corrective Actions — nested under projects (P1-006)
-	caGroup := projectsGroup.Group("/:id/corrective-actions")
-	caGroup.GET("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceCorrectiveActions, constants.ActionView), deps.ProjectHandler.ListCorrectiveActions)
-	caGroup.POST("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceCorrectiveActions, constants.ActionCreate), deps.ProjectHandler.CreateCorrectiveAction)
-	caGroup.GET("/:caID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceCorrectiveActions, constants.ActionView), deps.ProjectHandler.GetCorrectiveAction)
-	caGroup.PUT("/:caID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceCorrectiveActions, constants.ActionUpdate), deps.ProjectHandler.UpdateCorrectiveAction)
-	caGroup.DELETE("/:caID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceCorrectiveActions, constants.ActionDelete), deps.ProjectHandler.DeleteCorrectiveAction)
-	caGroup.POST("/:caID/transition", middleware.RequirePermission(deps.RBACRepo, constants.ResourceCorrectiveActions, constants.ActionUpdate), deps.ProjectHandler.TransitionCorrectiveAction)
-
-	// Vendors (protected, top-level master)
-	vendorsGroup := v1.Group("/vendors")
-	vendorsGroup.Use(middleware.AuthRequired(deps.TokenSvc, deps.AuthSvc))
-	vendorsGroup.GET("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceVendors, constants.ActionView), deps.ProjectHandler.ListVendors)
-	vendorsGroup.POST("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceVendors, constants.ActionCreate), deps.ProjectHandler.CreateVendor)
-	vendorsGroup.GET("/:vendorID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceVendors, constants.ActionView), deps.ProjectHandler.GetVendor)
-	vendorsGroup.PUT("/:vendorID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceVendors, constants.ActionUpdate), deps.ProjectHandler.UpdateVendor)
-	vendorsGroup.DELETE("/:vendorID", middleware.RequirePermission(deps.RBACRepo, constants.ResourceVendors, constants.ActionDelete), deps.ProjectHandler.DeleteVendor)
+	httprouter.RegisterProjectChildren(v1, deps.ProjectHandler, deps.TokenSvc, deps.AuthSvc, deps.RBACRepo)
+	httprouter.RegisterProjectControls(v1, deps.ProjectHandler, deps.TokenSvc, deps.AuthSvc, deps.RBACRepo)
+	httprouter.RegisterProjectFinance(v1, deps.ProjectHandler, deps.TokenSvc, deps.AuthSvc, deps.RBACRepo)
+	httprouter.RegisterProjectDocuments(v1, deps.ProjectHandler, deps.TokenSvc, deps.AuthSvc, deps.RBACRepo)
+	httprouter.RegisterProjectGovernance(v1, deps.ProjectHandler, deps.TokenSvc, deps.AuthSvc, deps.RBACRepo)
 
 	// Users (protected)
 	usersGroup := v1.Group("/users")

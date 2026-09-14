@@ -2,7 +2,7 @@
 
 > Modular enterprise platform for government operations management. Phase 1: Project Management Monitoring.
 
-> **Implementation note (2026-08-18):** Current code is an MVP foundation and does not yet satisfy the full PMO Grand Design requirements. See [docs/IMPLEMENTATION-GAP-ANALYSIS.md](docs/IMPLEMENTATION-GAP-ANALYSIS.md) before treating the SRS/architecture documents as completed scope.
+> **Implementation note (2026-08-18):** Current code is an MVP foundation and does not yet satisfy the full PMO Grand Design requirements. See [docs/planning/IMPLEMENTATION-GAP-ANALYSIS.md](docs/planning/IMPLEMENTATION-GAP-ANALYSIS.md) before treating the SRS/architecture documents as completed scope.
 
 ---
 
@@ -19,13 +19,15 @@
 
 ## Documentation
 
+See the [documentation index](docs/README.md) for the complete folder guide.
+
 | Document | Purpose |
 |----------|---------|
-| [SRS](docs/SRS.md) | Target product requirements for PMO |
-| [Architecture](docs/ARCHITECTURE.md) | Target technical architecture and implementation notes |
-| [Conceptual ERD](docs/ERD-CONCEPTUAL.md) | Conceptual data model |
-| [Permission Matrix](docs/PERMISSION-MATRIX.md) | Target role/resource/action model |
-| [Implementation Gap Analysis](docs/IMPLEMENTATION-GAP-ANALYSIS.md) | Current alignment against the PMO Grand Design and remaining work |
+| [SRS](docs/architecture/SRS.md) | Target product requirements for PMO |
+| [Architecture](docs/architecture/ARCHITECTURE.md) | Target technical architecture and implementation notes |
+| [Conceptual ERD](docs/architecture/ERD-CONCEPTUAL.md) | Conceptual data model |
+| [Permission Matrix](docs/architecture/PERMISSION-MATRIX.md) | Target role/resource/action model |
+| [Implementation Gap Analysis](docs/planning/IMPLEMENTATION-GAP-ANALYSIS.md) | Current alignment against the PMO Grand Design and remaining work |
 
 ---
 
@@ -119,6 +121,15 @@ PMO/
 │       ├── store/         # Zustand stores
 │       ├── lib/           # Axios instance, query client
 │       └── types/         # TypeScript types
+├── docs/                  # Documentation (see docs/README.md)
+│   ├── architecture/      # Requirements, architecture, ERD, permissions
+│   ├── planning/          # Backlog, roadmap, implementation analysis
+│   ├── uat/               # UAT guides, checklists, release runbook
+│   └── references/        # Source decks, PDF, reference images
+├── scripts/               # Deployment, backup, local UAT helpers
+│   └── smoke/             # Smoke and regression test scripts
+├── archives/              # Starter ZIP archives
+├── compose.yml
 └── docker-compose.yml
 ```
 

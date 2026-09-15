@@ -79,7 +79,7 @@ Expected: PASS atau hanya WARN. Tidak ada FAIL.
 ```bash
 bash scripts/uat-start.sh
 ```
-Expected: Backend :8080 + Frontend :3000 ready.
+Expected: Backend :8083 + Frontend :3003 ready.
 
 ### Step 3: Stack Status
 ```bash
@@ -135,6 +135,17 @@ bash scripts/uat-status.sh  # Expected: DOWN
 - Update CLAUDE.md status block
 - Update DEVELOPMENT-BACKLOG.md
 - Commit dengan message: `chore: UAT-010 final acceptance — Non-IoT RC`
+
+### Step 10b: Reset Demo Berat ke Data Kosong (opsional)
+Untuk mendemokan alur input dari nol (tanpa akun/data demo):
+```bash
+bash scripts/reset-local-admin-only.sh --yes
+cd backend && make reset-local-verify   # Expected: 11/11 PASS
+```
+Expected: users=1 (`admin@cankora.local`), projects=0, semua child data project
+kosong; organisasi + RBAC + master data tetap. `seed-demo` tidak dijalankan.
+
+Untuk mengembalikan data demo: `bash scripts/uat-start.sh`.
 
 ---
 

@@ -17,7 +17,7 @@
 | Redis | Opsional | Tidak diperlukan untuk UAT |
 | MinIO | Opsional | Tidak diperlukan untuk UAT |
 
-Port default: backend **:8080**, frontend **:3000**.
+Port default: backend **:8083**, frontend **:3003**.
 
 ---
 
@@ -38,7 +38,7 @@ make seed            # org + RBAC + admin user (idempotent)
 make seed-demo       # 10 proyek SDA demo (idempotent)
 
 # 4. Start backend
-make dev             # port 8080
+make dev             # port 8083
 ```
 
 ```bash
@@ -49,10 +49,10 @@ cd '/Users/harmanto/Documents/Code/DEV/Project Management/PMO/frontend'
 rm -rf .next
 
 npm install          # skip jika node_modules sudah ada
-npm run dev          # port 3000
+npm run dev          # port 3003
 ```
 
-**Verifikasi**: buka http://localhost:3000 → tampil halaman login.
+**Verifikasi**: buka http://localhost:3003 → tampil halaman login.
 
 ---
 
@@ -68,6 +68,47 @@ npm run dev          # port 3000
 | `auditor@cankora.local` | `Demo@Cankora2024!` | AUDITOR | Audit logs + reports, view+export only |
 
 Semua demo users di-seed idempotent via `make seed`. Tidak perlu membuat manual.
+
+### 3.1 Mode "Super Admin only" (tanpa akun & data demo)
+
+Untuk sesi yang harus bersih dari data demo (mis. demo ke stakeholder dengan data
+yang diinput sendiri, atau verifikasi form kosong):
+
+```bash
+# Dari root repo — stop app, migrate-up, truncate, seed Super Admin saja, verifikasi
+bash scripts/reset-local-admin-only.sh --yes
+```
+
+Hasilnya:
+
+| Item | Sebelum | Sesudah |
+|---|---|---|
+| Users | 6 (admin + 5 demo) | 1 (`admin@cankora.local`) |
+| Projects | 10 (`DEMO-SDA-*`) | 0 |
+| Tasks/milestones/issues/risks/budgets/contracts/documents | terisi | 0 |
+| Periodic reports / progress history | 60 / 50 | 0 |
+| AUDIT_LOGS / notifications | terisi | 0 |
+| Organizations | 1 | 1 (tetap) |
+| Roles / permissions / role_permissions | 7 / 246 / 862 | 7 / 246 / 862 (tetap) |
+| Programs / sectors / regions / river basins / org units / project categories | terisi | terisi (tetap) |
+| `schema_migrations` | versi terakhir | tidak berubah |
+
+Setelah reset, login hanya dengan `admin@cankora.local` / `Admin@Cankora2024!`.
+Akun `pmo@`, `pm@`, `officer@`, `executive@`, `auditor@` akan mengembalikan **401**.
+
+Perintah terkait:
+
+```bash
+cd backend
+make reset-local-verify     # verifikasi read-only (11 check)
+make reset-local            # truncate saja, tanpa seed ulang
+```
+
+Untuk mengembalikan data demo: `cd backend && make seed && make seed-demo`
+(atau `bash scripts/uat-start.sh` yang menjalankan keduanya).
+
+> `cmd/reset-local` menolak `APP_ENV=production`, host cloud/managed, dan
+> `DB_NAME` selain `cankora_db` (override: `RESET_LOCAL_EXPECTED_DB`).
 
 ---
 
@@ -99,7 +140,7 @@ Semua seed bersifat **idempotent** — aman dijalankan berulang kali tanpa membu
 ## 5. Urutan Demo 15–30 Menit
 
 ### Blok A — Login & Overview (3 menit)
-1. Buka `http://localhost:3000/login`
+1. Buka `http://localhost:3003/login`
 2. Login dengan `admin@cankora.local` / `Admin@Cankora2024!`
 3. Dashboard tampil: KPI proyek (total/aktif/overrun), distribusi status, early warning.
 4. Scroll ke section **Portfolio** (anchor `#portfolio`) → tabel proyek dengan filter.
@@ -309,7 +350,7 @@ rm -rf frontend/.next
 cd frontend && npm run dev
 
 # Verifikasi CSS:
-curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/_next/static/css/app/layout.css
+curl -s -o /dev/null -w "%{http_code}" http://localhost:3003/_next/static/css/app/layout.css
 # Harus: 200
 ```
 
@@ -326,13 +367,13 @@ cd backend && make seed && make seed-demo
 
 ### Backend tidak start (port sudah terpakai)
 ```bash
-lsof -ti:8080 | xargs kill -9 || true
+lsof -ti:8083 | xargs kill -9 || true
 cd backend && make dev
 ```
 
 ### Frontend tidak start (port sudah terpakai)
 ```bash
-lsof -ti:3000 | xargs kill -9 || true
+lsof -ti:3003 | xargs kill -9 || true
 cd frontend && npm run dev
 ```
 
@@ -357,7 +398,7 @@ DB_SSLMODE=disable
 JWT_SECRET=supersecretkey-min32chars-change-in-production
 
 APP_ENV=development
-PORT=8080
+PORT=8083
 
 STORAGE_LOCAL_PATH=./storage/documents
 STORAGE_MAX_SIZE_BYTES=20971520
@@ -367,8 +408,8 @@ STORAGE_MAX_SIZE_BYTES=20971520
 
 ## 12. Checklist Sebelum UAT
 
-- [ ] Backend running di `:8080` — `curl http://localhost:8080/health` → 200
-- [ ] Frontend running di `:3000` — browser buka `http://localhost:3000`
+- [ ] Backend running di `:8083` — `curl http://localhost:8083/health` → 200
+- [ ] Frontend running di `:3003` — browser buka `http://localhost:3003`
 - [ ] Login berhasil dengan `admin@cankora.local` / `Admin@Cankora2024!`
 - [ ] Dashboard tampil dengan data (tidak semua 0)
 - [ ] `/gis` → peta tampil dengan marker, sidebar dan topbar hadir

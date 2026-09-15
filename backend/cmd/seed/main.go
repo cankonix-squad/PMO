@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"log"
+	"os"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/harmanto-49/cankora/internal/identity/auth"
@@ -13,6 +15,7 @@ import (
 	"github.com/harmanto-49/cankora/internal/shared/constants"
 	"github.com/harmanto-49/cankora/internal/shared/utils"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 )
 
 func main() {
@@ -457,14 +460,12 @@ func main() {
 
 	// ------------------------------------------------------------------
 	// 6. Demo users per role (UAT-006 — idempotent)
+	//
+	// Set SEED_SKIP_DEMO_USERS=true to seed only the Super Admin account.
+	// `make reset-local-admin-only` uses this so a local reset leaves the
+	// database with the default Super Admin and no demo accounts.
 	// ------------------------------------------------------------------
-	type demoUserDef struct {
-		Email     string
-		FirstName string
-		LastName  string
-		RoleCode  string
-		Password  string // same simple UAT password for all demo accounts
-	}
+	skipDemoUsers := strings.EqualFold(os.Getenv("SEED_SKIP_DEMO_USERS"), "true")
 
 	demoUsers := []demoUserDef{
 		{Email: "pmo@cankora.local", FirstName: "Demo", LastName: "PMO Admin", RoleCode: constants.RolePMO, Password: "Demo@Cankora2024!"},
@@ -474,43 +475,10 @@ func main() {
 		{Email: "auditor@cankora.local", FirstName: "Demo", LastName: "Auditor", RoleCode: constants.RoleAuditor, Password: "Demo@Cankora2024!"},
 	}
 
-	for _, du := range demoUsers {
-		hashed, err := utils.HashPassword(du.Password)
-		if err != nil {
-			log.Fatalf("seed: hash demo password for %s: %v", du.Email, err)
-		}
-		demoUser := &auth.User{}
-		if err := db.WithContext(ctx).
-			Where("organization_id = ? AND email = ?", org.ID, du.Email).
-			Attrs(auth.User{
-				ID:             uuid.New(),
-				OrganizationID: org.ID,
-				Email:          du.Email,
-				FirstName:      du.FirstName,
-				LastName:       du.LastName,
-				PasswordHash:   hashed,
-				IsActive:       true,
-				MustChangePwd:  false,
-			}).
-			FirstOrCreate(demoUser).Error; err != nil {
-			log.Fatalf("seed: create demo user %s: %v", du.Email, err)
-		}
-
-		// Assign role
-		demoRole, ok := roleMap[du.RoleCode]
-		if !ok {
-			log.Fatalf("seed: role not found for demo user %s: %s", du.Email, du.RoleCode)
-		}
-		userRoleRecord := rbac.UserRole{
-			UserID: demoUser.ID,
-			RoleID: demoRole.ID,
-		}
-		if err := db.WithContext(ctx).
-			Where(userRoleRecord).
-			FirstOrCreate(&userRoleRecord).Error; err != nil {
-			log.Fatalf("seed: assign role for demo user %s: %v", du.Email, err)
-		}
-		logger.Info("demo user seeded", zap.String("email", du.Email), zap.String("role", du.RoleCode))
+	if skipDemoUsers {
+		logger.Info("demo users skipped", zap.String("reason", "SEED_SKIP_DEMO_USERS=true"))
+	} else {
+		seedDemoUsers(ctx, db, org.ID, roleMap, demoUsers, logger)
 	}
 
 	// ------------------------------------------------------------------
@@ -564,4 +532,67 @@ func contains(slice []string, s string) bool {
 		}
 	}
 	return false
+}
+
+// demoUserDef describes a non-production demo account seeded per role (UAT-006).
+type demoUserDef struct {
+	Email     string
+	FirstName string
+	LastName  string
+	RoleCode  string
+	Password  string // same simple UAT password for all demo accounts
+}
+
+// seedDemoUsers idempotently creates the demo accounts used by UAT/demo
+// sessions. It is skipped when SEED_SKIP_DEMO_USERS=true.
+func seedDemoUsers(
+	ctx context.Context,
+	db *gorm.DB,
+	orgID uuid.UUID,
+	roleMap map[string]*rbac.Role,
+	demoUsers []demoUserDef,
+	logger *zap.Logger,
+) {
+	for _, du := range demoUsers {
+		hashed, err := utils.HashPassword(du.Password)
+		if err != nil {
+			log.Fatalf("seed: hash demo password for %s: %v", du.Email, err)
+		}
+
+		demoUser := &auth.User{}
+		if err := db.WithContext(ctx).
+			Where("organization_id = ? AND email = ?", orgID, du.Email).
+			Attrs(auth.User{
+				ID:             uuid.New(),
+				OrganizationID: orgID,
+				Email:          du.Email,
+				FirstName:      du.FirstName,
+				LastName:       du.LastName,
+				PasswordHash:   hashed,
+				IsActive:       true,
+				MustChangePwd:  false,
+			}).
+			FirstOrCreate(demoUser).Error; err != nil {
+			log.Fatalf("seed: create demo user %s: %v", du.Email, err)
+		}
+
+		demoRole, ok := roleMap[du.RoleCode]
+		if !ok {
+			log.Fatalf("seed: role not found for demo user %s: %s", du.Email, du.RoleCode)
+		}
+
+		userRoleRecord := rbac.UserRole{
+			UserID: demoUser.ID,
+			RoleID: demoRole.ID,
+		}
+		if err := db.WithContext(ctx).
+			Where(userRoleRecord).
+			FirstOrCreate(&userRoleRecord).Error; err != nil {
+			log.Fatalf("seed: assign role for demo user %s: %v", du.Email, err)
+		}
+
+		logger.Info("demo user seeded",
+			zap.String("email", du.Email),
+			zap.String("role", du.RoleCode))
+	}
 }

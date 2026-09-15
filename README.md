@@ -65,13 +65,13 @@ cp .env.example .env          # edit values
 make tidy
 make migrate-up
 make seed
-make dev                      # runs on :8080
+make dev                      # runs on :8083
 
 # 3. Frontend (new terminal)
 cd frontend
 cp .env.local.example .env.local
 npm install
-npm run dev                   # runs on :3000
+npm run dev                   # runs on :3003
 ```
 
 ### Docker (Full Stack)
@@ -96,7 +96,63 @@ docker-compose exec backend ./cankora seed
 
 > Change this immediately in production.
 
+> Demo accounts (`pmo@`, `pm@`, `officer@`, `executive@`, `auditor@`) are
+> optional and only created by `make seed-demo`. After
+> `make reset-local-admin-only` the Super Admin above is the only account.
+
 ---
+
+## Reset Local Data (Super Admin only)
+
+Wipes demo/transactional data from the **local** database and leaves only the
+default organization, RBAC/permissions/roles, master data, and the Super Admin
+user. The schema and the `schema_migrations` bookkeeping table are preserved, and
+`seed-demo` is **not** run.
+
+```bash
+# From the project root — stops the app, migrates, truncates, seeds, verifies
+bash scripts/reset-local-admin-only.sh
+
+# Non-interactive
+bash scripts/reset-local-admin-only.sh --yes
+
+# Skip stopping the app / skip migrations
+bash scripts/reset-local-admin-only.sh --keep-running
+bash scripts/reset-local-admin-only.sh --no-migrate
+```
+
+Backend Makefile targets:
+
+```bash
+cd backend
+make reset-local-admin-only   # truncate + seed Super Admin only + verify
+make reset-local-verify       # read-only verification (11 checks)
+make reset-local              # truncate only (no re-seed)
+```
+
+**Removed:** demo users, projects `DEMO-SDA-*` and all child data (tasks,
+milestones, issues, risks, budgets, contracts, documents, periodic reports,
+inspections, benefits, snapshots, audit logs, notifications, integration runs…).
+Also leaves `projects` empty.
+
+**Kept:** `schema_migrations`, and after re-seed the organization, 7 roles, 246
+permissions, 862 role-permission mappings, programs/sectors/regions/river
+basins/org units/project categories, and `admin@cankora.local`.
+
+Safety guards (both the script and `cmd/reset-local`):
+
+- refuses `APP_ENV=production` and managed/cloud DB hosts
+- refuses non-local `DB_HOST`
+- requires `DB_NAME` to match `RESET_LOCAL_EXPECTED_DB` (default `cankora_db`)
+- `cmd/reset-local` requires `--yes`; override with `ALLOW_PRODUCTION_RESET=true`
+  only if you are absolutely sure
+
+> Prefer this over `make migrate-drop`: `migrate-drop` destroys the whole schema
+> and requires a full migration replay. The reset above only deletes application
+> rows, so the schema stays as-is.
+
+---
+
 
 ## Architecture
 
@@ -157,7 +213,7 @@ make docker-up      # Start all Docker services
 ## API Health Check
 
 ```bash
-curl http://localhost:8080/health
+curl http://localhost:8083/health
 # {"status":"ok","version":"0.1.0"}
 ```
 

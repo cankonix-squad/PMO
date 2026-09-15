@@ -85,9 +85,9 @@ DB_PASSWORD=cankora_secret
 DB_NAME=cankora_db
 DB_SSLMODE=disable
 JWT_SECRET=<ganti-dengan-string-32-karakter-minimal>
-PORT=8080
-APP_URL=http://localhost:3000
-CORS_ALLOWED_ORIGINS=http://localhost:3000
+PORT=8083
+APP_URL=http://localhost:3003
+CORS_ALLOWED_ORIGINS=http://localhost:3003
 ```
 
 > **Catatan**: `JWT_SECRET` harus minimal 32 karakter. Untuk UAT lokal, nilai placeholder dari `.env.example` dapat digunakan. Jangan gunakan nilai produksi.
@@ -105,12 +105,12 @@ make seed-demo     # 10 proyek SDA demo (idempotent)
 
 ```bash
 cd backend
-make dev           # Port 8080
+make dev           # Port 8083
 ```
 
 Verifikasi:
 ```bash
-curl http://localhost:8080/health
+curl http://localhost:8083/health
 # Expected: {"success":true,"message":"ok","data":{"status":"ok","version":"0.1.0"}}
 ```
 
@@ -120,7 +120,7 @@ curl http://localhost:8080/health
 cd frontend
 rm -rf .next       # PENTING: hapus build lama untuk mencegah CSS corruption
 npm install        # Skip jika node_modules sudah ada
-npm run dev        # Port 3000
+npm run dev        # Port 3003
 ```
 
 > **RULE**: Jangan jalankan `npm run build` saat dev server aktif menggunakan `.next` yang sama. Ini menyebabkan CSS corruption (sidebar/topbar hilang).
@@ -137,6 +137,9 @@ npm run dev        # Port 3000
 | officer@cankora.local | Demo@Cankora2024! | PROJECT_OFFICER |
 | executive@cankora.local | Demo@Cankora2024! | EXECUTIVE_VIEWER |
 | auditor@cankora.local | Demo@Cankora2024! | AUDITOR |
+
+> Demo accounts are optional. To reset the local database to Super Admin only,
+> see section 9.1 below.
 
 ---
 
@@ -191,7 +194,7 @@ Lihat `docs/uat/UAT-DEMO-GUIDE.md` section Known Limitations untuk daftar lengka
 | Dashboard full-screen tanpa sidebar | `.next` corrupt | `rm -rf frontend/.next && restart npm run dev` |
 | Backend 500 saat login | DB tidak ready | `brew services start postgresql@15` |
 | Migration gagal | Versi migration tidak cocok | `cd backend && make migrate-down && make migrate-up` |
-| Port 8080 in use | Backend sudah berjalan | `bash scripts/uat-stop.sh` lalu `bash scripts/uat-start.sh` |
+| Port 8083 in use | Backend sudah berjalan | `bash scripts/uat-stop.sh` lalu `bash scripts/uat-start.sh` |
 | SMTP email tidak terkirim | SMTP env kosong | Normal — NoopProvider aktif. Set SMTP_HOST/USER/PASSWORD untuk email nyata |
 | Seed-demo duplikat | Seed dijalankan ulang | Aman — `make seed-demo` idempotent via `ON CONFLICT DO NOTHING` |
 
@@ -202,6 +205,23 @@ Lihat `docs/uat/UAT-DEMO-GUIDE.md` section Known Limitations untuk daftar lengka
 ```bash
 bash scripts/uat-stop.sh
 ```
+
+### 9.1 Reset lokal ke Super Admin saja
+
+Untuk mengosongkan data demo/transaksional tanpa menghapus schema:
+
+```bash
+# Root repo — stop app, migrate-up, truncate, seed Super Admin saja, verifikasi
+bash scripts/reset-local-admin-only.sh --yes
+
+# Verifikasi read-only
+cd backend && make reset-local-verify
+```
+
+Efek: hanya `admin@cankora.local` yang tersisa sebagai user; `projects` dan
+seluruh child data kosong; organisasi default, RBAC (7 roles / 246 permissions /
+862 role_permissions), dan master data tetap. `seed-demo` **tidak** dijalankan.
+Lihat `docs/uat/UAT-DEMO-GUIDE.md` §3.1 untuk tabel sebelum/sesudah.
 
 ---
 
@@ -231,6 +251,7 @@ bash scripts/smoke/smoke-test-uat-006-role-permissions.sh  # RBAC (65/65)
 | `scripts/uat-start.sh` | Start backend + frontend |
 | `scripts/uat-status.sh` | Check stack status |
 | `scripts/uat-stop.sh` | Stop stack |
+| `scripts/reset-local-admin-only.sh` | Reset DB lokal ke Super Admin saja |
 | `scripts/smoke/smoke-test-uat-008-release-candidate.sh` | RC smoke orchestrator |
 | `docs/uat/UAT-DEMO-GUIDE.md` | Demo guide per role |
 | `docs/uat/UAT-FINAL-CHECKLIST.md` | Pre/during/post demo checklist |

@@ -159,9 +159,12 @@ func (s *Service) Calculate(orgID, actor, projectID uuid.UUID, req CalculateRequ
 		return nil, err
 	}
 	// Reload so the response carries the persisted row ID on recalculation.
-	if err := s.db.Where("organization_id = ? AND project_id = ? AND formula_id = ? AND period_year = ? AND period_month = ?", orgID, projectID, f.ID, req.PeriodYear, req.PeriodMonth).First(snap).Error; err != nil {
+	// Use a fresh struct: GORM would otherwise add the new (unsaved) ID as a condition.
+	saved := &Snapshot{}
+	if err := s.db.Where("organization_id = ? AND project_id = ? AND formula_id = ? AND period_year = ? AND period_month = ?", orgID, projectID, f.ID, req.PeriodYear, req.PeriodMonth).First(saved).Error; err != nil {
 		return nil, err
 	}
+	snap = saved
 	s.auditRecord(orgID, actor, snap.ID, "health_snapshot.calculated")
 	return snap, nil
 }

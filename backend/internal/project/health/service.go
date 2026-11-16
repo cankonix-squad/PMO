@@ -15,6 +15,14 @@ import (
 
 var ErrNotFound = errors.New("health resource not found")
 
+// ValidationError is a business-rule failure whose message is safe to show to
+// the client. Any other error is treated as internal and not exposed.
+type ValidationError struct{ msg string }
+
+func (e *ValidationError) Error() string { return e.msg }
+
+func validationError(msg string) error { return &ValidationError{msg: msg} }
+
 type component struct {
 	Score     float64 `json:"score"`
 	Weight    float64 `json:"weight"`
@@ -35,10 +43,10 @@ func (s *Service) ListFormulas(orgID uuid.UUID) ([]Formula, error) {
 }
 func (s *Service) CreateFormula(orgID, actor uuid.UUID, req CreateFormulaRequest) (*Formula, error) {
 	if req.Version <= 0 {
-		return nil, errors.New("version must be positive")
+		return nil, validationError("version must be positive")
 	}
 	if len(req.Weights) != 8 {
-		return nil, errors.New("weights must define all 8 dimensions")
+		return nil, validationError("weights must define all 8 dimensions")
 	}
 	if req.MissingDataRule == "" {
 		req.MissingDataRule = "PENALIZE"
@@ -61,16 +69,16 @@ func (s *Service) TransitionFormula(orgID, actor, id uuid.UUID, status string) (
 		var count int64
 		s.db.Model(&Formula{}).Where("organization_id = ? AND status = 'APPROVED'", orgID).Count(&count)
 		if count > 0 {
-			return nil, errors.New("an approved formula already exists")
+			return nil, validationError("an approved formula already exists")
 		}
 		now := time.Now()
 		f.Status = status
 		f.ApprovedAt = &now
 		f.ApprovedBy = &actor
 	} else if status == "RETIRED" && f.Status != "APPROVED" {
-		return nil, errors.New("only APPROVED formula can be retired")
+		return nil, validationError("only APPROVED formula can be retired")
 	} else if status != "RETIRED" {
-		return nil, errors.New("unsupported formula transition")
+		return nil, validationError("unsupported formula transition")
 	}
 	if err := s.db.Save(&f).Error; err != nil {
 		return nil, err
@@ -83,13 +91,13 @@ func (s *Service) Calculate(orgID, actor, projectID uuid.UUID, req CalculateRequ
 	if req.FormulaID != "" {
 		id, err := uuid.Parse(req.FormulaID)
 		if err != nil {
-			return nil, errors.New("invalid formula_id")
+			return nil, validationError("invalid formula_id")
 		}
 		if err = s.db.Where("organization_id = ? AND id = ?", orgID, id).First(&f).Error; err != nil {
 			return nil, ErrNotFound
 		}
 	} else if err := s.db.Where("organization_id = ? AND status = 'APPROVED'", orgID).Order("version DESC").First(&f).Error; err != nil {
-		return nil, errors.New("no approved health formula")
+		return nil, validationError("no approved health formula")
 	}
 	var projectCount int64
 	if err := s.db.Table("projects").Where("organization_id = ? AND id = ? AND deleted_at IS NULL", orgID, projectID).Count(&projectCount).Error; err != nil || projectCount == 0 {

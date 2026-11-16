@@ -49,7 +49,7 @@ func (h *Handler) CreateFormula(c *gin.Context) {
 	}
 	v, err := h.svc.CreateFormula(cl.OrganizationID, cl.UserID, req)
 	if err != nil {
-		response.BadRequest(c, err.Error())
+		h.writeServiceError(c, err)
 		return
 	}
 	response.Created(c, "health formula created", v)
@@ -75,7 +75,7 @@ func (h *Handler) TransitionFormula(c *gin.Context) {
 		return
 	}
 	if err != nil {
-		response.BadRequest(c, err.Error())
+		h.writeServiceError(c, err)
 		return
 	}
 	response.OK(c, "health formula status updated", v)
@@ -101,7 +101,7 @@ func (h *Handler) Calculate(c *gin.Context) {
 		return
 	}
 	if err != nil {
-		response.BadRequest(c, err.Error())
+		h.writeServiceError(c, err)
 		return
 	}
 	response.Created(c, "health snapshot calculated", v)
@@ -122,4 +122,15 @@ func (h *Handler) ListSnapshots(c *gin.Context) {
 		return
 	}
 	response.OK(c, "health snapshots retrieved", v)
+}
+
+// writeServiceError maps service errors to HTTP responses without leaking
+// internal (e.g. database) error details to the client.
+func (h *Handler) writeServiceError(c *gin.Context, err error) {
+	var vErr *ValidationError
+	if errors.As(err, &vErr) {
+		response.BadRequest(c, vErr.Error())
+		return
+	}
+	response.InternalError(c)
 }

@@ -164,7 +164,7 @@ export default function DashboardPage() {
 
   const kpis: KpiData[] = [
     {
-      label: "Total Proyek Aktif",
+      label: "Total Proyek",
       value: formatNumber(stats.total_projects),
       detail: `${stats.active_projects} proyek aktif`,
       icon: BriefcaseBusiness,

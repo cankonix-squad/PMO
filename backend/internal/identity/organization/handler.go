@@ -2,7 +2,6 @@ package organization
 
 import (
 	"errors"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -132,10 +131,7 @@ func (h *Handler) Create(c *gin.Context) {
 	}
 
 	h.recordAudit(c, claims, "org_unit.created", "org_unit", unit.ID, unit.Name, nil)
-	c.JSON(http.StatusCreated, gin.H{
-		"message": "org unit created",
-		"data":    unit,
-	})
+	response.Created(c, "org unit created", unit)
 }
 
 // Update godoc

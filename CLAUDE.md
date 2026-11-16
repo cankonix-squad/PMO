@@ -91,11 +91,13 @@ PMO (Enterprise Operations Platform by Cankonix) adalah modular monolith untuk o
 ## Key Facts for AI Assistants
 
 - **Go module**: `github.com/harmanto-49/cankora`
-- **Backend port**: 8080
-- **Frontend port**: 3000
+- **Backend port**: 8083 (local; container listens on 8080, mapped to host 8083)
+- **Frontend port**: 3003 (local; `npm run dev` uses `FRONTEND_PORT`, default 3003)
 - **Default admin**: admin@cankora.local / Admin@Cankora2024!
 - **Architecture**: Modular Monolith (NOT microservices)
 - **Multi-tenant**: organization_id on every table — enforce on all queries
+- **Git remote**: `https://github.com/cankonix-squad/PMO.git` (branch `main`)
+- **Production**: https://pmo.cankonix.com — every push to `main` auto-deploys via `.github/workflows/deploy-production.yml` → `scripts/deploy.sh` (build, up, health check, then idempotent `./seed`)
 
 ## Development Source of Truth
 
@@ -133,7 +135,7 @@ Planning note:
 ## Project Location
 
 ```
-/Users/harmanto/Documents/Code/DEV/Project Management/PMO/
+/Users/harmanto/Documents/Kemen-PU/PMO/
 ```
 
 ## Running the Project
@@ -154,6 +156,7 @@ docker-compose up -d
 
 Demo data note:
 - `make seed` remains limited to organization, RBAC, and default admin data.
+- Seed runs automatically on every production deploy. It re-syncs system role permissions (manual edits to system roles are overwritten) and skips demo accounts when `APP_ENV=production`. New permission resources used in routes MUST be added to the `resources` slice in `cmd/seed/main.go`, otherwise every role gets 403.
 - `make seed-demo` idempotently creates 10 `DEMO-SDA-*` projects plus tasks, milestones, issues, risks, budgets, and progress history for local dashboard evaluation.
 
 Frontend runtime rule:
@@ -330,7 +333,7 @@ Roles (system):
 DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME, DB_SSLMODE
 JWT_SECRET (min 32 chars)
 APP_ENV (development | staging | production)
-PORT (default 8080)
+PORT (default 8083)
 ```
 
 ## Common Mistakes to Avoid
@@ -444,11 +447,11 @@ Immediate order:
 Baseline local verification:
 ```bash
 # Setup env
-cp '/Users/harmanto/Documents/Code/DEV/Project Management/PMO/backend/.env.example' \
-   '/Users/harmanto/Documents/Code/DEV/Project Management/PMO/backend/.env'
+cp '/Users/harmanto/Documents/Kemen-PU/PMO/backend/.env.example' \
+   '/Users/harmanto/Documents/Kemen-PU/PMO/backend/.env'
 # Edit .env: DB_HOST=localhost, DB_PASSWORD sesuai setup lokal
 
-cd '/Users/harmanto/Documents/Code/DEV/Project Management/PMO/backend'
+cd '/Users/harmanto/Documents/Kemen-PU/PMO/backend'
 
 # Jalankan migrasi
 make migrate-up
@@ -457,14 +460,14 @@ make migrate-up
 make seed
 
 # Jalankan server
-make dev   # server di :8080
+make dev   # server di :8083
 
 # Cek health
-curl http://localhost:8080/health
+curl http://localhost:8083/health
 # Expected: {"status":"ok","version":"0.1.0"}
 
 # Test login
-curl -X POST http://localhost:8080/api/v1/auth/login \
+curl -X POST http://localhost:8083/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@cankora.local","password":"Admin@Cankora2024!"}'
 ```

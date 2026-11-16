@@ -67,3 +67,6 @@ backend/coverage.html
 *.orig
 .terraform/
 .uat-pids
+
+# TypeScript incremental build cache
+*.tsbuildinfo

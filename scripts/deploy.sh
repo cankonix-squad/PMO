@@ -20,12 +20,12 @@ echo "============================================================"
 
 # ── 1. Show current commit ────────────────────────────────────────────────────
 echo ""
-echo "[1/5] Current commit before update:"
+echo "[1/6] Current commit before update:"
 git rev-parse HEAD
 
 # ── 2. Pull latest source ─────────────────────────────────────────────────────
 echo ""
-echo "[2/5] Fetching latest source from main..."
+echo "[2/6] Fetching latest source from main..."
 git remote set-url origin "$DEPLOY_REMOTE_URL"
 git fetch origin
 git checkout main
@@ -37,21 +37,21 @@ git rev-parse HEAD
 # ── 3. Build containers ───────────────────────────────────────────────────────
 if [[ "$SKIP_BUILD" != "--skip-build" ]]; then
   echo ""
-  echo "[3/5] Building containers..."
+  echo "[3/6] Building containers..."
   docker compose -f "$COMPOSE_FILE" build --pull
 else
   echo ""
-  echo "[3/5] Skipping build (--skip-build flag set)"
+  echo "[3/6] Skipping build (--skip-build flag set)"
 fi
 
 # ── 4. Start / update containers ─────────────────────────────────────────────
 echo ""
-echo "[4/5] Starting containers..."
+echo "[4/6] Starting containers..."
 docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
 
 # ── 5. Health check ───────────────────────────────────────────────────────────
 echo ""
-echo "[5/5] Waiting for API health check..."
+echo "[5/6] Waiting for API health check..."
 
 MAX_WAIT=60
 INTERVAL=5
@@ -73,6 +73,20 @@ if [[ "$API_HEALTHY" != "true" ]]; then
   echo ""
   echo "============================================================"
   echo " ❌  Deployment WARNING: API health check timed out after ${MAX_WAIT}s"
+  echo "     Check logs: docker compose -f $COMPOSE_FILE logs --tail=50 cankonix-pmo-api"
+  echo "============================================================"
+  exit 1
+fi
+
+# ── 6. Sync RBAC / master data seed ──────────────────────────────────────────
+# Idempotent: creates missing permissions, re-syncs system role permissions,
+# and upserts master data. Demo accounts are skipped when APP_ENV=production.
+echo ""
+echo "[6/6] Running idempotent seed (permissions, roles, master data)..."
+if ! docker compose -f "$COMPOSE_FILE" exec -T cankonix-pmo-api ./seed; then
+  echo ""
+  echo "============================================================"
+  echo " ❌  Deployment WARNING: seed failed"
   echo "     Check logs: docker compose -f $COMPOSE_FILE logs --tail=50 cankonix-pmo-api"
   echo "============================================================"
   exit 1

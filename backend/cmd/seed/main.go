@@ -467,6 +467,8 @@ func main() {
 	// database with the default Super Admin and no demo accounts.
 	// ------------------------------------------------------------------
 	skipDemoUsers := strings.EqualFold(os.Getenv("SEED_SKIP_DEMO_USERS"), "true")
+	// Never create demo accounts (shared, publicly known password) in production.
+	isProduction := strings.EqualFold(cfg.App.Env, "production")
 
 	demoUsers := []demoUserDef{
 		{Email: "pmo@cankora.local", FirstName: "Demo", LastName: "PMO Admin", RoleCode: constants.RolePMO, Password: "Demo@Cankora2024!"},
@@ -476,7 +478,9 @@ func main() {
 		{Email: "auditor@cankora.local", FirstName: "Demo", LastName: "Auditor", RoleCode: constants.RoleAuditor, Password: "Demo@Cankora2024!"},
 	}
 
-	if skipDemoUsers {
+	if isProduction {
+		logger.Info("demo users skipped", zap.String("reason", "APP_ENV=production"))
+	} else if skipDemoUsers {
 		logger.Info("demo users skipped", zap.String("reason", "SEED_SKIP_DEMO_USERS=true"))
 	} else {
 		seedDemoUsers(ctx, db, org.ID, roleMap, demoUsers, logger)

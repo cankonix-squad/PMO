@@ -186,8 +186,14 @@ export default function DashboardPage() {
     },
     {
       label: "Penyerapan Keuangan",
-      value: "N/A",
-      detail: "Menunggu data realisasi",
+      value:
+        stats.budget_absorption_pct == null
+          ? "N/A"
+          : `${formatDecimal(stats.budget_absorption_pct)}%`,
+      detail:
+        stats.budget_absorption_pct == null
+          ? "Menunggu data realisasi"
+          : `${formatCompactCurrency(stats.budget_actual ?? 0)} dari ${formatCompactCurrency(stats.budget_planned ?? 0)}`,
       icon: WalletCards,
       tone: "green",
     },

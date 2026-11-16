@@ -37,6 +37,12 @@ type StatsRow struct {
 	TotalUsers  int64 `json:"total_users"`
 	ActiveUsers int64 `json:"active_users"`
 
+	// Budget realisation (operational input from project budget lines).
+	// BudgetAbsorptionPct is nil when no planned budget exists yet.
+	BudgetPlanned       float64  `json:"budget_planned"`
+	BudgetActual        float64  `json:"budget_actual"`
+	BudgetAbsorptionPct *float64 `json:"budget_absorption_pct"`
+
 	EarlyWarnings []EarlyWarning `json:"early_warnings"`
 }
 
@@ -211,6 +217,17 @@ func (h *Handler) aggregate(ctx context.Context, orgID uuid.UUID) (*StatsRow, er
 	}
 	s.EarlyWarnings = warnings
 
+	// ---- Budget absorption ----------------------------------------------------
+	budget, err := h.currentBudgetAggregate(ctx, orgID)
+	if err != nil {
+		return nil, err
+	}
+	s.BudgetPlanned = roundTwo(budget.Planned)
+	s.BudgetActual = roundTwo(budget.Actual)
+	if budget.Planned > 0 {
+		pct := roundTwo(budget.Actual / budget.Planned * 100)
+		s.BudgetAbsorptionPct = &pct
+	}
 	return &s, nil
 }
 

@@ -51,4 +51,9 @@ export interface DashboardStats {
   total_users: number;
   active_users: number;
   early_warnings: DashboardWarning[];
+  /** Sum of project budget lines (operational input). */
+  budget_planned?: number;
+  budget_actual?: number;
+  /** actual / planned × 100; null when no planned budget exists. */
+  budget_absorption_pct?: number | null;
 }

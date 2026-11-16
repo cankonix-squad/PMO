@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"gorm.io/gorm/clause"
 	"math"
 	"time"
 
@@ -150,7 +151,15 @@ func (s *Service) Calculate(orgID, actor, projectID uuid.UUID, req CalculateRequ
 	raw, _ := json.Marshal(components)
 	now := time.Now()
 	snap := &Snapshot{ID: uuid.New(), OrganizationID: orgID, ProjectID: projectID, FormulaID: f.ID, PeriodYear: req.PeriodYear, PeriodMonth: req.PeriodMonth, Score: score, HealthClass: class, Components: raw, Explanation: fmt.Sprintf("Formula v%d; %d/%d dimensions available.", f.Version, 8-missing, 8), CalculatedAt: now}
-	if err := s.db.Create(snap).Error; err != nil {
+	// Recalculating the same project/formula/period replaces the previous result.
+	if err := s.db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "organization_id"}, {Name: "project_id"}, {Name: "formula_id"}, {Name: "period_year"}, {Name: "period_month"}},
+		DoUpdates: clause.AssignmentColumns([]string{"score", "health_class", "components", "explanation", "calculated_at"}),
+	}).Create(snap).Error; err != nil {
+		return nil, err
+	}
+	// Reload so the response carries the persisted row ID on recalculation.
+	if err := s.db.Where("organization_id = ? AND project_id = ? AND formula_id = ? AND period_year = ? AND period_month = ?", orgID, projectID, f.ID, req.PeriodYear, req.PeriodMonth).First(snap).Error; err != nil {
 		return nil, err
 	}
 	s.auditRecord(orgID, actor, snap.ID, "health_snapshot.calculated")

@@ -77,6 +77,7 @@ func (h *Handler) CreateMilestone(c *gin.Context) {
 		return
 	}
 
+	h.recordEntityAudit(c, "milestone.created", "milestone", m.ID, m.Title, nil)
 	response.Created(c, "milestone created", m)
 }
 
@@ -163,6 +164,7 @@ func (h *Handler) UpdateMilestone(c *gin.Context) {
 		return
 	}
 
+	h.recordEntityAudit(c, "milestone.updated", "milestone", m.ID, m.Title, req)
 	response.OK(c, "ok", m)
 }
 
@@ -200,5 +202,6 @@ func (h *Handler) DeleteMilestone(c *gin.Context) {
 		return
 	}
 
+	h.recordEntityAudit(c, "milestone.deleted", "milestone", milestoneID, "", nil)
 	response.NoContent(c)
 }

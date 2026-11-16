@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/harmanto-49/cankora/internal/governance/audit"
 	"github.com/harmanto-49/cankora/internal/identity/auth"
 	"github.com/harmanto-49/cankora/internal/platform/response"
 	"go.uber.org/zap"
@@ -14,8 +15,9 @@ import (
 
 // Handler serves org unit CRUD endpoints.
 type Handler struct {
-	svc *Service
-	log *zap.Logger
+	svc   *Service
+	log   *zap.Logger
+	audit *audit.Writer
 }
 
 func NewHandler(db *gorm.DB, log *zap.Logger) *Handler {
@@ -129,6 +131,7 @@ func (h *Handler) Create(c *gin.Context) {
 		return
 	}
 
+	h.recordAudit(c, claims, "org_unit.created", "org_unit", unit.ID, unit.Name, nil)
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "org unit created",
 		"data":    unit,
@@ -167,6 +170,7 @@ func (h *Handler) Update(c *gin.Context) {
 		return
 	}
 
+	h.recordAudit(c, claims, "org_unit.updated", "org_unit", unit.ID, unit.Name, req)
 	response.OK(c, "org unit updated", unit)
 }
 
@@ -195,5 +199,6 @@ func (h *Handler) Delete(c *gin.Context) {
 		return
 	}
 
+	h.recordAudit(c, claims, "org_unit.deleted", "org_unit", unitID, "", nil)
 	response.OK(c, "org unit deleted", nil)
 }

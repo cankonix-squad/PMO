@@ -116,6 +116,7 @@ func (h *Handler) CreateTask(c *gin.Context) {
 		return
 	}
 
+	h.recordEntityAudit(c, "task.created", "task", task.ID, task.Title, nil)
 	response.Created(c, "task created", task)
 }
 
@@ -206,6 +207,7 @@ func (h *Handler) UpdateTask(c *gin.Context) {
 		return
 	}
 
+	h.recordEntityAudit(c, "task.updated", "task", task.ID, task.Title, req)
 	response.OK(c, "ok", task)
 }
 
@@ -243,5 +245,6 @@ func (h *Handler) DeleteTask(c *gin.Context) {
 		return
 	}
 
+	h.recordEntityAudit(c, "task.deleted", "task", taskID, "", nil)
 	response.NoContent(c)
 }

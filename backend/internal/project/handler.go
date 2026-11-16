@@ -237,6 +237,7 @@ func (h *Handler) Create(c *gin.Context) {
 		return
 	}
 
+	h.recordEntityAudit(c, "project.created", "project", p.ID, p.Name, nil)
 	response.Created(c, "Project created", p)
 }
 
@@ -303,6 +304,7 @@ func (h *Handler) Update(c *gin.Context) {
 		return
 	}
 
+	h.recordEntityAudit(c, "project.updated", "project", p.ID, p.Name, req)
 	response.OK(c, "Project updated", p)
 }
 
@@ -341,6 +343,7 @@ func (h *Handler) Transition(c *gin.Context) {
 		return
 	}
 
+	h.recordEntityAudit(c, "project.transitioned", "project", p.ID, p.Name, gin.H{"status": p.Status})
 	response.OK(c, "Status updated", p)
 }
 
@@ -359,6 +362,10 @@ func (h *Handler) Delete(c *gin.Context) {
 		return
 	}
 
+	label := ""
+	if existing, gerr := h.svc.GetByID(c.Request.Context(), id, claims.OrganizationID); gerr == nil && existing != nil {
+		label = existing.Name
+	}
 	if err := h.svc.Delete(c.Request.Context(), id, claims.OrganizationID); err != nil {
 		if errors.Is(err, ErrProjectNotFound) {
 			response.NotFound(c, "Project not found")
@@ -368,6 +375,7 @@ func (h *Handler) Delete(c *gin.Context) {
 		return
 	}
 
+	h.recordEntityAudit(c, "project.deleted", "project", id, label, nil)
 	response.NoContent(c)
 }
 

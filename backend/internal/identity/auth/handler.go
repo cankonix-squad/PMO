@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/harmanto-49/cankora/internal/governance/audit"
 	"github.com/harmanto-49/cankora/internal/platform/response"
 )
 
@@ -12,6 +13,7 @@ import (
 type Handler struct {
 	service      *Service
 	tokenService *TokenService
+	audit        *audit.Writer
 }
 
 // NewHandler creates a new auth Handler.
@@ -64,6 +66,7 @@ func (h *Handler) Login(c *gin.Context) {
 		return
 	}
 
+	h.recordAudit(c, &Claims{UserID: pair.User.ID, Email: pair.User.Email, OrganizationID: pair.User.OrganizationID}, "auth.login", "user", pair.User.ID, pair.User.Email, nil)
 	response.OK(c, "Login successful", pair)
 }
 
@@ -131,6 +134,7 @@ func (h *Handler) Logout(c *gin.Context) {
 		return
 	}
 
+	h.recordAudit(c, claims, "auth.logout", "user", claims.UserID, claims.Email, nil)
 	response.OK(c, "Logged out successfully", nil)
 }
 
@@ -148,6 +152,7 @@ func (h *Handler) LogoutAll(c *gin.Context) {
 		return
 	}
 
+	h.recordAudit(c, claims, "auth.logout_all", "user", claims.UserID, claims.Email, nil)
 	response.OK(c, "All sessions terminated", nil)
 }
 
@@ -175,6 +180,7 @@ func (h *Handler) ChangePassword(c *gin.Context) {
 		return
 	}
 
+	h.recordAudit(c, claims, "auth.password_changed", "user", claims.UserID, claims.Email, nil)
 	response.OK(c, "Password changed successfully", nil)
 }
 

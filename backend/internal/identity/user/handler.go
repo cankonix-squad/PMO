@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/harmanto-49/cankora/internal/governance/audit"
 	"github.com/harmanto-49/cankora/internal/identity/auth"
 	"github.com/harmanto-49/cankora/internal/platform/response"
 	"github.com/harmanto-49/cankora/internal/shared/types"
@@ -13,7 +14,8 @@ import (
 
 // Handler wires the user service to HTTP routes.
 type Handler struct {
-	svc *Service
+	svc   *Service
+	audit *audit.Writer
 }
 
 // NewHandler creates a new user Handler.
@@ -146,6 +148,7 @@ func (h *Handler) Create(c *gin.Context) {
 		return
 	}
 
+	h.recordAudit(c, claims, "user.created", "user", profile.ID, profile.Email, nil)
 	response.Created(c, "user created", profile)
 }
 
@@ -180,6 +183,7 @@ func (h *Handler) Update(c *gin.Context) {
 		return
 	}
 
+	h.recordAudit(c, claims, "user.updated", "user", profile.ID, profile.Email, nil)
 	response.OK(c, "user updated", profile)
 }
 
@@ -207,6 +211,7 @@ func (h *Handler) Deactivate(c *gin.Context) {
 		return
 	}
 
+	h.recordAudit(c, claims, "user.deactivated", "user", id, "", nil)
 	response.OK(c, "user deactivated", nil)
 }
 

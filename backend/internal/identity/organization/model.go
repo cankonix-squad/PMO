@@ -86,7 +86,7 @@ type UpdateOrgUnitRequest struct {
 	ParentID   *uuid.UUID   `json:"parent_id"`
 	Code       string       `json:"code" binding:"max=100"`
 	Name       string       `json:"name" binding:"max=300"`
-	Level      OrgUnitLevel `json:"level" binding:"min=1,max=5"`
+	Level      OrgUnitLevel `json:"level" binding:"omitempty,min=1,max=5"`
 	HeadUserID *uuid.UUID   `json:"head_user_id"`
 	IsActive   *bool        `json:"is_active"`
 	SortOrder  int          `json:"sort_order"`

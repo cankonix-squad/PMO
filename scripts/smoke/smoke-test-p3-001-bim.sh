@@ -5,8 +5,8 @@
 
 set -euo pipefail
 
-BASE_URL="${BASE_URL:-http://localhost:8080/api/v1}"
-HEALTH_URL="${HEALTH_URL:-http://localhost:8080}"
+BASE_URL="${BASE_URL:-http://localhost:8083/api/v1}"
+HEALTH_URL="${HEALTH_URL:-http://localhost:8083}"
 ADMIN_EMAIL="${ADMIN_EMAIL:-admin@cankora.local}"
 ADMIN_PASSWORD="${ADMIN_PASSWORD:-Admin@Cankora2024!}"
 

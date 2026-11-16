@@ -7,14 +7,14 @@
 #   ./scripts/smoke/smoke-test-p2-004-priority.sh
 #
 # Prerequisites:
-#   - Backend running on http://localhost:8080
+#   - Backend running on http://localhost:8083
 #   - At least one project seeded in the DB
 #   - jq installed (brew install jq)
 # =============================================================================
 
 set -uo pipefail
 
-BASE_URL="${BASE_URL:-http://localhost:8080/api/v1}"
+BASE_URL="${BASE_URL:-http://localhost:8083/api/v1}"
 ADMIN_EMAIL="${ADMIN_EMAIL:-admin@cankora.local}"
 ADMIN_PASS="${ADMIN_PASS:-Admin@Cankora2024!}"
 

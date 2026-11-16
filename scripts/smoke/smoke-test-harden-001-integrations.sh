@@ -20,7 +20,7 @@
 # =============================================================================
 set -euo pipefail
 
-BASE_URL="${PMO_BASE_URL:-http://localhost:8080}"
+BASE_URL="${PMO_BASE_URL:-http://localhost:8083}"
 ADMIN_EMAIL="${PMO_ADMIN_EMAIL:-admin@cankora.local}"
 ADMIN_PASS="${PMO_ADMIN_PASS:-Admin@Cankora2024!}"
 

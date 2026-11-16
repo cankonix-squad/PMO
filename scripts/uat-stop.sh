@@ -7,6 +7,8 @@
 
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PID_FILE="$BASE_DIR/.uat-pids"
+BACKEND_PORT="${BACKEND_PORT:-8083}"
+FRONTEND_PORT="${FRONTEND_PORT:-3003}"
 
 GREEN='\033[0;32m'; RED='\033[0;31m'; YELLOW='\033[1;33m'; NC='\033[0m'
 info()  { echo -e "${GREEN}[UAT-STOP]${NC} $1"; }
@@ -45,7 +47,7 @@ else
   warn "Looking for processes by port..."
 
   # Fallback: kill by port — only kill processes listening on our ports
-  for PORT in 8080 3000; do
+  for PORT in "$BACKEND_PORT" "$FRONTEND_PORT"; do
     PIDS=$(lsof -ti tcp:"$PORT" 2>/dev/null || true)
     if [ -n "$PIDS" ]; then
       for P in $PIDS; do

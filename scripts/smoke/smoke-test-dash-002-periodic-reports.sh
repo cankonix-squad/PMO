@@ -4,7 +4,7 @@
 # Usage: bash scripts/smoke/smoke-test-dash-002-periodic-reports.sh
 set -euo pipefail
 
-BASE_URL="${BASE_URL:-http://localhost:8080}"
+BASE_URL="${BASE_URL:-http://localhost:8083}"
 PASS=0; FAIL=0; SKIP=0
 PROJECT_ID=""
 REPORT_ID=""

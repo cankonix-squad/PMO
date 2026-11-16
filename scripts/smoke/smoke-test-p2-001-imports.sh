@@ -6,7 +6,7 @@
 # =============================================================================
 set -euo pipefail
 
-BASE_URL="${BASE_URL:-http://localhost:8080/api/v1}"
+BASE_URL="${BASE_URL:-http://localhost:8083/api/v1}"
 EMAIL="${EMAIL:-admin@cankora.local}"
 PASSWORD="${PASSWORD:-Admin@Cankora2024!}"
 

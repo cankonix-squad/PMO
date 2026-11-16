@@ -2,7 +2,7 @@
 # =============================================================================
 # PMO P0-013 — Local End-to-End Smoke Test (documented artifact)
 # Usage:  ./scripts/smoke/smoke-test-p0-013.sh
-# Prereq: backend running on :8080, frontend on :3000, DB migrated + seeded
+# Prereq: backend running on :8083, frontend on :3003, DB migrated + seeded
 # Result: all checks print "PASS"; exit code 0 = all green
 #
 # P0-014 hardening (2026-08-20):
@@ -11,7 +11,7 @@
 #   - No orphan active child rows are left behind in soft-deleted projects.
 # =============================================================================
 set -e
-BASE=http://localhost:8080/api/v1
+BASE=http://localhost:8083/api/v1
 GREEN='\033[0;32m'; RED='\033[0;31m'; NC='\033[0m'
 PASS=0; FAIL=0
 ok()   { echo -e "${GREEN}✓ PASS${NC} $1"; PASS=$((PASS+1)); }

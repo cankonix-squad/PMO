@@ -2,11 +2,11 @@
 # =============================================================================
 # PMO P2-008 — GIS Map smoke test
 # Usage: bash scripts/smoke/smoke-test-p2-008-gis.sh
-# Prereq: backend running on :8080, DB migrated + seeded (koordinat DEMO projects sudah diisi)
+# Prereq: backend running on :8083, DB migrated + seeded (koordinat DEMO projects sudah diisi)
 # =============================================================================
 set -uo pipefail
 
-BASE=${BASE:-http://localhost:8080/api/v1}
+BASE=${BASE:-http://localhost:8083/api/v1}
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m'

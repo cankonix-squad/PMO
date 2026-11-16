@@ -2,11 +2,11 @@
 # =============================================================================
 # PMO P1-015 / P2-010 — Command Center + Benefit smoke
 # Usage: bash scripts/smoke/smoke-test-p1-015-p2-010.sh
-# Prereq: backend running on :8080, DB migrated + seeded
+# Prereq: backend running on :8083, DB migrated + seeded
 # =============================================================================
 set -e
 
-BASE=${BASE:-http://localhost:8080/api/v1}
+BASE=${BASE:-http://localhost:8083/api/v1}
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m'

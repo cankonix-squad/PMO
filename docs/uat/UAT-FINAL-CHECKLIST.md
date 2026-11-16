@@ -28,9 +28,9 @@ bash scripts/uat-status.sh      # Harus: Backend UP + Frontend UP + Login OK
 ```
 
 - [ ] `uat-env-check.sh` → no FAIL
-- [ ] `uat-start.sh` → backend :8080 ready + frontend :3000 ready
+- [ ] `uat-start.sh` → backend :8083 ready + frontend :3003 ready
 - [ ] `uat-status.sh` → UP + Login OK
-- [ ] Buka http://localhost:3000 → tampil halaman login
+- [ ] Buka http://localhost:3003 → tampil halaman login
 - [ ] Login sebagai `admin@cankora.local` / `Admin@Cankora2024!` → redirect ke `/dashboard`
 - [ ] Dashboard menampilkan data (proyek, warnings, stats) — bukan blank
 
@@ -113,7 +113,7 @@ bash scripts/smoke/smoke-test-rel-001-regression.sh   # Expected: 44/44 PASS
 | Map full-screen | `rm -rf frontend/.next` lalu restart frontend |
 | Backend 500 | `bash scripts/uat-status.sh` → restart jika perlu |
 | Data kosong | `cd backend && make seed-demo` |
-| Login gagal | Cek backend status: `curl http://localhost:8080/health` |
+| Login gagal | Cek backend status: `curl http://localhost:8083/health` |
 
 ---
 

@@ -4,11 +4,11 @@
 # =============================================================================
 # Usage: bash scripts/smoke/smoke-test-p2-011-primavera.sh
 # Requires: curl, jq, psql (for project ID lookup)
-# Backend must be running at http://localhost:8080
+# Backend must be running at http://localhost:8083
 
 set -uo pipefail
 
-BASE="http://localhost:8080/api/v1"
+BASE="http://localhost:8083/api/v1"
 EMAIL="admin@cankora.local"
 PASSWORD="Admin@Cankora2024!"
 PASS=0

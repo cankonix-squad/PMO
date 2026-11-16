@@ -14,7 +14,7 @@
 #   6.  Command Center aggregate
 #   7.  Analytics: programs & executive
 #   8.  Analytics: sectors
-#   9.  GIS / frontend page route reachability (port 3000 health check)
+#   9.  GIS / frontend page route reachability (port 3003 health check)
 #  10.  Governance: submissions & lock-periods list
 #  11.  Government integration: connectors & mappings list
 #  12.  BIM integration: catalog & model list
@@ -23,14 +23,14 @@
 #  15.  Audit log integrity (governance events exist)
 #
 # Prerequisites:
-#   - Backend running: cd backend && make dev    (port 8080)
-#   - Frontend running: cd frontend && npm run dev  (port 3000) — opsional
+#   - Backend running: cd backend && make dev    (port 8083)
+#   - Frontend running: cd frontend && npm run dev  (port 3003) — opsional
 #   - Database migrated: make migrate-up (incl. 000035)
 #   - make seed: admin@cankora.local / Admin@Cankora2024!
 #
 # Usage:
 #   bash scripts/smoke/smoke-test-rel-001-regression.sh
-#   BASE_URL=http://localhost:8080 FRONTEND_URL=http://localhost:3000 \
+#   BASE_URL=http://localhost:8083 FRONTEND_URL=http://localhost:3003 \
 #     bash scripts/smoke/smoke-test-rel-001-regression.sh
 #
 # Strict UAT mode: frontend must be running and reachable, otherwise the check
@@ -39,8 +39,8 @@
 
 set -euo pipefail
 
-BASE_URL="${BASE_URL:-http://localhost:8080}"
-FRONTEND_URL="${FRONTEND_URL:-http://localhost:3000}"
+BASE_URL="${BASE_URL:-http://localhost:8083}"
+FRONTEND_URL="${FRONTEND_URL:-http://localhost:3003}"
 TOKEN="${TOKEN:-}"
 STRICT_FRONTEND="${STRICT_FRONTEND:-0}"
 API="$BASE_URL/api/v1"
@@ -229,7 +229,7 @@ HTTP=$(api_get "/analytics/sectors")
 [[ "$HTTP" == "200" ]] && pass "GET /analytics/sectors → 200" || fail "GET /analytics/sectors → $HTTP"
 
 # ---------------------------------------------------------------------------
-# 9. Frontend reachability (port 3000)
+# 9. Frontend reachability (port 3003)
 # ---------------------------------------------------------------------------
 info "9. Frontend reachability"
 FE_HTTP=$(curl -s -o /dev/null -w "%{http_code}" -m 3 "$FRONTEND_URL" 2>/dev/null || true)

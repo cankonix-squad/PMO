@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # smoke-test-uat-002-report-export.sh
 # UAT-002 Report Export Real File — smoke tests
-# Usage: BASE_URL=http://localhost:8080 bash smoke-test-uat-002-report-export.sh
+# Usage: BASE_URL=http://localhost:8083 bash smoke-test-uat-002-report-export.sh
 #
 # Requirements: curl, python3, jq (optional but helps)
 # Idempotent: safe to re-run multiple times
 
-BASE_URL="${BASE_URL:-http://localhost:8080}"
+BASE_URL="${BASE_URL:-http://localhost:8083}"
 ADMIN_EMAIL="${ADMIN_EMAIL:-admin@cankora.local}"
 ADMIN_PASS="${ADMIN_PASS:-Admin@Cankora2024!}"
 

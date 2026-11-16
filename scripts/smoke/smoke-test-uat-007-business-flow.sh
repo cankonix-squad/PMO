@@ -16,7 +16,7 @@
 #   K. Data Cleanup (soft delete)
 #
 # Prerequisites:
-#   - Backend running at http://localhost:8080
+#   - Backend running at http://localhost:8083
 #   - Demo users seeded: make seed (from backend/)
 #   - All passwords: Demo@Cankora2024! (demo) / Admin@Cankora2024! (admin)
 #
@@ -25,7 +25,7 @@
 
 set -uo pipefail
 
-BASE="http://localhost:8080/api/v1"
+BASE="http://localhost:8083/api/v1"
 PASS=0
 FAIL=0
 SKIP=0
@@ -127,7 +127,7 @@ check_created() {
 # 0. Health & Login
 # =============================================================================
 header "0. Health & Login"
-S=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:8080/health")
+S=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:8083/health")
 check_status "GET /health" "200" "$S"
 
 TOKEN=$(login "admin@cankora.local" "Admin@Cankora2024!")

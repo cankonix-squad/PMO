@@ -52,13 +52,13 @@ run_suite() {
 
 # --- Pre-flight: backend health ---
 header "0. Pre-flight: Backend Health"
-if ! curl -sf "http://localhost:8080/health" > /dev/null 2>&1; then
-  echo -e "${RED}✗ FAIL${NC}  Backend not running at :8080 — run 'bash scripts/uat-start.sh' first"
+if ! curl -sf "http://localhost:8083/health" > /dev/null 2>&1; then
+  echo -e "${RED}✗ FAIL${NC}  Backend not running at :8083 — run 'bash scripts/uat-start.sh' first"
   exit 1
 fi
 echo -e "${GREEN}✓ PASS${NC}  Backend health OK"
-if ! curl -sf -o /dev/null -w "%{http_code}" http://localhost:3000/ 2>/dev/null | grep -qE "200|307"; then
-  echo -e "${YELLOW}~ WARN${NC}  Frontend not running at :3000 — UI smoke tests may fail"
+if ! curl -sf -o /dev/null -w "%{http_code}" http://localhost:3003/ 2>/dev/null | grep -qE "200|307"; then
+  echo -e "${YELLOW}~ WARN${NC}  Frontend not running at :3003 — UI smoke tests may fail"
 else
   echo -e "${GREEN}✓ PASS${NC}  Frontend up"
 fi

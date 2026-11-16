@@ -79,8 +79,8 @@ func Load() (*Config, error) {
 	// App
 	cfg.App.Env = getEnv("APP_ENV", "development")
 	cfg.App.Version = getEnv("APP_VERSION", "0.1.0")
-	cfg.App.Port = getEnv("PORT", "8080")
-	cfg.App.URL = getEnv("APP_URL", "http://localhost:8080")
+	cfg.App.Port = getEnv("PORT", "8083")
+	cfg.App.URL = getEnv("APP_URL", "http://localhost:3003")
 
 	// Database
 	cfg.Database.Host = requireEnv("DB_HOST")

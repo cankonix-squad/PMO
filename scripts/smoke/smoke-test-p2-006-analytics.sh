@@ -4,7 +4,7 @@
 
 set -uo pipefail
 
-BASE="http://localhost:8080/api/v1"
+BASE="http://localhost:8083/api/v1"
 PASS=0
 FAIL=0
 TOTAL=0

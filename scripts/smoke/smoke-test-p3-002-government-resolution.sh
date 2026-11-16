@@ -11,11 +11,11 @@
 #   ./scripts/smoke/smoke-test-p3-002-government-resolution.sh
 #
 # Set TOKEN and BASE_URL before running if needed:
-#   TOKEN=<jwt> BASE_URL=http://localhost:8080 ./scripts/smoke/smoke-test-p3-002-government-resolution.sh
+#   TOKEN=<jwt> BASE_URL=http://localhost:8083 ./scripts/smoke/smoke-test-p3-002-government-resolution.sh
 
 set -euo pipefail
 
-BASE_URL="${BASE_URL:-http://localhost:8080}"
+BASE_URL="${BASE_URL:-http://localhost:8083}"
 TOKEN="${TOKEN:-}"
 API="$BASE_URL/api/v1"
 

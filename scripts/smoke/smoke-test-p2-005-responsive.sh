@@ -15,12 +15,12 @@
 #   bash scripts/smoke/smoke-test-p2-005-responsive.sh
 #
 # Prerequisites:
-#   - Backend running di :8080
+#   - Backend running di :8083
 #   - Frontend build clean (npm run build / tsc --noEmit)
 #   - python3 tersedia
 # =============================================================================
 
-BASE_URL="http://localhost:8080/api/v1"
+BASE_URL="http://localhost:8083/api/v1"
 PASS=0
 FAIL=0
 

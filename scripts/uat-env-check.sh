@@ -9,6 +9,8 @@ set -uo pipefail
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BACKEND_DIR="$BASE_DIR/backend"
 FRONTEND_DIR="$BASE_DIR/frontend"
+BACKEND_PORT="${BACKEND_PORT:-8083}"
+FRONTEND_PORT="${FRONTEND_PORT:-3003}"
 
 PASS=0; FAIL=0; WARN=0
 
@@ -77,15 +79,15 @@ else
 fi
 
 header "6. Ports availability"
-if nc -z localhost 8080 2>/dev/null; then
-  warn "Port 8080 already in use — backend may already be running (OK if intentional)"
+if nc -z localhost "$BACKEND_PORT" 2>/dev/null; then
+  warn "Port $BACKEND_PORT already in use — backend may already be running (OK if intentional)"
 else
-  pass "Port 8080 available"
+  pass "Port $BACKEND_PORT available"
 fi
-if nc -z localhost 3000 2>/dev/null; then
-  warn "Port 3000 already in use — frontend may already be running (OK if intentional)"
+if nc -z localhost "$FRONTEND_PORT" 2>/dev/null; then
+  warn "Port $FRONTEND_PORT already in use — frontend may already be running (OK if intentional)"
 else
-  pass "Port 3000 available"
+  pass "Port $FRONTEND_PORT available"
 fi
 
 header "7. Security sanity"

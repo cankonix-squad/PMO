@@ -11,14 +11,14 @@
 #   6. Cross-tenant guard still enforced
 #
 # Prerequisites:
-#   - Backend running at http://localhost:8080
+#   - Backend running at http://localhost:8083
 #   - Demo users seeded: make seed (from backend/)
 #   - All passwords: Demo@Cankora2024!
 # =============================================================================
 
 set -uo pipefail
 
-BASE="http://localhost:8080/api/v1"
+BASE="http://localhost:8083/api/v1"
 PASS=0
 FAIL=0
 SKIP=0
@@ -79,7 +79,7 @@ check_status() {
 # 1. Health check
 # =============================================================================
 header "1. Health check"
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:8080/health")
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:8083/health")
 check_status "GET /health" "200" "$STATUS"
 
 # =============================================================================

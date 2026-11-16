@@ -17,20 +17,20 @@
 #   - Desktop regression quick check 1366x768 (Playwright jika tersedia)
 #
 # Prerequisites:
-#   - Backend running:  cd backend && make dev   (port 8080)
-#   - Frontend running: cd frontend && npm run dev  (port 3000) — opsional
+#   - Backend running:  cd backend && make dev   (port 8083)
+#   - Frontend running: cd frontend && npm run dev  (port 3003) — opsional
 #   - make seed + make seed-demo sudah dijalankan
 #
 # Usage:
 #   bash scripts/smoke/smoke-test-uat-005-field-mobile.sh
-#   BASE_URL=http://localhost:8080 bash scripts/smoke/smoke-test-uat-005-field-mobile.sh
+#   BASE_URL=http://localhost:8083 bash scripts/smoke/smoke-test-uat-005-field-mobile.sh
 #
 # Exit: 0 = all PASS, 1 = one or more FAIL
 
 set -euo pipefail
 
-BASE_URL="${BASE_URL:-http://localhost:8080}"
-FRONTEND_URL="${FRONTEND_URL:-http://localhost:3000}"
+BASE_URL="${BASE_URL:-http://localhost:8083}"
+FRONTEND_URL="${FRONTEND_URL:-http://localhost:3003}"
 API="$BASE_URL/api/v1"
 TOKEN="${TOKEN:-}"
 STRICT_FRONTEND="${STRICT_FRONTEND:-0}"
@@ -358,8 +358,8 @@ const { chromium } = require('playwright');
 (async () => {
   const browser = await chromium.launch({ headless: true });
   const errors = [];
-  const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-  const apiUrl  = process.env.API_URL       || 'http://localhost:8080';
+  const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3003';
+  const apiUrl  = process.env.API_URL       || 'http://localhost:8083';
   const projectId = process.env.PROJECT_ID  || '';
 
   // Mobile viewport

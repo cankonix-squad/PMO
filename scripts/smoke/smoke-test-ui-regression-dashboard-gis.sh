@@ -4,8 +4,8 @@
 # Pastikan sidebar/topbar tampil, map bukan full-screen, tidak ada horizontal overflow.
 #
 # Prasyarat:
-#   - Frontend dev server jalan di :3000
-#   - Backend API jalan di :8080
+#   - Frontend dev server jalan di :3003
+#   - Backend API jalan di :8083
 #   - Node.js terinstall (untuk Playwright runner inline)
 #   npm install -g playwright / npx playwright install chromium
 #
@@ -17,8 +17,8 @@
 
 set -euo pipefail
 
-BASE_URL="${BASE_URL:-http://localhost:3000}"
-API_URL="${API_URL:-http://localhost:8080}"
+BASE_URL="${BASE_URL:-http://localhost:3003}"
+API_URL="${API_URL:-http://localhost:8083}"
 EMAIL="${SMOKE_EMAIL:-admin@cankora.local}"
 PASS="${SMOKE_PASS:-Admin@Cankora2024!}"
 
@@ -65,7 +65,7 @@ else
   cat > "$TMP_SCRIPT" << 'PLAYWRIGHT_EOF'
 import { chromium } from 'playwright';
 
-const BASE = process.env.BASE_URL || 'http://localhost:3000';
+const BASE = process.env.BASE_URL || 'http://localhost:3003';
 const EMAIL = process.env.SMOKE_EMAIL || 'admin@cankora.local';
 const PASS  = process.env.SMOKE_PASS  || 'Admin@Cankora2024!';
 

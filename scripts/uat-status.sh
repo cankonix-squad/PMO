@@ -7,6 +7,8 @@
 
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PID_FILE="$BASE_DIR/.uat-pids"
+BACKEND_PORT="${BACKEND_PORT:-8083}"
+FRONTEND_PORT="${FRONTEND_PORT:-3003}"
 
 GREEN='\033[0;32m'; RED='\033[0;31m'; YELLOW='\033[1;33m'; NC='\033[0m'
 ok()   { echo -e "${GREEN}✓ UP${NC}    $1"; }
@@ -19,20 +21,20 @@ echo " PMO UAT Stack Status"
 echo "═══════════════════════════════════════════════════"
 
 # Backend health
-BACKEND_STATUS=$(curl -sf http://localhost:8080/health 2>/dev/null)
+BACKEND_STATUS=$(curl -sf "http://localhost:$BACKEND_PORT/health" 2>/dev/null)
 if [ $? -eq 0 ]; then
   VERSION=$(echo "$BACKEND_STATUS" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('version','?'))" 2>/dev/null || echo "?")
-  ok "Backend  http://localhost:8080/health  (v$VERSION)"
+  ok "Backend  http://localhost:$BACKEND_PORT/health  (v$VERSION)"
 else
-  down "Backend  http://localhost:8080  — not responding"
+  down "Backend  http://localhost:$BACKEND_PORT  — not responding"
 fi
 
 # Frontend
-FE_CODE=$(curl -sf -o /dev/null -w "%{http_code}" http://localhost:3000/ 2>/dev/null)
+FE_CODE=$(curl -sf -o /dev/null -w "%{http_code}" "http://localhost:$FRONTEND_PORT/" 2>/dev/null)
 if [[ "$FE_CODE" == "200" || "$FE_CODE" == "307" ]]; then
-  ok "Frontend http://localhost:3000  (HTTP $FE_CODE)"
+  ok "Frontend http://localhost:$FRONTEND_PORT  (HTTP $FE_CODE)"
 else
-  down "Frontend http://localhost:3000  — not responding (got: ${FE_CODE:-no response})"
+  down "Frontend http://localhost:$FRONTEND_PORT  — not responding (got: ${FE_CODE:-no response})"
 fi
 
 # PID file
@@ -60,7 +62,7 @@ fi
 
 echo
 echo "── Quick login check ──"
-TOKEN=$(curl -s -X POST "http://localhost:8080/api/v1/auth/login" \
+TOKEN=$(curl -s -X POST "http://localhost:$BACKEND_PORT/api/v1/auth/login" \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@cankora.local","password":"Admin@Cankora2024!"}' \
   2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('data',{}).get('access_token',''))" 2>/dev/null)

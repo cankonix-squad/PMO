@@ -4,17 +4,17 @@
 # ============================================================
 # Usage:
 #   bash scripts/smoke/smoke-test-uat-004-notifications.sh
-#   BASE_URL=http://localhost:8080 bash scripts/smoke/smoke-test-uat-004-notifications.sh
+#   BASE_URL=http://localhost:8083 bash scripts/smoke/smoke-test-uat-004-notifications.sh
 #
 # Requirements:
-#   - Backend running at BASE_URL (default http://localhost:8080)
+#   - Backend running at BASE_URL (default http://localhost:8083)
 #   - Seeded DB (admin@cankora.local / Admin@Cankora2024!)
 #   - curl + jq available
 # ============================================================
 
 set -uo pipefail
 
-BASE_URL="${BASE_URL:-http://localhost:8080}"
+BASE_URL="${BASE_URL:-http://localhost:8083}"
 API="${BASE_URL}/api/v1"
 ADMIN_EMAIL="admin@cankora.local"
 ADMIN_PASSWORD="Admin@Cankora2024!"
@@ -307,7 +307,7 @@ fi
 # ── [14] Frontend route reachability ─────────────────────────────────────────
 
 header "[14] Frontend /notifications"
-FRONTEND_URL="${FRONTEND_URL:-http://localhost:3000}"
+FRONTEND_URL="${FRONTEND_URL:-http://localhost:3003}"
 FE_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "${FRONTEND_URL}/notifications" 2>/dev/null || echo "000")
 if [[ "$FE_CODE" == "200" ]]; then
   pass "[14-1] Frontend /notifications → 200"

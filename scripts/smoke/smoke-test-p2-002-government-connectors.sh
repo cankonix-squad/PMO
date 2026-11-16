@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Smoke test P2-002 — Government Connector Foundation
 # Usage: bash scripts/smoke/smoke-test-p2-002-government-connectors.sh
-# Requires: curl, jq; backend running at localhost:8080
+# Requires: curl, jq; backend running at localhost:8083
 
 set -uo pipefail
 
-BASE="http://localhost:8080/api/v1"
+BASE="http://localhost:8083/api/v1"
 PASS=0
 FAIL=0
 RUN_ID=""
@@ -23,7 +23,7 @@ info() { echo -e "${YELLOW}[INFO]${NC} $1"; }
 # 0. Health check
 # ---------------------------------------------------------------------------
 info "0. Health check"
-r=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:8080/health")
+r=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:8083/health")
 if [ "$r" = "200" ]; then pass "Health check => 200"; else fail "Health check => $r (expected 200)"; fi
 
 # ---------------------------------------------------------------------------

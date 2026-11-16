@@ -35,8 +35,8 @@
 #   Curl-only fallback (jika Playwright tidak tersedia): HTTP + content-type check.
 #
 # Prerequisites:
-#   - Backend running:  cd backend && make dev           (port 8080)
-#   - Frontend running: cd frontend && npm run dev       (port 3000)
+#   - Backend running:  cd backend && make dev           (port 8083)
+#   - Frontend running: cd frontend && npm run dev       (port 3003)
 #   - If frontend is NOT running, script will:
 #       1. Try to start it automatically (background, wait 20s), then run checks.
 #       2. If auto-start fails, FAIL with a clear message.
@@ -46,7 +46,7 @@
 #   bash scripts/smoke/smoke-test-uat-001-ui-full.sh
 #
 #   With explicit URLs:
-#     BASE_URL=http://localhost:3000 API_URL=http://localhost:8080 \
+#     BASE_URL=http://localhost:3003 API_URL=http://localhost:8083 \
 #       bash scripts/smoke/smoke-test-uat-001-ui-full.sh
 #
 #   Skip auto-start of frontend (fail immediately if not running):
@@ -56,8 +56,8 @@
 
 set -euo pipefail
 
-BASE_URL="${BASE_URL:-http://localhost:3000}"
-API_URL="${API_URL:-http://localhost:8080}"
+BASE_URL="${BASE_URL:-http://localhost:3003}"
+API_URL="${API_URL:-http://localhost:8083}"
 EMAIL="${SMOKE_EMAIL:-admin@cankora.local}"
 PASS_WORD="${SMOKE_PASS:-Admin@Cankora2024!}"
 NO_AUTO_START="${NO_AUTO_START:-0}"
@@ -239,8 +239,8 @@ if [[ "$PLAYWRIGHT_AVAILABLE" == "1" ]]; then
   cat > "$PW_SCRIPT" << 'PLAYWRIGHT_EOF'
 import { chromium } from 'playwright';
 
-const BASE     = process.env.BASE_URL  || 'http://localhost:3000';
-const API      = process.env.API_URL   || 'http://localhost:8080';
+const BASE     = process.env.BASE_URL  || 'http://localhost:3003';
+const API      = process.env.API_URL   || 'http://localhost:8083';
 const EMAIL    = process.env.SMOKE_EMAIL || 'admin@cankora.local';
 const PASSWORD = process.env.SMOKE_PASS  || 'Admin@Cankora2024!';
 

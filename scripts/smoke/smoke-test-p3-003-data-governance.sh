@@ -24,11 +24,11 @@
 #
 # Usage:
 #   ./scripts/smoke/smoke-test-p3-003-data-governance.sh
-#   TOKEN=<jwt> BASE_URL=http://localhost:8080 ./scripts/smoke/smoke-test-p3-003-data-governance.sh
+#   TOKEN=<jwt> BASE_URL=http://localhost:8083 ./scripts/smoke/smoke-test-p3-003-data-governance.sh
 
 set -euo pipefail
 
-BASE_URL="${BASE_URL:-http://localhost:8080}"
+BASE_URL="${BASE_URL:-http://localhost:8083}"
 TOKEN="${TOKEN:-}"
 API="$BASE_URL/api/v1"
 

@@ -169,37 +169,27 @@ export default function GISPage() {
         </span>
       </div>
 
-      {/* Main Area: Map + Sidebar */}
-      <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
-        {/* Map — container terkontrol: tinggi tetap agar Leaflet tidak melar */}
-        <div className="flex-1 min-w-0 h-[420px] lg:h-[calc(100vh-280px)] min-h-[360px] rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-white">
-          {loadingMarkers ? (
-            <div className="w-full h-full flex items-center justify-center">
-              <div className="text-center">
-                <MapPin className="w-8 h-8 text-gray-300 mx-auto mb-2 animate-pulse" />
-                <p className="text-sm text-gray-400">Memuat data proyek...</p>
-              </div>
+      {/* Main Area: full-width map; project detail opens as an overlay on marker click */}
+      <div className="relative w-full h-[520px] lg:h-[calc(100vh-220px)] min-h-[420px] rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-white flex-shrink-0">
+        {loadingMarkers ? (
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="text-center">
+              <MapPin className="w-8 h-8 text-gray-300 mx-auto mb-2 animate-pulse" />
+              <p className="text-sm text-gray-400">Memuat data proyek...</p>
             </div>
-          ) : (
-            <GISMap markers={allMarkers} onMarkerClick={setSelectedProject} />
-          )}
-        </div>
+          </div>
+        ) : (
+          <GISMap markers={allMarkers} onMarkerClick={setSelectedProject} />
+        )}
 
-        {/* Sidebar: daftar proyek / detail proyek */}
-        <div className="w-full lg:w-72 flex-shrink-0 flex flex-col gap-3 overflow-y-auto max-h-96 lg:max-h-none">
-          {selectedProject ? (
+        {selectedProject && (
+          <div className="absolute top-3 right-3 bottom-3 z-[1000] w-[calc(100%-1.5rem)] sm:w-80 overflow-y-auto">
             <ProjectDetailPanel
               project={selectedProject}
               onClose={() => setSelectedProject(null)}
             />
-          ) : (
-            <ProjectListPanel
-              markers={allMarkers}
-              onSelect={setSelectedProject}
-              loading={loadingMarkers}
-            />
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Legend — flex-wrap agar badge tidak melebar di viewport kecil */}
@@ -236,77 +226,6 @@ function SummaryCard({
         <p className="text-xl font-bold text-gray-900 truncate">{value}</p>
         <p className="text-xs text-gray-400 truncate">{sub}</p>
       </div>
-    </div>
-  )
-}
-
-function ProjectListPanel({
-  markers, onSelect, loading,
-}: {
-  markers: GISProjectMarker[]
-  onSelect: (p: GISProjectMarker) => void
-  loading: boolean
-}) {
-  const sorted = useMemo(
-    () => [...markers].sort((a, b) => {
-      // Prioritaskan CRITICAL dan RED
-      const order: Record<string, number> = { CRITICAL: 0, RED: 1, YELLOW: 2, GREEN: 3, UNSCORED: 4 }
-      return (order[a.health_class] ?? 9) - (order[b.health_class] ?? 9)
-    }),
-    [markers],
-  )
-
-  if (loading) return (
-    <div className="bg-white rounded-xl border border-gray-100 p-4 text-sm text-gray-400 text-center">
-      Memuat daftar proyek...
-    </div>
-  )
-
-  return (
-    <div className="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm">
-      <div className="px-4 py-3 border-b border-gray-100">
-        <h2 className="text-sm font-semibold text-gray-700">Daftar Proyek</h2>
-        <p className="text-xs text-gray-400">{sorted.length} proyek · klik untuk detail</p>
-      </div>
-      <ul className="divide-y divide-gray-50 max-h-[520px] overflow-y-auto">
-        {sorted.map((p) => {
-          const badge = HEALTH_BADGE[p.health_class] ?? HEALTH_BADGE.UNSCORED
-          return (
-            <li key={p.project_id}>
-              <button
-                onClick={() => onSelect(p)}
-                className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold text-gray-800 truncate">{p.project_name}</p>
-                    <p className="text-xs text-gray-400">{p.project_code}</p>
-                  </div>
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${badge.className}`}>
-                    {badge.label}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 mt-1">
-                  <span className="text-xs text-gray-500">{p.progress_pct.toFixed(1)}%</span>
-                  {p.latitude != null ? (
-                    <MapPin className="w-3 h-3 text-blue-400" />
-                  ) : (
-                    <span className="text-xs text-gray-300">No GPS</span>
-                  )}
-                  {p.open_risks > 0 && (
-                    <span className="text-xs text-red-500">{p.open_risks} risiko</span>
-                  )}
-                </div>
-              </button>
-            </li>
-          )
-        })}
-        {sorted.length === 0 && (
-          <li className="px-4 py-6 text-sm text-gray-400 text-center">
-            Tidak ada proyek yang sesuai filter
-          </li>
-        )}
-      </ul>
     </div>
   )
 }

@@ -40,6 +40,10 @@ export function formValues(form: HTMLFormElement): ProjectFormValues {
     sector_id: getString(data, "sector_id"),
     region_id: getString(data, "region_id"),
     river_basin_id: getString(data, "river_basin_id"),
+    latitude: getString(data, "latitude"),
+    longitude: getString(data, "longitude"),
+    province: getString(data, "province"),
+    location_name: getString(data, "location_name"),
   };
 }
 
@@ -66,6 +70,10 @@ export function toCreatePayload(values: ProjectFormValues): CreateProjectRequest
     sector_id: optionalString(values.sector_id),
     region_id: optionalString(values.region_id),
     river_basin_id: optionalString(values.river_basin_id),
+    latitude: optionalNumber(values.latitude),
+    longitude: optionalNumber(values.longitude),
+    province: optionalString(values.province),
+    location_name: optionalString(values.location_name),
   };
 }
 
@@ -86,12 +94,23 @@ export function toUpdatePayload(values: ProjectFormValues): UpdateProjectRequest
     sector_id: optionalString(values.sector_id),
     region_id: optionalString(values.region_id),
     river_basin_id: optionalString(values.river_basin_id),
+    latitude: optionalNumber(values.latitude),
+    longitude: optionalNumber(values.longitude),
+    province: optionalString(values.province),
+    location_name: optionalString(values.location_name),
   };
 }
 
 export function optionalString(value: string | undefined) {
   const trimmed = value?.trim();
   return trimmed ? trimmed : undefined;
+}
+
+export function optionalNumber(value: string | undefined) {
+  const trimmed = value?.trim();
+  if (!trimmed) return undefined;
+  const n = Number(trimmed);
+  return Number.isFinite(n) ? n : undefined;
 }
 
 export function parseRupiahInput(value: string) {

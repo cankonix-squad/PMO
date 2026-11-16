@@ -59,6 +59,11 @@ func (s *Service) Create(ctx context.Context, req *CreateProjectRequest, orgID, 
 		Currency:       req.Currency,
 		ProgressPct:    *req.ProgressPct,
 		ManagerID:      req.ManagerID,
+		Latitude:       req.Latitude,
+		Longitude:      req.Longitude,
+		Province:       req.Province,
+		City:           req.City,
+		LocationName:   req.LocationName,
 		CreatedBy:      createdBy,
 	}
 	if p.Priority == "" {
@@ -135,6 +140,21 @@ func (s *Service) Update(ctx context.Context, id, orgID uuid.UUID, req *UpdatePr
 	}
 	if req.ProgressPct != nil {
 		p.ProgressPct = *req.ProgressPct
+	}
+	if req.Latitude != nil {
+		p.Latitude = req.Latitude
+	}
+	if req.Longitude != nil {
+		p.Longitude = req.Longitude
+	}
+	if req.Province != nil {
+		p.Province = *req.Province
+	}
+	if req.City != nil {
+		p.City = *req.City
+	}
+	if req.LocationName != nil {
+		p.LocationName = *req.LocationName
 	}
 	if req.OrgUnitID != nil {
 		p.OrgUnitID = req.OrgUnitID

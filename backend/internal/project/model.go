@@ -31,10 +31,18 @@ type Project struct {
 	Currency       string          `gorm:"size:10;default:'IDR'" json:"currency"`
 	ProgressPct    float64         `gorm:"type:decimal(5,2);default:0" json:"progress_pct"`
 	ManagerID      *uuid.UUID      `gorm:"type:uuid" json:"manager_id,omitempty"`
-	CreatedBy      uuid.UUID       `gorm:"type:uuid;not null" json:"created_by"`
-	CreatedAt      time.Time       `json:"created_at"`
-	UpdatedAt      time.Time       `json:"updated_at"`
-	DeletedAt      gorm.DeletedAt  `gorm:"index" json:"-"`
+
+	// Location (GIS). Optional; columns added by migration 000022.
+	Latitude     *float64 `json:"latitude"`
+	Longitude    *float64 `json:"longitude"`
+	Province     string   `gorm:"size:100" json:"province,omitempty"`
+	City         string   `gorm:"size:150" json:"city,omitempty"`
+	LocationName string   `gorm:"size:200" json:"location_name,omitempty"`
+
+	CreatedBy uuid.UUID      `gorm:"type:uuid;not null" json:"created_by"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 
 	// Computed via batch lookup after query; not a DB column
 	OrgUnitName string `gorm:"-" json:"org_unit_name,omitempty"`
@@ -303,6 +311,11 @@ type CreateProjectRequest struct {
 	Currency     string          `json:"currency" binding:"max=10"`
 	ManagerID    *uuid.UUID      `json:"manager_id"`
 	ProgressPct  *float64        `json:"progress_pct" binding:"required,min=0,max=100"`
+	Latitude     *float64        `json:"latitude" binding:"omitempty,min=-90,max=90"`
+	Longitude    *float64        `json:"longitude" binding:"omitempty,min=-180,max=180"`
+	Province     string          `json:"province" binding:"max=100"`
+	City         string          `json:"city" binding:"max=150"`
+	LocationName string          `json:"location_name" binding:"max=200"`
 }
 
 type UpdateProjectRequest struct {
@@ -323,6 +336,11 @@ type UpdateProjectRequest struct {
 	Currency     string          `json:"currency" binding:"max=10"`
 	ManagerID    *uuid.UUID      `json:"manager_id"`
 	ProgressPct  *float64        `json:"progress_pct"`
+	Latitude     *float64        `json:"latitude" binding:"omitempty,min=-90,max=90"`
+	Longitude    *float64        `json:"longitude" binding:"omitempty,min=-180,max=180"`
+	Province     *string         `json:"province" binding:"omitempty,max=100"`
+	City         *string         `json:"city" binding:"omitempty,max=150"`
+	LocationName *string         `json:"location_name" binding:"omitempty,max=200"`
 }
 
 type TransitionRequest struct {

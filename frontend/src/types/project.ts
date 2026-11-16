@@ -39,6 +39,11 @@ export interface Project {
   currency: string;
   progress_pct: number;
   manager_id: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  province?: string | null;
+  city?: string | null;
+  location_name?: string | null;
   created_by: string;
   created_at: string;
   updated_at: string;
@@ -61,6 +66,10 @@ export interface CreateProjectRequest {
   sector_id?: string;
   region_id?: string;
   river_basin_id?: string;
+  latitude?: number;
+  longitude?: number;
+  province?: string;
+  location_name?: string;
 }
 
 export interface UpdateProjectRequest extends Partial<CreateProjectRequest> {

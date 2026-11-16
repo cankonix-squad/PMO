@@ -57,6 +57,19 @@ export const projectFormSchema = z.object({
   sector_id: z.string().trim().min(1, "Sektor SDA wajib dipilih"),
   region_id: z.string().trim().min(1, "Wilayah wajib dipilih"),
   river_basin_id: z.string().trim().min(1, "DAS wajib dipilih"),
+  // Optional location for the GIS map. Both coordinates must be filled together.
+  latitude: z
+    .string()
+    .trim()
+    .refine((v) => v === "" || (Number.isFinite(Number(v)) && Math.abs(Number(v)) <= 90), "Latitude harus antara -90 dan 90"),
+  longitude: z
+    .string()
+    .trim()
+    .refine((v) => v === "" || (Number.isFinite(Number(v)) && Math.abs(Number(v)) <= 180), "Longitude harus antara -180 dan 180"),
+  province: z.string().trim().max(100),
+  location_name: z.string().trim().max(200),
+}).refine((v) => (v.latitude === "") === (v.longitude === ""), {
+  message: "Latitude dan longitude harus diisi berpasangan",
 });
 
 export type ProjectFormValues = z.infer<typeof projectFormSchema>;

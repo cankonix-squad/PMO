@@ -95,6 +95,10 @@ export function ProjectForm({
       sector_id: (data.get("sector_id") as string) ?? "",
       region_id: (data.get("region_id") as string) ?? "",
       river_basin_id: (data.get("river_basin_id") as string) ?? "",
+      latitude: (data.get("latitude") as string) ?? "",
+      longitude: (data.get("longitude") as string) ?? "",
+      province: (data.get("province") as string) ?? "",
+      location_name: (data.get("location_name") as string) ?? "",
     };
 
     const parsed = projectFormSchema.safeParse(raw);
@@ -297,6 +301,48 @@ export function ProjectForm({
               </option>
             ))}
           </select>
+        </Field>
+        <Field label="Provinsi">
+          <input
+            name="province"
+            defaultValue={project?.province ?? ""}
+            className={inputClassName}
+            placeholder="cth. Jawa Barat"
+            maxLength={100}
+          />
+        </Field>
+        <Field label="Nama Lokasi">
+          <input
+            name="location_name"
+            defaultValue={project?.location_name ?? ""}
+            className={inputClassName}
+            placeholder="cth. Bendungan Ciawi, Bogor"
+            maxLength={200}
+          />
+        </Field>
+        <Field label="Latitude">
+          <input
+            name="latitude"
+            type="number"
+            step="any"
+            min={-90}
+            max={90}
+            defaultValue={project?.latitude ?? ""}
+            className={inputClassName}
+            placeholder="cth. -6.6612"
+          />
+        </Field>
+        <Field label="Longitude">
+          <input
+            name="longitude"
+            type="number"
+            step="any"
+            min={-180}
+            max={180}
+            defaultValue={project?.longitude ?? ""}
+            className={inputClassName}
+            placeholder="cth. 106.8530"
+          />
         </Field>
       </div>
 

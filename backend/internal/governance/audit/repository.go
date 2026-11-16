@@ -131,6 +131,13 @@ func (r *postgresRepository) Summary(ctx context.Context, orgID uuid.UUID) (*Sum
 		return nil, err
 	}
 
+	if topActions == nil {
+		topActions = []ActionCount{}
+	}
+	if topEntities == nil {
+		topEntities = []EntityCount{}
+	}
+
 	return &Summary{
 		TotalEvents:  total,
 		UniqueActors: uniqueActors,

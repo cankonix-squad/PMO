@@ -229,14 +229,14 @@ function SummaryCards() {
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
       <StatCard label="Total Events" value={data.total_events.toLocaleString()} />
       <StatCard label="Unique Actors" value={data.unique_actors.toLocaleString()} />
-      {data.top_actions[0] && (
+      {data.top_actions?.[0] && (
         <StatCard
           label="Top Action"
           value={data.top_actions[0].action}
           sub={`${data.top_actions[0].count.toLocaleString()}×`}
         />
       )}
-      {data.top_entities[0] && (
+      {data.top_entities?.[0] && (
         <StatCard
           label="Top Entity"
           value={data.top_entities[0].entity_type}

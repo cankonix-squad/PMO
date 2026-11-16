@@ -21,8 +21,8 @@ export interface AuditLog {
 export interface AuditLogSummary {
   total_events: number;
   unique_actors: number;
-  top_actions: ActionCount[];
-  top_entities: EntityCount[];
+  top_actions: ActionCount[] | null;
+  top_entities: EntityCount[] | null;
 }
 
 export interface ActionCount {

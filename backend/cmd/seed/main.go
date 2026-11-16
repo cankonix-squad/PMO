@@ -65,6 +65,7 @@ func main() {
 		constants.ResourceDataSubmission, constants.ResourceValidationQueue,
 		constants.ResourceFieldInspection, constants.ResourceFieldEvidence,
 		constants.ResourceHealthFormula, constants.ResourceHealthSnapshot,
+		constants.ResourceBaseline, constants.ResourceSnapshot,
 		constants.ResourceCommandCenter,
 		constants.ResourceBenefit,
 		constants.ResourcePriority,

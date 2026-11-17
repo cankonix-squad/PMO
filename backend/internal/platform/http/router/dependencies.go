@@ -35,6 +35,7 @@ import (
 	"github.com/harmanto-49/cankora/internal/project/monitoring"
 	"github.com/harmanto-49/cankora/internal/project/portfolio"
 	"github.com/harmanto-49/cankora/internal/project/spatial"
+	"github.com/harmanto-49/cankora/internal/project/vendorportal"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -94,4 +95,5 @@ type Dependencies struct {
 	NotificationHandler       *notifications.Handler
 	ProjectCategoryHandler    *projectcategory.Handler
 	KPBUHandler               *kpbu.Handler
+	VendorPortalHandler       *vendorportal.Handler
 }

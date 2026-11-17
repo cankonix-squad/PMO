@@ -45,6 +45,7 @@ import (
 	"github.com/harmanto-49/cankora/internal/project/monitoring"
 	"github.com/harmanto-49/cankora/internal/project/portfolio"
 	"github.com/harmanto-49/cankora/internal/project/spatial"
+	"github.com/harmanto-49/cankora/internal/project/vendorportal"
 	"go.uber.org/zap"
 )
 
@@ -114,6 +115,7 @@ func Wire(cfg *config.Config, log *zap.Logger) (*httprouter.Dependencies, error)
 	notificationHandler := notifications.NewHandler(notifSvc)
 	projectCategoryHandler := projectcategory.NewHandler(db, log)
 	kpbuHandler := kpbu.NewHandler(db, auditWriter, log)
+	vendorPortalHandler := vendorportal.NewHandler(db, cfg.Storage.LocalPath, cfg.Storage.MaxSizeBytes, auditWriter, log)
 
 	_ = auditWriter
 
@@ -163,6 +165,7 @@ func Wire(cfg *config.Config, log *zap.Logger) (*httprouter.Dependencies, error)
 		NotificationHandler:       notificationHandler,
 		ProjectCategoryHandler:    projectCategoryHandler,
 		KPBUHandler:               kpbuHandler,
+		VendorPortalHandler:       vendorPortalHandler,
 	}, nil
 }
 

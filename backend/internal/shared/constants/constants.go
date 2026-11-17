@@ -44,6 +44,8 @@ const (
 	RoleProjectOfficer  = "PROJECT_OFFICER"
 	RoleExecutiveViewer = "EXECUTIVE_VIEWER"
 	RoleAuditor         = "AUDITOR"
+	// RoleVendor is an external contractor account (users.vendor_id set).
+	RoleVendor = "VENDOR"
 )
 
 // Permission resources
@@ -103,6 +105,10 @@ const (
 
 	// KPBU-K1: KPBU (PPP) project monitoring
 	ResourceKPBUProject = "kpbu_project"
+
+	// VENDOR-PORTAL-001: contractor portal (vendor side) and Balai review queue
+	ResourceVendorPortal     = "vendor_portal"
+	ResourceVendorSubmission = "vendor_submission"
 
 	// P3-003: Data Governance — official validation & approval workflow
 	ResourceDataGovernance = "data_governance"

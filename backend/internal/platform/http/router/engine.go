@@ -461,6 +461,40 @@ func New(deps *Dependencies) *gin.Engine {
 	kpbuGroup.PUT("/:id/parties/:partyID", kpbuPerm(constants.ActionUpdate), deps.KPBUHandler.UpdateParty)
 	kpbuGroup.DELETE("/:id/parties/:partyID", kpbuPerm(constants.ActionDelete), deps.KPBUHandler.DeleteParty)
 
+	// Contractor portal — VENDOR-PORTAL-001. Vendor-side routes additionally
+	// require the caller to be linked to a vendor (users.vendor_id) and only
+	// expose that vendor's own contracts.
+	vp := deps.VendorPortalHandler
+	vendorPortal := v1.Group("/vendor-portal")
+	vendorPortal.Use(middleware.AuthRequired(deps.TokenSvc, deps.AuthSvc))
+	vpPerm := func(action string) gin.HandlerFunc {
+		return middleware.RequirePermission(deps.RBACRepo, constants.ResourceVendorPortal, action)
+	}
+	vendorPortal.GET("/contracts", vpPerm(constants.ActionView), vp.MyContracts)
+	vendorPortal.GET("/contracts/:contractID", vpPerm(constants.ActionView), vp.MyContract)
+	vendorPortal.GET("/contracts/:contractID/progress-reports", vpPerm(constants.ActionView), vp.ListReports)
+	vendorPortal.POST("/contracts/:contractID/progress-reports", vpPerm(constants.ActionCreate), vp.CreateReport)
+	vendorPortal.GET("/contracts/:contractID/documents", vpPerm(constants.ActionView), vp.ListDocuments)
+	vendorPortal.POST("/contracts/:contractID/documents", vpPerm(constants.ActionCreate), vp.UploadDocument)
+	vendorPortal.GET("/documents/:documentID/download", vpPerm(constants.ActionView), vp.DownloadOwnDocument)
+
+	// Balai review queue for contractor submissions.
+	vendorSubmissions := v1.Group("/vendor-submissions")
+	vendorSubmissions.Use(middleware.AuthRequired(deps.TokenSvc, deps.AuthSvc))
+	vsPerm := func(action string) gin.HandlerFunc {
+		return middleware.RequirePermission(deps.RBACRepo, constants.ResourceVendorSubmission, action)
+	}
+	vendorSubmissions.GET("", vsPerm(constants.ActionView), vp.ListSubmissions)
+	vendorSubmissions.POST("/progress-reports/:id/review", vsPerm(constants.ActionApprove), vp.ReviewReport)
+	vendorSubmissions.POST("/documents/:id/review", vsPerm(constants.ActionApprove), vp.ReviewDocument)
+	vendorSubmissions.GET("/documents/:id/download", vsPerm(constants.ActionView), vp.DownloadSubmittedDocument)
+
+	// Contractor accounts (admin).
+	vendorAccounts := v1.Group("/vendors/:vendorID/accounts")
+	vendorAccounts.Use(middleware.AuthRequired(deps.TokenSvc, deps.AuthSvc))
+	vendorAccounts.GET("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceUsers, constants.ActionView), vp.ListAccounts)
+	vendorAccounts.POST("", middleware.RequirePermission(deps.RBACRepo, constants.ResourceUsers, constants.ActionCreate), vp.CreateAccount)
+
 	return r
 }
 

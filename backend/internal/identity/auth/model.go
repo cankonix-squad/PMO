@@ -12,6 +12,7 @@ type User struct {
 	ID             uuid.UUID      `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
 	OrganizationID uuid.UUID      `gorm:"type:uuid;not null" json:"organization_id"`
 	OrgUnitID      *uuid.UUID     `gorm:"type:uuid" json:"org_unit_id"`
+	VendorID       *uuid.UUID     `gorm:"type:uuid" json:"vendor_id,omitempty"`
 	EmployeeID     *string        `gorm:"size:100;uniqueIndex" json:"employee_id,omitempty"`
 	FirstName      string         `gorm:"size:100;not null" json:"first_name"`
 	LastName       string         `gorm:"size:100" json:"last_name"`

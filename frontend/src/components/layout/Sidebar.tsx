@@ -14,6 +14,9 @@ import {
   ChevronDown,
   ClipboardCheck,
   FileText,
+  FileCheck2,
+  HardHat,
+  KeyRound,
   Handshake,
   Crown,
   Gavel,
@@ -33,6 +36,7 @@ import {
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/auth.store";
 import { cn } from "@/lib/utils";
+import { isVendorUser } from "@/lib/roles";
 
 // Role constants — must match backend constants.go values
 const R_SUPER_ADMIN = "SUPER_ADMIN";
@@ -75,6 +79,7 @@ const navSections: NavSection[] = [
       { label: "Proyek", href: "/projects", icon: Building2 },
       { label: "Command Center", href: "/command-center", icon: ShieldAlert, roles: PMO_AND_ABOVE },
       { label: "Validasi Data", href: "/validation", icon: ClipboardCheck, roles: PMO_AND_ABOVE },
+      { label: "Verifikasi Penyedia", href: "/vendor-submissions", icon: FileCheck2, roles: [...PMO_AND_ABOVE, R_PROJECT_MANAGER] },
       { label: "Notifikasi", href: "/notifications", icon: Bell },
     ],
   },
@@ -124,6 +129,15 @@ const settingsItems: NavItem[] = [
   { label: "Wilayah", href: "/settings/regions", icon: MapPinned, roles: PMO_AND_ABOVE },
   { label: "DAS", href: "/settings/river-basins", icon: MapPinned, roles: PMO_AND_ABOVE },
   { label: "Kategori Proyek", href: "/settings/project-categories", icon: Tag, roles: PMO_AND_ABOVE },
+  { label: "Akun Penyedia", href: "/settings/vendor-accounts", icon: KeyRound, roles: ADMIN_ROLES },
+];
+
+/** Contractor accounts see only the contractor portal. */
+const vendorNavSections: NavSection[] = [
+  {
+    label: "Portal Penyedia",
+    items: [{ label: "Kontrak Saya", href: "/vendor-portal", icon: HardHat }],
+  },
 ];
 
 const defaultOpenSections: Record<string, boolean> = {
@@ -135,6 +149,7 @@ export function Sidebar({ mobileOpen, onClose, desktopOpen }: SidebarProps) {
   const router = useRouter();
   const clearAuth = useAuthStore((state) => state.clearAuth);
   const hasRole = useAuthStore((state) => state.hasRole);
+  const user = useAuthStore((state) => state.user);
   const [isMounted, setIsMounted] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(defaultOpenSections);
 
@@ -143,7 +158,7 @@ export function Sidebar({ mobileOpen, onClose, desktopOpen }: SidebarProps) {
   }, []);
 
   useEffect(() => {
-    const allSections = [...navSections, { label: "Pengaturan", items: settingsItems }];
+    const allSections = [...navSections, ...vendorNavSections, { label: "Pengaturan", items: settingsItems }];
     const activeSection = allSections.find((section) =>
       section.items.some((item) => isItemActive(item, pathname))
     );
@@ -158,7 +173,8 @@ export function Sidebar({ mobileOpen, onClose, desktopOpen }: SidebarProps) {
     }
   }, [pathname]);
 
-  const visibleNavSections = navSections
+  const vendorUser = isMounted && isVendorUser(user);
+  const visibleNavSections = (vendorUser ? vendorNavSections : navSections)
     .map((section) => ({
       ...section,
       items: section.items.filter(
@@ -166,9 +182,9 @@ export function Sidebar({ mobileOpen, onClose, desktopOpen }: SidebarProps) {
       ),
     }))
     .filter((section) => section.items.length > 0);
-  const visibleSettingsItems = settingsItems.filter(
-    (item) => !item.roles || (isMounted && item.roles.some((r) => hasRole(r)))
-  );
+  const visibleSettingsItems = vendorUser
+    ? []
+    : settingsItems.filter((item) => !item.roles || (isMounted && item.roles.some((r) => hasRole(r))));
   const visibleSections = [
     ...visibleNavSections,
     ...(visibleSettingsItems.length > 0

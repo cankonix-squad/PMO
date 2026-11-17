@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/store/auth.store";
+import { isVendorUser, VENDOR_HOME } from "@/lib/roles";
 
 interface DashboardLayoutProps {
   title: string;
@@ -13,6 +16,18 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ title, children }: DashboardLayoutProps) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [desktopNavOpen, setDesktopNavOpen] = useState(true);
+  const user = useAuthStore((s) => s.user);
+  const pathname = usePathname();
+  const router = useRouter();
+  const vendor = isVendorUser(user);
+
+  // Contractor accounts are confined to the contractor portal. The backend
+  // enforces this with permissions; this only avoids showing 403 pages.
+  useEffect(() => {
+    if (vendor && !pathname.startsWith(VENDOR_HOME)) {
+      router.replace(VENDOR_HOME);
+    }
+  }, [vendor, pathname, router]);
 
   return (
     <div className="min-h-screen bg-[#f4f7fb]">

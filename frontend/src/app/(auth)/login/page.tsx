@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/auth.store";
+import { isVendorUser, VENDOR_HOME } from "@/lib/roles";
 import { cn } from "@/lib/utils";
 
 const loginSchema = z.object({
@@ -106,10 +107,13 @@ export default function LoginPage() {
       if (res.success) {
         const { access_token, refresh_token, user } = res.data;
         setAuth(user, access_token, refresh_token, values.rememberMe);
-        const redirectPath =
+        const requested =
           typeof window !== "undefined"
             ? getSafeRedirectPath(window.location.search)
             : "/dashboard";
+        // Contractor accounts only have the contractor portal.
+        const redirectPath =
+          isVendorUser(user) && !requested.startsWith(VENDOR_HOME) ? VENDOR_HOME : requested;
         router.replace(redirectPath);
         router.refresh();
       }

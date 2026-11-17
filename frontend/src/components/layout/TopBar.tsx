@@ -68,6 +68,18 @@ export function TopBar({
       title: "Peta GIS",
       subtitle: "Sebaran lokasi proyek dan status kesehatan",
     },
+    "Portal Penyedia": {
+      title: "Portal Penyedia",
+      subtitle: "Laporan progres dan dokumen kontrak",
+    },
+    "Verifikasi Penyedia": {
+      title: "Verifikasi Penyedia",
+      subtitle: "Kiriman kontraktor yang perlu diverifikasi Balai",
+    },
+    "Akun Penyedia": {
+      title: "Akun Penyedia",
+      subtitle: "Akun login portal untuk kontraktor",
+    },
     "Portofolio KPBU": {
       title: "Portofolio KPBU",
       subtitle: "Kerjasama Pemerintah dengan Badan Usaha",

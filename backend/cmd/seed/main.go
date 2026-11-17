@@ -87,6 +87,8 @@ func main() {
 		constants.ResourceOrgUnit,
 		constants.ResourceProjectCategory,
 		constants.ResourceKPBUProject,
+		constants.ResourceVendorPortal,
+		constants.ResourceVendorSubmission,
 	}
 	actions := []string{
 		constants.ActionView, constants.ActionCreate, constants.ActionUpdate,
@@ -148,6 +150,7 @@ func main() {
 				constants.ResourceIssues, constants.ResourceRisks, constants.ResourceBudgets,
 				constants.ResourceVendors, constants.ResourceContracts, constants.ResourceDocuments,
 				constants.ResourceTeam, constants.ResourceNotification,
+				constants.ResourceKPBUProject, constants.ResourceVendorSubmission,
 			},
 		},
 		{
@@ -165,6 +168,7 @@ func main() {
 				constants.ResourceProjects, constants.ResourceReports, constants.ResourcePriority,
 				constants.ResourceProgramDashboard, constants.ResourceExecutiveDashboard,
 				constants.ResourceGISMap, constants.ResourceNotification,
+				constants.ResourceKPBUProject,
 			},
 		},
 		{
@@ -174,6 +178,13 @@ func main() {
 				constants.ResourceAuditLogs, constants.ResourceProjects, constants.ResourceReports,
 				constants.ResourceNotification,
 			},
+		},
+		{
+			// External contractor (users.vendor_id set). Only the contractor
+			// portal: no access to any internal module.
+			Code:      constants.RoleVendor,
+			Name:      "Penyedia / Kontraktor",
+			Resources: []string{constants.ResourceVendorPortal},
 		},
 	}
 

@@ -467,3 +467,24 @@ MVP lokal dianggap usable jika:
 - Smoke test browser tidak menemukan redirect loop atau halaman tanpa CSS.
 
 Definition of Done di atas hanya untuk local operational MVP. Kebutuhan Full PMO Control Tower dianggap terpenuhi per capability setelah tiket P1/P2/P3 terkait `Done`, bukan hanya karena P0 selesai.
+
+
+### VENDOR-PORTAL-003 — Verified progress → periodic report + notifications (Done 2026-11-18, not yet verified on production)
+- Verifying a contractor progress report upserts `project_periodic_reports` for that project/period in the same transaction. Physical % = contract-value-weighted average of each active contract's latest VERIFIED cumulative progress up to the period (no report = 0%; all values 0 = equal weight). Existing financial figures are kept; `projects.progress_pct` is refreshed from the latest periodic row.
+- In-app notifications: new report/document → contract PPK (or SUPER_ADMIN/ADMIN/PMO when no PPK); verified/rejected → submitting contractor.
+- VENDOR role gains `notification` view. Security fix: `GET /notifications/admin` (org-wide list) now requires `users:view`.
+- Limitation: a manually entered physical % for the same period is overwritten by the verified value.
+
+### ANALYTICS-CRITICAL-001 — Single "Proyek Kritis" definition (Done 2026-11-18)
+- `internal/analytics/critical`: latest health RED/CRITICAL or latest priority HIGH/CRITICAL. Dashboard (`critical_projects`) and Executive (`summary.critical_projects`) both use it. The old Dashboard count (projects with HIGH/CRITICAL early warnings) is gone.
+
+### KPBU-K2 — Finance (Done 2026-11-18, not yet verified on production)
+- Migration `000044`: `kpbu_financings` (equity/senior/subordinated debt/bond/shareholder loan), `kpbu_government_supports` (VGF, fiscal incentive, land acquisition, permit, guarantee), `kpbu_availability_payments` (per period: scheduled, performance deduction with required reason, paid; computed net/outstanding/status SCHEDULED|PARTIAL|PAID|OVERDUE).
+- `GET /kpbu/projects/:id/finance-summary`: totals, equity %, debt-to-equity, funding coverage vs investment value, support approved/proposed, AP totals and overdue. Other-currency rows are excluded and counted.
+- Regulatory articles for these items were NOT re-read; no article numbers are cited in the UI.
+
+### KPBU-K3 + BUP portal (Done 2026-11-18, not yet verified on production)
+- Migration `000045`: `kpbu_kpis` (target, direction, deduction % of AP) and `kpbu_kpi_measurements` (INTERNAL = verified at entry; PORTAL = SUBMITTED → PJPK review, rejection needs notes).
+- `GET /kpbu/projects/:id/kpi-scorecard?year&month`: MET/MISSED/PENDING/NO_DATA per active KPI; suggested deduction = sum of deduction % of VERIFIED misses (cap 100%) × that period's scheduled AP. Never applied automatically.
+- BUP portal reuses contractor accounts: an account with `users.vendor_id` sees KPBU projects where a party has role `BUP` and the same `vendor_id` (party form now has a vendor selector). Routes `/vendor-portal/kpbu-projects[/:id/...]` (checklist, upload, download, KPIs, measurements, AP read-only) behind `PortalScope`.
+- Notifications: portal document/KPI → SUPER_ADMIN/ADMIN/PMO; review → uploader/submitter.

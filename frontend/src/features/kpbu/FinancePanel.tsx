@@ -25,7 +25,7 @@ import { btnPrimary, btnSecondary, Field, fmtDate, fmtRupiahShort, inputCls, Mod
 
 // ── Generic record section (table + create/edit modal) ──────────────────────
 
-type FieldDef = {
+export type FieldDef = {
   key: string;
   label: string;
   kind: "text" | "number" | "date" | "select" | "textarea";
@@ -33,8 +33,8 @@ type FieldDef = {
   required?: boolean;
   wide?: boolean;
 };
-type Values = Record<string, string>;
-type Column<T> = { label: string; render: (row: T) => ReactNode; className?: string };
+export type Values = Record<string, string>;
+export type Column<T> = { label: string; render: (row: T) => ReactNode; className?: string };
 
 interface SectionProps<T extends { id: string }> {
   title: string;
@@ -53,7 +53,7 @@ interface SectionProps<T extends { id: string }> {
   validate?: (v: Values) => string | null;
 }
 
-function RecordSection<T extends { id: string }>(props: SectionProps<T>) {
+export function RecordSection<T extends { id: string }>(props: SectionProps<T>) {
   const qc = useQueryClient();
   const key = ["kpbu", props.queryKey, props.projectId];
   const { data, isLoading, isError, refetch } = useQuery({ queryKey: key, queryFn: () => props.list(props.projectId) });
@@ -184,11 +184,11 @@ function RecordModal(props: {
   );
 }
 
-const num = (s: string) => (s === "" ? 0 : Number(s));
+export const num = (s: string) => (s === "" ? 0 : Number(s));
 const dateOrNull = (s: string) => s || null;
 const str = (n: number | null | undefined) => (n == null ? "" : String(n));
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
-const MONTH_OPTIONS = Object.fromEntries(MONTHS.map((m, i) => [String(i + 1), m]));
+export const MONTHS = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+export const MONTH_OPTIONS = Object.fromEntries(MONTHS.map((m, i) => [String(i + 1), m]));
 
 // ── Summary ─────────────────────────────────────────────────────────────────
 

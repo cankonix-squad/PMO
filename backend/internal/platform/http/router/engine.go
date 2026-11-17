@@ -487,6 +487,17 @@ func New(deps *Dependencies) *gin.Engine {
 	kpbuGroup.PUT("/:id/availability-payments/:paymentID", kpbuPerm(constants.ActionUpdate), fin.Payment.Update)
 	kpbuGroup.DELETE("/:id/availability-payments/:paymentID", kpbuPerm(constants.ActionDelete), fin.Payment.Delete)
 
+	// KPBU-K3: service KPIs, measurements, scorecard
+	kpi := deps.KPBUHandler.KPIRoutes()
+	kpbuGroup.GET("/:id/kpis", kpbuPerm(constants.ActionView), kpi.List)
+	kpbuGroup.POST("/:id/kpis", kpbuPerm(constants.ActionCreate), kpi.Create)
+	kpbuGroup.PUT("/:id/kpis/:kpiID", kpbuPerm(constants.ActionUpdate), kpi.Update)
+	kpbuGroup.DELETE("/:id/kpis/:kpiID", kpbuPerm(constants.ActionDelete), kpi.Delete)
+	kpbuGroup.GET("/:id/kpi-measurements", kpbuPerm(constants.ActionView), kpi.ListMeasurements)
+	kpbuGroup.POST("/:id/kpi-measurements", kpbuPerm(constants.ActionCreate), kpi.CreateMeasurement)
+	kpbuGroup.POST("/:id/kpi-measurements/:measurementID/review", kpbuPerm(constants.ActionApprove), kpi.ReviewMeasurement)
+	kpbuGroup.GET("/:id/kpi-scorecard", kpbuPerm(constants.ActionView), kpi.Scorecard)
+
 	kpbuReq := v1.Group("/kpbu/document-requirements")
 	kpbuReq.Use(middleware.AuthRequired(deps.TokenSvc, deps.AuthSvc))
 	kpbuReq.GET("", kpbuPerm(constants.ActionView), deps.KPBUHandler.ListRequirements)
@@ -510,6 +521,21 @@ func New(deps *Dependencies) *gin.Engine {
 	vendorPortal.GET("/contracts/:contractID/documents", vpPerm(constants.ActionView), vp.ListDocuments)
 	vendorPortal.POST("/contracts/:contractID/documents", vpPerm(constants.ActionCreate), vp.UploadDocument)
 	vendorPortal.GET("/documents/:documentID/download", vpPerm(constants.ActionView), vp.DownloadOwnDocument)
+
+	// BUP portal: KPBU projects where the account's vendor is the BUP party.
+	kh := deps.KPBUHandler
+	vendorPortal.GET("/kpbu-projects", vpPerm(constants.ActionView), kh.PortalListProjects)
+	bup := vendorPortal.Group("/kpbu-projects/:id")
+	bup.Use(kh.PortalScope)
+	bupKPI := kh.KPIRoutes()
+	bup.GET("", vpPerm(constants.ActionView), kh.PortalGetProject)
+	bup.GET("/checklist", vpPerm(constants.ActionView), kh.GetChecklist)
+	bup.POST("/documents", vpPerm(constants.ActionCreate), kh.UploadDocument)
+	bup.GET("/documents/:docID/download", vpPerm(constants.ActionView), kh.DownloadDocument)
+	bup.GET("/kpis", vpPerm(constants.ActionView), bupKPI.List)
+	bup.GET("/kpi-measurements", vpPerm(constants.ActionView), bupKPI.ListMeasurements)
+	bup.POST("/kpi-measurements", vpPerm(constants.ActionCreate), bupKPI.CreateMeasurement)
+	bup.GET("/availability-payments", vpPerm(constants.ActionView), kh.Finance().Payment.List)
 
 	// Balai review queue for contractor submissions.
 	vendorSubmissions := v1.Group("/vendor-submissions")

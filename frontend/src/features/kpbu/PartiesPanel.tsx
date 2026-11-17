@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { projectService } from "@/services/project.service";
 import { Pencil, Plus, Trash2, Users } from "lucide-react";
 import { kpbuErrorMessage, kpbuService } from "@/services/kpbu.service";
 import { KPBU_PARTY_ROLE_LABEL, type KpbuParty, type KpbuPartyRole } from "@/types/kpbu";
@@ -84,13 +85,18 @@ function PartyModal({ projectId, party, onClose }: { projectId: string; party?: 
     email: party?.email ?? "",
     phone: party?.phone ?? "",
     notes: party?.notes ?? "",
+    vendor_id: party?.vendor_id ?? "",
+  });
+  const vendors = useQuery({
+    queryKey: ["vendors", "kpbu-party"],
+    queryFn: () => projectService.listVendors({ is_active: true }).then((r) => r.data.data ?? []),
   });
   const [error, setError] = useState<string | null>(null);
   const set = (k: keyof typeof v) => (e: { target: { value: string } }) => setV((s) => ({ ...s, [k]: e.target.value }));
 
   const save = useMutation({
     mutationFn: () => {
-      const payload = { ...v, share_pct: v.share_pct === "" ? null : Number(v.share_pct) };
+      const payload = { ...v, share_pct: v.share_pct === "" ? null : Number(v.share_pct), vendor_id: v.vendor_id || null };
       return party ? kpbuService.updateParty(projectId, party.id, payload) : kpbuService.createParty(projectId, payload);
     },
     onSuccess: () => {
@@ -121,6 +127,13 @@ function PartyModal({ projectId, party, onClose }: { projectId: string; party?: 
         </Field>
         <Field label="Nama" required className="sm:col-span-2">
           <input className={inputCls} value={v.name} onChange={set("name")} maxLength={300} />
+        </Field>
+        <Field label="Data penyedia (untuk akses portal BUP)" className="sm:col-span-2">
+          <select className={inputCls} value={v.vendor_id} onChange={set("vendor_id")}>
+            <option value="">— Tidak terhubung —</option>
+            {(vendors.data ?? []).map((vd) => <option key={vd.id} value={vd.id}>{vd.name}</option>)}
+          </select>
+          <span className="text-xs text-gray-400">Bila peran BUP dan terhubung ke data penyedia, akun penyedia tersebut dapat membuka proyek ini di portal.</span>
         </Field>
         <Field label="Kontak"><input className={inputCls} value={v.contact_person} onChange={set("contact_person")} maxLength={200} /></Field>
         <Field label="Telepon"><input className={inputCls} value={v.phone} onChange={set("phone")} maxLength={50} /></Field>

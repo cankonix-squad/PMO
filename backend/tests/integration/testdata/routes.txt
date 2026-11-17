@@ -9,6 +9,7 @@ DELETE /api/v1/kpbu/projects/:id/documents/:docID
 DELETE /api/v1/kpbu/projects/:id/financings/:financingID
 DELETE /api/v1/kpbu/projects/:id/government-supports/:supportID
 DELETE /api/v1/kpbu/projects/:id/guarantees/:guaranteeID
+DELETE /api/v1/kpbu/projects/:id/kpis/:kpiID
 DELETE /api/v1/kpbu/projects/:id/parties/:partyID
 DELETE /api/v1/org-units/:unitID
 DELETE /api/v1/programs/:programID
@@ -103,6 +104,9 @@ GET /api/v1/kpbu/projects/:id/finance-summary
 GET /api/v1/kpbu/projects/:id/financings
 GET /api/v1/kpbu/projects/:id/government-supports
 GET /api/v1/kpbu/projects/:id/guarantees
+GET /api/v1/kpbu/projects/:id/kpi-measurements
+GET /api/v1/kpbu/projects/:id/kpi-scorecard
+GET /api/v1/kpbu/projects/:id/kpis
 GET /api/v1/kpbu/projects/:id/parties
 GET /api/v1/kpbu/projects/:id/stage-milestones
 GET /api/v1/notifications
@@ -170,6 +174,13 @@ GET /api/v1/vendor-portal/contracts/:contractID
 GET /api/v1/vendor-portal/contracts/:contractID/documents
 GET /api/v1/vendor-portal/contracts/:contractID/progress-reports
 GET /api/v1/vendor-portal/documents/:documentID/download
+GET /api/v1/vendor-portal/kpbu-projects
+GET /api/v1/vendor-portal/kpbu-projects/:id
+GET /api/v1/vendor-portal/kpbu-projects/:id/availability-payments
+GET /api/v1/vendor-portal/kpbu-projects/:id/checklist
+GET /api/v1/vendor-portal/kpbu-projects/:id/documents/:docID/download
+GET /api/v1/vendor-portal/kpbu-projects/:id/kpi-measurements
+GET /api/v1/vendor-portal/kpbu-projects/:id/kpis
 GET /api/v1/vendor-submissions
 GET /api/v1/vendor-submissions/documents/:id/download
 GET /api/v1/vendors
@@ -230,6 +241,9 @@ POST /api/v1/kpbu/projects/:id/documents/:docID/review
 POST /api/v1/kpbu/projects/:id/financings
 POST /api/v1/kpbu/projects/:id/government-supports
 POST /api/v1/kpbu/projects/:id/guarantees
+POST /api/v1/kpbu/projects/:id/kpi-measurements
+POST /api/v1/kpbu/projects/:id/kpi-measurements/:measurementID/review
+POST /api/v1/kpbu/projects/:id/kpis
 POST /api/v1/kpbu/projects/:id/parties
 POST /api/v1/kpbu/projects/:id/transition
 POST /api/v1/notifications/:id/retry
@@ -271,6 +285,8 @@ POST /api/v1/users/:id/deactivate
 POST /api/v1/validation-queue
 POST /api/v1/vendor-portal/contracts/:contractID/documents
 POST /api/v1/vendor-portal/contracts/:contractID/progress-reports
+POST /api/v1/vendor-portal/kpbu-projects/:id/documents
+POST /api/v1/vendor-portal/kpbu-projects/:id/kpi-measurements
 POST /api/v1/vendor-submissions/documents/:id/review
 POST /api/v1/vendor-submissions/progress-reports/:id/review
 POST /api/v1/vendors
@@ -283,6 +299,7 @@ PUT /api/v1/kpbu/projects/:id/availability-payments/:paymentID
 PUT /api/v1/kpbu/projects/:id/financings/:financingID
 PUT /api/v1/kpbu/projects/:id/government-supports/:supportID
 PUT /api/v1/kpbu/projects/:id/guarantees/:guaranteeID
+PUT /api/v1/kpbu/projects/:id/kpis/:kpiID
 PUT /api/v1/kpbu/projects/:id/parties/:partyID
 PUT /api/v1/kpbu/projects/:id/stage-milestones
 PUT /api/v1/org-units/:unitID

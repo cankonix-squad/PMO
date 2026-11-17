@@ -14,6 +14,7 @@ import { PartiesPanel } from "@/features/kpbu/PartiesPanel";
 import { DocumentsPanel, FinancialCloseBanner } from "@/features/kpbu/DocumentsPanel";
 import { GuaranteesPanel } from "@/features/kpbu/GuaranteesPanel";
 import { FinancePanel } from "@/features/kpbu/FinancePanel";
+import { KpiPanel } from "@/features/kpbu/KpiPanel";
 import { btnSecondary, fmtDate, fmtRupiahShort, StageBadge } from "@/features/kpbu/ui";
 import { KPBU_INITIATIVE_LABEL, KPBU_PROCUREMENT_LABEL, KPBU_RETURN_SCHEME_LABEL, KPBU_SECTOR_LABEL } from "@/types/kpbu";
 
@@ -112,10 +113,11 @@ export default function KpbuDetailPage() {
             <DocumentsPanel projectId={p.id} canWrite={canWrite} canReview={canWrite} canDelete={canWrite} />
             <GuaranteesPanel projectId={p.id} canWrite={canWrite} canDelete={canDelete} />
             <FinancePanel projectId={p.id} returnScheme={p.return_scheme} canWrite={canWrite} canDelete={canDelete} />
+            <KpiPanel projectId={p.id} canWrite={canWrite} canDelete={canDelete} />
             <PartiesPanel projectId={p.id} parties={data.parties} canWrite={canWrite} />
 
             <p className="text-xs text-gray-400">
-              Modul KPBU fase K1–K2: data proyek, tahapan, para pihak, checklist dokumen badan usaha, jaminan, struktur pendanaan, dukungan pemerintah, dan pembayaran ketersediaan layanan. KPI layanan menyusul di fase K3.
+              Modul KPBU fase K1–K2: data proyek, tahapan, para pihak, checklist dokumen badan usaha, jaminan, struktur pendanaan, dukungan pemerintah, dan pembayaran ketersediaan layanan. KPI layanan (K3). Badan usaha dapat mengunggah dokumen dan melaporkan KPI melalui portal bila tercatat sebagai pihak BUP yang terhubung ke data penyedia.
             </p>
           </>
         )}

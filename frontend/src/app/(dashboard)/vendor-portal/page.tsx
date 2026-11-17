@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { FileText, HardHat } from "lucide-react";
+import { Building, FileText, HardHat } from "lucide-react";
+import { bupPortalService } from "@/services/kpbu.service";
+import { StageBadge } from "@/features/kpbu/ui";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { vendorPortalService } from "@/services/vendor-portal.service";
 import { useAuthStore } from "@/store/auth.store";
@@ -16,6 +18,11 @@ export default function VendorPortalPage() {
   const { data: contracts = [], isLoading, isError, refetch } = useQuery({
     queryKey: ["vendor-portal", "contracts"],
     queryFn: () => vendorPortalService.myContracts().then((r) => r.data ?? []),
+    enabled: !!user && !mustChange,
+  });
+  const { data: kpbuProjects = [] } = useQuery({
+    queryKey: ["bup-portal", "projects"],
+    queryFn: () => bupPortalService.list().then((r) => r.data ?? []),
     enabled: !!user && !mustChange,
   });
 
@@ -86,6 +93,33 @@ export default function VendorPortalPage() {
                 </div>
               </Link>
             ))}
+          </div>
+        )}
+
+        {!mustChange && kpbuProjects.length > 0 && (
+          <div className="space-y-3">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">Proyek KPBU</h2>
+              <p className="text-sm text-gray-500">Proyek tempat perusahaan Anda tercatat sebagai Badan Usaha Pelaksana (BUP).</p>
+            </div>
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              {kpbuProjects.map((p) => (
+                <Link key={p.id} href={`/vendor-portal/kpbu/${p.id}`} className="block rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition-colors hover:border-blue-200">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-xs text-gray-400">{p.code}</p>
+                      <h3 className="truncate font-semibold text-gray-900">{p.name}</h3>
+                      <p className="truncate text-sm text-gray-600">PJPK: {p.pjpk_name || "—"}</p>
+                    </div>
+                    <Building className="h-5 w-5 shrink-0 text-blue-500" />
+                  </div>
+                  <div className="mt-3 flex items-center gap-3 text-xs text-gray-600">
+                    <StageBadge stage={p.stage} />
+                    <span>Investasi {fmtRupiahShort(p.investment_value)}</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         )}
       </div>

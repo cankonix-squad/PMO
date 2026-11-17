@@ -196,6 +196,7 @@ export interface KpbuStageMilestoneRequest {
 export interface KpbuPartyRequest {
   role: KpbuPartyRole;
   name: string;
+  vendor_id?: string | null;
   share_pct?: number | null;
   contact_person?: string;
   email?: string;
@@ -494,4 +495,104 @@ export interface KpbuFinanceSummary {
   ap_outstanding_due: number;
   ap_overdue_count: number;
   skipped_other_currency: number;
+}
+
+// ── K3 — service KPIs ──────────────────────────────────────────────────────
+
+export type KpbuKpiDirection = "HIGHER_BETTER" | "LOWER_BETTER";
+export const KPBU_KPI_DIRECTION_LABEL: Record<KpbuKpiDirection, string> = {
+  HIGHER_BETTER: "Minimal (≥ target)",
+  LOWER_BETTER: "Maksimal (≤ target)",
+};
+
+export interface KpbuKpi {
+  id: string;
+  kpbu_project_id: string;
+  code: string;
+  name: string;
+  description: string;
+  unit: string;
+  target_value: number;
+  direction: KpbuKpiDirection;
+  deduction_pct: number;
+  is_active: boolean;
+  sort_order: number;
+}
+export interface KpbuKpiRequest {
+  code: string;
+  name: string;
+  description: string;
+  unit: string;
+  target_value: number;
+  direction: KpbuKpiDirection;
+  deduction_pct: number;
+  is_active: boolean;
+  sort_order: number;
+}
+
+export type KpbuMeasurementStatus = "SUBMITTED" | "VERIFIED" | "REJECTED";
+export const KPBU_MEASUREMENT_STATUS_LABEL: Record<KpbuMeasurementStatus, string> = {
+  SUBMITTED: "Menunggu verifikasi",
+  VERIFIED: "Terverifikasi",
+  REJECTED: "Ditolak",
+};
+
+export interface KpbuKpiMeasurement {
+  id: string;
+  kpi_id: string;
+  kpi_code?: string;
+  kpi_name?: string;
+  period_year: number;
+  period_month: number;
+  actual_value: number;
+  notes: string;
+  source: "INTERNAL" | "PORTAL";
+  status: KpbuMeasurementStatus;
+  submitted_at: string;
+  reviewed_at: string | null;
+  review_notes: string;
+  met: boolean | null;
+}
+export interface KpbuMeasurementRequest {
+  kpi_id: string;
+  period_year: number;
+  period_month: number;
+  actual_value: number;
+  notes?: string;
+}
+
+export type KpbuScoreStatus = "MET" | "MISSED" | "PENDING" | "NO_DATA";
+export const KPBU_SCORE_STATUS_LABEL: Record<KpbuScoreStatus, string> = {
+  MET: "Tercapai",
+  MISSED: "Tidak tercapai",
+  PENDING: "Menunggu verifikasi",
+  NO_DATA: "Belum dilaporkan",
+};
+
+export interface KpbuScorecard {
+  period_year: number;
+  period_month: number;
+  rows: { kpi: KpbuKpi; measurement: KpbuKpiMeasurement | null; status: KpbuScoreStatus }[];
+  met: number;
+  missed: number;
+  pending: number;
+  no_data: number;
+  suggested_deduction_pct: number;
+  scheduled_payment: number | null;
+  suggested_deduction: number | null;
+  recorded_deduction: number | null;
+}
+
+/** BUP portal project summary. */
+export interface KpbuPortalProject {
+  id: string;
+  code: string;
+  name: string;
+  stage: KpbuStage;
+  sector: string;
+  return_scheme: KpbuReturnScheme;
+  pjpk_name: string;
+  investment_value: number;
+  currency: string;
+  party_name: string;
 }

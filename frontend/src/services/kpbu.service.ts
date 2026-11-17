@@ -13,6 +13,12 @@ import type {
   KpbuDocumentRequirement,
   KpbuDocumentUpload,
   KpbuGuarantee,
+  KpbuKpi,
+  KpbuKpiMeasurement,
+  KpbuKpiRequest,
+  KpbuMeasurementRequest,
+  KpbuPortalProject,
+  KpbuScorecard,
   KpbuGuaranteeRequest,
   KpbuRequirementRequest,
   KpbuListFilter,
@@ -146,6 +152,29 @@ export const kpbuService = {
     return api.delete(`${base}/${id}/availability-payments/${rid}`).then(() => undefined);
   },
 
+  // K3 — service KPIs
+  listKpis(id: string): Promise<ApiResponse<KpbuKpi[]>> {
+    return api.get(`${base}/${id}/kpis`).then((r) => r.data);
+  },
+  saveKpi(id: string, kid: string | null, payload: KpbuKpiRequest): Promise<ApiResponse<KpbuKpi>> {
+    return (kid ? api.put(`${base}/${id}/kpis/${kid}`, payload) : api.post(`${base}/${id}/kpis`, payload)).then((r) => r.data);
+  },
+  deleteKpi(id: string, kid: string): Promise<void> {
+    return api.delete(`${base}/${id}/kpis/${kid}`).then(() => undefined);
+  },
+  listMeasurements(id: string, params: { status?: string; year?: number; month?: number } = {}): Promise<ApiResponse<KpbuKpiMeasurement[]>> {
+    return api.get(`${base}/${id}/kpi-measurements`, { params }).then((r) => r.data);
+  },
+  createMeasurement(id: string, payload: KpbuMeasurementRequest): Promise<ApiResponse<KpbuKpiMeasurement>> {
+    return api.post(`${base}/${id}/kpi-measurements`, payload).then((r) => r.data);
+  },
+  reviewMeasurement(id: string, mid: string, decision: "VERIFIED" | "REJECTED", notes: string): Promise<ApiResponse<KpbuKpiMeasurement>> {
+    return api.post(`${base}/${id}/kpi-measurements/${mid}/review`, { decision, notes }).then((r) => r.data);
+  },
+  scorecard(id: string, year: number, month: number): Promise<ApiResponse<KpbuScorecard>> {
+    return api.get(`${base}/${id}/kpi-scorecard`, { params: { year, month } }).then((r) => r.data);
+  },
+
   // K1.5 — checklist master
   listRequirements(includeInactive = false): Promise<ApiResponse<KpbuDocumentRequirement[]>> {
     return api
@@ -169,3 +198,49 @@ export function kpbuErrorMessage(err: unknown, fallback: string): string {
     (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? fallback
   );
 }
+
+const portalBase = "/vendor-portal/kpbu-projects";
+
+/** BUP portal: KPBU projects where the account's business entity is the BUP. */
+export const bupPortalService = {
+  list(): Promise<ApiResponse<KpbuPortalProject[]>> {
+    return api.get(portalBase).then((r) => r.data);
+  },
+  get(id: string): Promise<ApiResponse<KpbuPortalProject>> {
+    return api.get(`${portalBase}/${id}`).then((r) => r.data);
+  },
+  checklist(id: string): Promise<ApiResponse<KpbuChecklist>> {
+    return api.get(`${portalBase}/${id}/checklist`).then((r) => r.data);
+  },
+  uploadDocument(id: string, input: KpbuDocumentUpload): Promise<ApiResponse<KpbuDocument>> {
+    const fd = new FormData();
+    fd.append("file", input.file);
+    if (input.requirement_id) fd.append("requirement_id", input.requirement_id);
+    if (input.name) fd.append("name", input.name);
+    if (input.document_number) fd.append("document_number", input.document_number);
+    if (input.document_date) fd.append("document_date", input.document_date);
+    if (input.notes) fd.append("notes", input.notes);
+    return api.post(`${portalBase}/${id}/documents`, fd, { headers: { "Content-Type": "multipart/form-data" } }).then((r) => r.data);
+  },
+  async downloadDocument(id: string, doc: KpbuDocument): Promise<void> {
+    const res = await api.get(`${portalBase}/${id}/documents/${doc.id}/download`, { responseType: "blob" });
+    const url = URL.createObjectURL(res.data as Blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = doc.name;
+    a.click();
+    URL.revokeObjectURL(url);
+  },
+  listKpis(id: string): Promise<ApiResponse<KpbuKpi[]>> {
+    return api.get(`${portalBase}/${id}/kpis`).then((r) => r.data);
+  },
+  listMeasurements(id: string): Promise<ApiResponse<KpbuKpiMeasurement[]>> {
+    return api.get(`${portalBase}/${id}/kpi-measurements`).then((r) => r.data);
+  },
+  createMeasurement(id: string, payload: KpbuMeasurementRequest): Promise<ApiResponse<KpbuKpiMeasurement>> {
+    return api.post(`${portalBase}/${id}/kpi-measurements`, payload).then((r) => r.data);
+  },
+  listPayments(id: string): Promise<ApiResponse<KpbuAvailabilityPayment[]>> {
+    return api.get(`${portalBase}/${id}/availability-payments`).then((r) => r.data);
+  },
+};

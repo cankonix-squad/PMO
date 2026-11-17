@@ -115,6 +115,7 @@ func Wire(cfg *config.Config, log *zap.Logger) (*httprouter.Dependencies, error)
 	notificationHandler := notifications.NewHandler(notifSvc)
 	projectCategoryHandler := projectcategory.NewHandler(db, log)
 	kpbuHandler := kpbu.NewHandler(db, cfg.Storage.LocalPath, cfg.Storage.MaxSizeBytes, auditWriter, log)
+	kpbuHandler.SetNotifier(notifSvc)
 	vendorPortalHandler := vendorportal.NewHandler(db, cfg.Storage.LocalPath, cfg.Storage.MaxSizeBytes, auditWriter, log, notifSvc)
 
 	_ = auditWriter

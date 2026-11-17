@@ -2,6 +2,7 @@ package kpbu
 
 import (
 	"fmt"
+	notification "github.com/harmanto-49/cankora/internal/notifications/delivery"
 	"io"
 	"net/url"
 	"path/filepath"
@@ -170,6 +171,12 @@ func (h *Handler) UploadDocument(c *gin.Context) {
 		return
 	}
 	h.record(c, claims, "kpbu_document.uploaded", "kpbu_document", d.ID, d.Name, d)
+	if isPortal(c) {
+		h.svc.notify(claims.OrganizationID, h.svc.internalReviewers(claims.OrganizationID), notification.PriorityNormal,
+			"Dokumen badan usaha KPBU menunggu verifikasi",
+			fmt.Sprintf("Badan usaha mengunggah dokumen \"%s\" melalui portal. Periksa di checklist dokumen proyek KPBU.", d.Name),
+			"kpbu_document", d.ID)
+	}
 	response.Created(c, "KPBU document uploaded", d)
 }
 
@@ -200,6 +207,14 @@ func (h *Handler) ReviewDocument(c *gin.Context) {
 	}
 	h.record(c, claims, "kpbu_document."+strings.ToLower(d.Status), "kpbu_document", d.ID, d.Name,
 		gin.H{"status": d.Status, "review_notes": d.ReviewNotes})
+	if d.UploadedBy != claims.UserID {
+		subject, prio, body := "Dokumen KPBU disetujui", notification.PriorityNormal, fmt.Sprintf("Dokumen \"%s\" telah disetujui.", d.Name)
+		if d.Status == DocRejected {
+			subject, prio = "Dokumen KPBU ditolak", notification.PriorityHigh
+			body = fmt.Sprintf("Dokumen \"%s\" ditolak. Alasan: %s. Unggah ulang dokumen yang diperbaiki.", d.Name, d.ReviewNotes)
+		}
+		h.svc.notify(claims.OrganizationID, []uuid.UUID{d.UploadedBy}, prio, subject, body, "kpbu_document", d.ID)
+	}
 	response.OK(c, "KPBU document reviewed", d)
 }
 

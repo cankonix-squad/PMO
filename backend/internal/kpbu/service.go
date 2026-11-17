@@ -19,6 +19,7 @@ type Service struct {
 	now         func() time.Time
 	storageRoot string
 	maxSize     int64
+	notifier    Notifier
 }
 
 func NewService(db *gorm.DB, log *zap.Logger, storageRoot string, maxSize int64) *Service {

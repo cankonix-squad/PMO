@@ -228,7 +228,7 @@ export function Sidebar({ mobileOpen, onClose, desktopOpen }: SidebarProps) {
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-60 flex-col bg-[#052f63] text-white shadow-xl transition-transform duration-200 ease-out",
+          "fixed inset-y-0 left-0 z-50 flex w-60 flex-col bg-[#17385D] text-white shadow-xl transition-transform duration-200 ease-out",
           mobileOpen ? "translate-x-0" : "-translate-x-full",
           desktopOpen ? "lg:translate-x-0" : "lg:-translate-x-full"
         )}
@@ -245,8 +245,8 @@ export function Sidebar({ mobileOpen, onClose, desktopOpen }: SidebarProps) {
           </div>
           <div className="min-w-0">
             <p className="text-sm font-bold uppercase leading-5">Kementerian PU</p>
-            <p className="mt-0.5 text-[10px] uppercase leading-4 text-blue-100">
-              Ditjen Sumber Daya Air
+            <p className="mt-0.5 text-[10px] uppercase leading-4 tracking-wide text-blue-100/80">
+              PMO Digital Platform
             </p>
           </div>
           <button
@@ -260,8 +260,8 @@ export function Sidebar({ mobileOpen, onClose, desktopOpen }: SidebarProps) {
         </div>
 
         <div className="px-5 pb-3 pt-5">
-          <p className="text-[10px] font-semibold uppercase text-blue-300">PMO Control Tower</p>
-          <p className="mt-1 text-sm font-semibold">PMO</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[.12em] text-[#EBAA16]">PMO Control Tower</p>
+          <p className="mt-1 text-sm font-semibold">Ruang Kendali Proyek</p>
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 py-2" aria-label="Navigasi utama">
@@ -317,8 +317,8 @@ function SidebarSection({
         className={cn(
           "flex h-9 w-full items-center justify-between rounded-md px-3 text-left text-[10px] font-semibold uppercase tracking-wide transition-colors",
           active || open
-            ? "bg-white/10 text-blue-100"
-            : "text-blue-300 hover:bg-white/10 hover:text-blue-100"
+            ? "bg-white/10 text-[#F5C34B]"
+            : "text-blue-100/75 hover:bg-white/10 hover:text-white"
         )}
         aria-expanded={open}
       >
@@ -359,19 +359,19 @@ function SidebarLink({
         className={cn(
           "group flex h-10 items-center gap-3 rounded-md px-3 text-sm font-medium transition-colors",
           isActive
-            ? "bg-[#1262b8] text-white shadow-sm"
-            : "text-blue-100 hover:bg-white/10 hover:text-white"
+            ? "bg-white/[.12] text-white shadow-sm ring-1 ring-inset ring-white/10"
+            : "text-blue-100/85 hover:bg-white/10 hover:text-white"
         )}
         aria-current={isActive ? "page" : undefined}
       >
         <span
           className={cn(
             "h-5 w-0.5 rounded-full transition-colors",
-            isActive ? "bg-white" : "bg-transparent"
+            isActive ? "bg-[#EBAA16]" : "bg-transparent"
           )}
           aria-hidden="true"
         />
-        <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+        <Icon className={cn("h-4 w-4 shrink-0", isActive && "text-[#F5C34B]")} aria-hidden="true" />
         <span className="min-w-0 flex-1 truncate">{item.label}</span>
       </Link>
     </li>

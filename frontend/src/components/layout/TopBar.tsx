@@ -99,17 +99,17 @@ export function TopBar({
   };
   const pageMeta = titleMap[title] ?? {
     title,
-    subtitle: "Kementerian Pekerjaan Umum · Ditjen Sumber Daya Air",
+    subtitle: "Kementerian Pekerjaan Umum · PMO Digital Platform",
   };
 
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white">
+    <header className="sticky top-0 z-30 border-b border-[#17385D]/10 bg-white/95 shadow-[0_2px_12px_rgba(23,56,93,0.035)] backdrop-blur">
       <div className="mx-auto flex min-h-20 w-full max-w-[2400px] items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-7">
         <div className="flex min-w-0 items-center gap-3">
           <button
             type="button"
             onClick={onOpenMenu}
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-md border border-slate-200 text-[#0b4c91] lg:hidden"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-[#17385D]/15 text-[#17385D] transition-colors hover:bg-[#17385D]/5 lg:hidden"
             aria-label="Buka navigasi"
             title="Buka navigasi"
           >
@@ -118,7 +118,7 @@ export function TopBar({
           <button
             type="button"
             onClick={onToggleDesktopNav}
-            className="hidden h-10 w-10 shrink-0 place-items-center rounded-md border border-slate-200 text-[#0b4c91] transition-colors hover:bg-slate-50 lg:grid"
+            className="hidden h-10 w-10 shrink-0 place-items-center rounded-xl border border-[#17385D]/15 text-[#17385D] transition-colors hover:bg-[#17385D]/5 lg:grid"
             aria-label={desktopNavOpen ? "Sembunyikan navigasi" : "Tampilkan navigasi"}
             title={desktopNavOpen ? "Sembunyikan navigasi" : "Tampilkan navigasi"}
           >
@@ -129,7 +129,7 @@ export function TopBar({
             )}
           </button>
           <div className="min-w-0">
-            <h1 className="truncate text-lg font-semibold leading-7 text-[#082e63] sm:text-xl">
+            <h1 className="truncate text-lg font-bold leading-7 tracking-[-.02em] text-[#17385D] sm:text-xl">
               {pageMeta.title}
             </h1>
             <p className="mt-0.5 truncate text-xs font-medium leading-5 text-slate-500 sm:text-sm">
@@ -152,7 +152,7 @@ export function TopBar({
             <Bell className="h-5 w-5" aria-hidden="true" />
           </button>
           <div className="flex items-center gap-2">
-            <div className="grid h-9 w-9 place-items-center rounded-full bg-[#0b4c91] text-white">
+            <div className="grid h-9 w-9 place-items-center rounded-full bg-[#17385D] text-white ring-2 ring-[#EBAA16]/25">
               <UserRound className="h-5 w-5" aria-hidden="true" />
             </div>
             <div className="hidden text-left sm:block">

@@ -49,6 +49,23 @@
   }
 }
 
+.pmo-dashboard {
+  --background: 210 20% 97%;
+  --foreground: 213 56% 23%;
+  --primary: 213 56% 23%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 28% 94%;
+  --secondary-foreground: 213 56% 23%;
+  --muted: 210 24% 95%;
+  --muted-foreground: 215 16% 44%;
+  --accent: 42 91% 51%;
+  --accent-foreground: 213 56% 23%;
+  --border: 213 28% 88%;
+  --input: 213 28% 84%;
+  --ring: 213 56% 23%;
+  --radius: 0.75rem;
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -56,4 +73,44 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.pmo-dashboard input:not([type="checkbox"]):focus,
+.pmo-dashboard select:focus,
+.pmo-dashboard textarea:focus {
+  border-color: #17385d;
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(23 56 93 / 10%);
+}
+
+.pmo-dashboard [class~="bg-blue-600"],
+.pmo-dashboard [class~="bg-indigo-600"] {
+  background-color: #17385d;
+}
+
+.pmo-dashboard [class~="hover:bg-blue-700"]:hover,
+.pmo-dashboard [class~="hover:bg-indigo-700"]:hover {
+  background-color: #244970;
+}
+
+.pmo-dashboard [class~="text-blue-600"],
+.pmo-dashboard [class~="text-blue-700"] {
+  color: #17385d;
+}
+
+.pmo-dashboard [class~="bg-blue-50"] {
+  background-color: rgb(23 56 93 / 5%);
+}
+
+.pmo-dashboard [class~="border-slate-200"],
+.pmo-dashboard [class~="border-gray-200"] {
+  border-color: rgb(23 56 93 / 12%);
+}
+
+.pmo-dashboard thead {
+  background-color: rgb(23 56 93 / 4%);
+}
+
+.pmo-dashboard tbody tr:hover {
+  background-color: rgb(235 170 22 / 6%);
 }

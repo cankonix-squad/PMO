@@ -221,12 +221,12 @@ export default function DashboardPage() {
             className="-mx-1 overflow-x-auto px-1"
             aria-label="Navigasi bagian dashboard"
           >
-            <div className="flex min-w-max items-center gap-1 rounded-md border border-slate-200 bg-white p-1 shadow-sm">
+            <div className="flex min-w-max items-center gap-1 rounded-xl border border-[#17385D]/10 bg-white/90 p-1.5 shadow-[0_4px_18px_rgba(23,56,93,0.05)]">
               {dashboardSections.map((section) => (
                 <Link
                   key={section.href}
                   href={section.href}
-                  className="inline-flex h-8 items-center rounded px-3 text-xs font-semibold text-slate-600 transition-colors hover:bg-blue-50 hover:text-[#0b5aa2]"
+                  className="inline-flex h-9 items-center rounded-lg px-3 text-xs font-semibold text-slate-600 transition-colors hover:bg-[#EBAA16]/15 hover:text-[#17385D]"
                 >
                   {section.label}
                 </Link>
@@ -235,7 +235,7 @@ export default function DashboardPage() {
           </nav>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <label className="flex h-9 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-600">
+            <label className="flex h-10 items-center gap-2 rounded-xl border border-[#17385D]/[.12] bg-white px-3 text-xs text-slate-600 shadow-sm">
               <span className="font-semibold text-[#082e63]">Periode Data:</span>
               <input
                 type="month"
@@ -248,7 +248,7 @@ export default function DashboardPage() {
               type="button"
               onClick={refresh}
               disabled={!accessToken || isFetching}
-              className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-xs font-semibold text-[#0b5aa2] hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[#17385D]/15 bg-white px-4 text-xs font-semibold text-[#17385D] shadow-sm transition-colors hover:border-[#EBAA16]/70 hover:bg-[#EBAA16]/10 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Filter className="h-4 w-4" aria-hidden="true" />
               Muat Ulang
@@ -259,7 +259,7 @@ export default function DashboardPage() {
       </section>
 
       {isError && (
-        <div role="alert" className="mb-5 flex items-start gap-3 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div role="alert" className="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
           <div>
             <p className="font-semibold">Data dashboard belum dapat dimuat.</p>
@@ -531,12 +531,12 @@ interface KpiData {
 }
 
 const kpiTones: Record<KpiData["tone"], { icon: string; box: string; detail: string }> = {
-  blue: { icon: "text-blue-700", box: "bg-blue-50", detail: "text-blue-700" },
-  navy: { icon: "text-[#0b4c91]", box: "bg-slate-100", detail: "text-slate-500" },
+  blue: { icon: "text-[#17385D]", box: "bg-[#17385D]/[.07]", detail: "text-[#17385D]" },
+  navy: { icon: "text-[#17385D]", box: "bg-[#17385D]/[.06]", detail: "text-slate-500" },
   teal: { icon: "text-cyan-700", box: "bg-cyan-50", detail: "text-cyan-700" },
   green: { icon: "text-emerald-700", box: "bg-emerald-50", detail: "text-emerald-700" },
   red: { icon: "text-red-600", box: "bg-red-50", detail: "text-red-600" },
-  amber: { icon: "text-amber-600", box: "bg-amber-50", detail: "text-amber-700" },
+  amber: { icon: "text-[#A77508]", box: "bg-[#EBAA16]/[.14]", detail: "text-[#8A5D00]" },
 };
 
 function KpiCard({ data, loading }: { data: KpiData; loading: boolean }) {
@@ -544,16 +544,17 @@ function KpiCard({ data, loading }: { data: KpiData; loading: boolean }) {
   const tone = kpiTones[data.tone];
 
   return (
-    <article className="grid min-h-32 grid-cols-[auto_minmax(0,1fr)] items-center gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-      <div className={cn("grid h-12 w-12 shrink-0 place-items-center rounded-md", tone.box)}>
+    <article className="group relative grid min-h-32 grid-cols-[auto_minmax(0,1fr)] items-center gap-4 overflow-hidden rounded-2xl border border-[#17385D]/10 bg-white p-4 shadow-[0_5px_20px_rgba(23,56,93,0.045)] transition-shadow hover:shadow-[0_10px_28px_rgba(23,56,93,0.09)]">
+      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#EBAA16] via-[#EBAA16]/50 to-transparent opacity-80" />
+      <div className={cn("grid h-12 w-12 shrink-0 place-items-center rounded-xl", tone.box)}>
         <Icon className={cn("h-6 w-6", tone.icon)} aria-hidden="true" />
       </div>
       <div className="min-w-0">
-        <p className="min-h-8 text-[10px] font-semibold uppercase leading-4 text-slate-500">{data.label}</p>
+        <p className="min-h-8 text-[10px] font-bold uppercase leading-4 tracking-wide text-slate-500">{data.label}</p>
         {loading ? (
           <div className="my-2 h-7 w-24 rounded-md bg-slate-100" />
         ) : (
-          <p className="mt-1 break-words text-2xl font-bold leading-none text-[#082e63] tabular-nums">{data.value}</p>
+          <p className="mt-1 break-words text-2xl font-bold leading-none text-[#17385D] tabular-nums">{data.value}</p>
         )}
         <p className={cn("mt-2 min-h-8 text-[10px] leading-4", tone.detail)}>{data.detail}</p>
       </div>
@@ -575,11 +576,11 @@ function Panel({
   id?: string;
 }) {
   return (
-    <article id={id} className={cn("min-w-0 scroll-mt-24 rounded-lg border border-slate-200 bg-white p-4 shadow-sm", className)}>
-      <div className="mb-3 flex min-h-9 items-start justify-between gap-4 border-b border-slate-200 pb-2">
-        <h3 className="min-w-0 text-xs font-bold uppercase leading-5 text-[#082e63]">{title}</h3>
+    <article id={id} className={cn("min-w-0 scroll-mt-24 rounded-2xl border border-[#17385D]/10 bg-white p-4 shadow-[0_5px_20px_rgba(23,56,93,0.045)] sm:p-5", className)}>
+      <div className="mb-4 flex min-h-9 items-start justify-between gap-4 border-b border-[#17385D]/10 pb-3">
+        <h3 className="min-w-0 text-xs font-bold uppercase leading-5 tracking-wide text-[#17385D]">{title}</h3>
         {action && (
-          <Link href={action.href} className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-[10px] font-semibold leading-5 text-[#0b5aa2] hover:underline">
+          <Link href={action.href} className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-[10px] font-semibold leading-5 text-[#17385D] transition-colors hover:text-[#A77508] hover:underline">
             {action.label}
             <ArrowRight className="h-3 w-3" aria-hidden="true" />
           </Link>

@@ -30,7 +30,7 @@ export function DashboardLayout({ title, children }: DashboardLayoutProps) {
   }, [vendor, pathname, router]);
 
   return (
-    <div className="min-h-screen bg-[#f4f7fb]">
+    <div className="pmo-dashboard min-h-screen bg-[#F4F6F8]">
       <Sidebar
         mobileOpen={mobileNavOpen}
         onClose={() => setMobileNavOpen(false)}
@@ -48,7 +48,7 @@ export function DashboardLayout({ title, children }: DashboardLayoutProps) {
           desktopNavOpen={desktopNavOpen}
           onToggleDesktopNav={() => setDesktopNavOpen((open) => !open)}
         />
-        <main className="mx-auto w-full max-w-[2400px] flex-1 px-4 py-5 sm:px-6 lg:px-7">
+        <main className="mx-auto w-full max-w-[2400px] flex-1 px-4 py-5 sm:px-6 lg:px-7 xl:py-7">
           {children}
         </main>
       </div>

@@ -8,15 +8,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
-  BarChart3,
   Eye,
   EyeOff,
   LockKeyhole,
   LogIn,
   ShieldCheck,
-  TriangleAlert,
   UserRound,
-  UsersRound,
 } from "lucide-react";
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/auth.store";
@@ -31,24 +28,6 @@ const loginSchema = z.object({
 
 type LoginForm = z.infer<typeof loginSchema>;
 
-const platformBenefits = [
-  {
-    icon: BarChart3,
-    title: "Monitoring Terintegrasi",
-    description: "Pantau progres proyek SDA secara real-time dan akurat.",
-  },
-  {
-    icon: TriangleAlert,
-    title: "Peringatan Dini",
-    description: "Identifikasi risiko lebih awal untuk mitigasi yang tepat.",
-  },
-  {
-    icon: UsersRound,
-    title: "Keputusan Eksekutif",
-    description: "Dukung keputusan lebih cepat dengan data dan insight.",
-  },
-];
-
 function getSafeRedirectPath(search: string) {
   const from = new URLSearchParams(search).get("from");
   if (!from || !from.startsWith("/") || from.startsWith("//")) {
@@ -57,22 +36,23 @@ function getSafeRedirectPath(search: string) {
   return from;
 }
 
-function BrandMark({ compact = false }: { compact?: boolean }) {
+function BrandMark({ compact = false, small = false }: { compact?: boolean; small?: boolean }) {
+  const size = compact || small ? 48 : 56;
   return (
     <div
       className={cn(
-        "grid shrink-0 place-items-center overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-white/20",
-        compact ? "h-12 w-12" : "h-14 w-14"
+        "grid shrink-0 place-items-center overflow-hidden",
+        size === 48 ? "h-12 w-12" : "h-14 w-14"
       )}
       aria-hidden="true"
     >
       <Image
         src="/images/logo-kemenpu.png"
         alt="Logo Kementerian Pekerjaan Umum"
-        width={compact ? 48 : 56}
-        height={compact ? 48 : 56}
+        width={size}
+        height={size}
         priority
-        className="h-full w-full object-contain p-1"
+        className="h-full w-full object-contain"
       />
     </div>
   );
@@ -126,76 +106,46 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F4F6F8] lg:grid lg:grid-cols-[minmax(0,1.63fr)_minmax(0,1fr)]">
-      <section className="relative hidden min-h-screen overflow-hidden bg-white lg:flex lg:flex-col lg:justify-between">
-        <div className="absolute inset-0 bg-white" />
-        <svg className="absolute inset-0 h-full w-full opacity-[.075]" viewBox="0 0 1200 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-          <defs>
-            <pattern id="draft-hatch" width="12" height="12" patternTransform="rotate(28)" patternUnits="userSpaceOnUse"><path d="M0 0v12" stroke="#aeb6c0" strokeWidth="1" /></pattern>
-            <pattern id="draft-hatch-light" width="17" height="17" patternTransform="rotate(-22)" patternUnits="userSpaceOnUse"><path d="M0 0v17" stroke="#c0c6ce" strokeWidth=".8" /></pattern>
-          </defs>
-          <g fill="none" stroke="#8c97a5" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            {/* Sparse structural sketch, kept toward the open upper and right areas */}
-            <path d="M390 470 490 95l265-35 94 410M422 470 512 108l224-29 79 391M452 470 535 121l187-24 65 373" />
-            <path d="M492 100 503 470M574 88 578 470M656 76 650 470M738 92 728 470M820 172 806 470" />
-            <path d="m492 172 350-42M476 242l385-47M460 312l420-53M442 386l458-60" />
-            {/* Soft hand-drawn contour strokes */}
-            <path d="M-30 250q55-26 93 3t77-5q37-22 76 7t72 0M-20 276q58-20 94 7t78-4q39-20 77 8t70 1" />
-            <path d="M914 64q32 14 48 1t34 17q19 24 45 8t36 22q14 26 47 12t58 29M904 84q33 12 49 0t35 18q19 23 46 7t36 23q14 25 47 11t59 30" />
-            {/* One small hatch detail */}
-            <path d="M918 430q46-24 86-5t76-5l-12 38q-53 13-91-8t-64 14z" fill="url(#draft-hatch)" stroke="none" />
-            <path d="M112 665h690M112 659v12M802 659v12" strokeDasharray="3 7" />
-          </g>
-        </svg>
-        <div className="absolute inset-x-0 bottom-0 h-[28%] bg-gradient-to-t from-[#17385D]/[.035] to-transparent" />
-        <div className="absolute inset-y-0 left-0 w-1.5 bg-[#EBAA16]" />
-
-        <header className="relative z-10 flex items-center justify-between px-10 pt-9 xl:px-14 xl:pt-11">
-          <div className="flex items-center gap-4">
-            <BrandMark />
-            <div className="text-xs font-semibold uppercase leading-snug tracking-[.12em] text-[#17385D] xl:text-sm">
-              <p>Kementerian Pekerjaan Umum</p>
-            </div>
-          </div>
-          <div className="rounded-full border border-[#17385D]/10 bg-white/80 px-4 py-2 text-xs font-medium tracking-wide text-[#17385D]/70">
+    <main className="relative isolate min-h-screen overflow-x-hidden bg-[#F4F6F8] lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.63fr)]">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[url('/images/pmo-architecture.png')] bg-cover bg-center bg-no-repeat lg:bg-[length:100%_100%]"
+      />
+      <section className="relative order-2 hidden min-h-screen overflow-hidden bg-transparent lg:order-2 lg:flex lg:flex-col">
+        <header className="relative z-10 flex items-center justify-end px-10 pt-9 xl:px-14 xl:pt-11">
+          <div className="rounded-full border border-[#17385D]/10 bg-white/85 px-4 py-2 text-xs font-medium tracking-wide text-[#17385D]/70">
             PROJECT MANAGEMENT OFFICE
           </div>
         </header>
 
-        <div className="relative z-10 max-w-4xl px-10 pb-14 xl:px-14">
-          <p className="mb-5 text-sm font-semibold uppercase tracking-[.18em] text-[#A77508]">
-            PMO DIGITAL PLATFORM
-          </p>
-          <h1 className="max-w-3xl text-5xl font-bold leading-[1.04] tracking-tight text-[#17385D] xl:text-6xl 2xl:text-7xl">
-            Pantau proyek.<br /><span className="text-[#EBAA16]">Bangun dampak.</span>
-          </h1>
-          <p className="mt-5 max-w-2xl text-base leading-7 text-slate-600 xl:text-lg">
-            PMO Digital Platform menyatukan data, progres, dan risiko proyek dalam satu ruang kendali untuk keputusan yang lebih cepat.
-          </p>
-          <div className="mt-8 h-1 w-16 rounded-full bg-[#EBAA16]" />
-          <div className="mt-7 flex flex-wrap items-center gap-x-8 gap-y-3 text-sm font-medium text-[#17385D]/75">
-            <span>Monitoring terintegrasi</span>
-            <span>Peringatan dini</span>
-            <span>Keputusan berbasis data</span>
+        <div className="relative z-10 flex flex-1 flex-col justify-center pb-28 pl-8 pr-10 pt-4 xl:pl-12 xl:pr-14">
+          <div className="min-w-0 max-w-[640px]">
+            <div className="mb-7 flex items-center gap-4">
+              <BrandMark small />
+              <div>
+                <p className="mb-1 text-xs font-semibold uppercase tracking-[.12em] text-[#17385D] xl:text-sm">
+                  Kementerian Pekerjaan Umum
+                </p>
+                <p className="text-xs font-bold uppercase tracking-[.2em] text-[#A77508] xl:text-sm">
+                  PMO DIGITAL PLATFORM
+                </p>
+              </div>
+            </div>
+            <div className="relative before:pointer-events-none before:absolute before:-inset-x-6 before:-inset-y-8 before:-z-10 before:bg-[radial-gradient(ellipse_at_38%_50%,rgba(255,255,255,0.96)_0%,rgba(255,255,255,0.88)_45%,rgba(255,255,255,0)_100%)] before:content-['']">
+              <h1 className="max-w-[570px] text-4xl font-bold leading-[1.04] tracking-[-.04em] text-[#17385D] xl:text-5xl">
+                Pantau proyek.<br /><span className="text-[#EBAA16]">Bangun dampak.</span>
+              </h1>
+              <p className="mt-5 max-w-[660px] text-base leading-7 text-slate-600 xl:text-lg">
+                PMO Digital Platform menyatukan data, progres, dan risiko proyek dalam satu ruang kendali untuk keputusan yang lebih cepat.
+              </p>
+              <div className="mt-7 h-1 w-14 rounded-full bg-[#EBAA16]" />
+            </div>
           </div>
         </div>
 
-        <div className="relative z-10 grid grid-cols-3 gap-5 border-t border-[#17385D]/10 bg-white/80 px-10 py-6 xl:px-14">
-          {platformBenefits.map(({ icon: Icon, title, description }) => (
-            <div key={title} className="flex min-w-0 gap-3">
-              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-[#EBAA16]/50 bg-white text-[#A77508]">
-                <Icon className="h-5 w-5" aria-hidden="true" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-[#17385D]">{title}</p>
-                <p className="mt-1 text-xs leading-5 text-slate-500">{description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
       </section>
 
-      <section className="relative flex min-h-screen flex-col bg-[#F4F6F8] lg:justify-center lg:px-7 xl:px-10 2xl:px-14">
+      <section className="relative order-1 flex min-h-screen flex-col bg-transparent lg:order-1 lg:justify-center lg:pl-7 lg:pr-0 xl:pl-10">
         <div className="relative h-48 overflow-hidden bg-[#17365b] lg:hidden">
           <div className="absolute -right-8 -top-24 h-64 w-64 rounded-full border border-white/15" />
           <div className="absolute -right-2 -top-16 h-48 w-48 rounded-full border border-[#f4b323]/35" />
@@ -213,12 +163,12 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="relative z-10 flex flex-1 items-center justify-center px-5 py-6 lg:px-5 lg:py-4">
-          <div className="w-full max-w-[440px] rounded-[24px] border border-white bg-white/90 px-6 py-6 shadow-[0_20px_56px_rgba(23,56,93,0.08)] sm:px-9 sm:py-7">
+        <div className="relative z-10 flex flex-1 items-center justify-center px-4 py-6 sm:px-6 lg:justify-end lg:px-0 lg:pb-16 lg:pt-4">
+          <div className="w-full max-w-[440px] rounded-[24px] border border-[#17385D]/15 bg-white/55 px-6 py-6 shadow-[0_20px_56px_rgba(23,56,93,0.06)] backdrop-blur-[2px] sm:px-9 sm:py-7">
             <div className="mb-6">
               <div className="mb-6 flex items-center gap-3">
-                <div className="grid h-11 w-11 place-items-center overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
-                  <Image src="/images/logo-kemenpu.png" alt="Logo Kementerian Pekerjaan Umum" width={40} height={40} priority className="h-10 w-10 object-contain" />
+                <div className="grid h-11 w-11 shrink-0 place-items-center">
+                  <Image src="/images/logo-kemenpu.png" alt="Logo Kementerian Pekerjaan Umum" width={44} height={44} priority className="h-11 w-11 object-contain" />
                 </div>
                 <div className="text-left">
                   <p className="text-[11px] font-bold uppercase tracking-[.14em] text-[#17385D]">Kementerian PU</p>
@@ -226,7 +176,7 @@ export default function LoginPage() {
                 </div>
               </div>
               <p className="mb-2 text-xs font-semibold uppercase tracking-[.13em] text-[#A77508]">Selamat datang kembali</p>
-              <h2 className="whitespace-nowrap text-[26px] font-bold tracking-[-.04em] text-[#17385D]">Masuk ke akun Anda</h2>
+              <h2 className="text-2xl sm:text-[26px] font-bold tracking-[-.04em] text-[#17385D]">Masuk ke akun Anda</h2>
               <p className="mt-1.5 text-sm leading-5 text-[#64748B]">Gunakan akun PMO untuk melanjutkan.</p>
             </div>
 

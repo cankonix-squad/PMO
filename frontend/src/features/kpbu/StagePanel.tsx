@@ -115,7 +115,7 @@ export function StagePanel({ detail, canWrite }: { detail: KpbuProjectDetail; ca
               <tr key={m.stage}>
                 <td className="py-2 pr-3 font-medium text-gray-800">
                   {KPBU_STAGE_LABEL[m.stage]}
-                  {m.notes && <p className="text-xs font-normal text-gray-400">{m.notes}</p>}
+                  {m.notes && <p className="whitespace-pre-line text-xs font-normal text-gray-400">{m.notes}</p>}
                 </td>
                 <td className="py-2 pr-3 text-xs text-gray-600">{fmtDate(m.planned_start)} – {fmtDate(m.planned_end)}</td>
                 <td className="py-2 pr-3 text-xs text-gray-600">{fmtDate(m.actual_start)} – {fmtDate(m.actual_end)}</td>

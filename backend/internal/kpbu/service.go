@@ -376,8 +376,13 @@ func (s *Service) touchMilestone(tx *gorm.DB, orgID, projectID uuid.UUID, stage 
 		d := *end
 		m.ActualEnd = &d
 	}
+	// Append the transition note instead of replacing notes the user already wrote.
 	if notes != "" {
-		m.Notes = notes
+		if m.Notes == "" {
+			m.Notes = notes
+		} else {
+			m.Notes = m.Notes + "\n" + notes
+		}
 	}
 	return tx.Save(&m).Error
 }

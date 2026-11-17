@@ -40,4 +40,8 @@ func RegisterAdmin(v1 *gin.RouterGroup, uh *user.Handler, gh *governance.Handler
 	n := v1.Group("/notifications")
 	n.Use(middleware.AuthRequired(t, a), middleware.RequirePermission(p, constants.ResourceNotification, constants.ActionView))
 	nh.RegisterRoutes(n)
+	// Org-wide listing: administrators only (user management permission).
+	na := v1.Group("/notifications")
+	na.Use(middleware.AuthRequired(t, a), middleware.RequirePermission(p, constants.ResourceUsers, constants.ActionView))
+	nh.RegisterAdminRoutes(na)
 }

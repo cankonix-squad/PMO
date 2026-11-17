@@ -254,8 +254,13 @@ func (h *Handler) RegisterRoutes(rg *gin.RouterGroup) {
 	rg.GET("/summary", h.Summary)
 	rg.POST("/test", h.CreateTest)
 	rg.PATCH("/read-all", h.MarkAllRead)
-	rg.GET("/admin", h.ListAdmin)
 	rg.GET("/:id", h.GetByID)
 	rg.PATCH("/:id/read", h.MarkRead)
 	rg.POST("/:id/retry", h.Retry)
+}
+
+// RegisterAdminRoutes attaches the org-wide listing. Caller must restrict it
+// to administrators: it returns every recipient's notifications.
+func (h *Handler) RegisterAdminRoutes(rg *gin.RouterGroup) {
+	rg.GET("/admin", h.ListAdmin)
 }

@@ -69,6 +69,8 @@ type ProgressReport struct {
 	DeletedAt           gorm.DeletedAt `gorm:"index" json:"-"`
 
 	Context `gorm:"-"`
+	// ProjectProgressPct is set after verification: the project's physical progress for that period.
+	ProjectProgressPct *float64 `gorm:"-" json:"project_progress_pct,omitempty"`
 }
 
 func (ProgressReport) TableName() string { return "vendor_progress_reports" }

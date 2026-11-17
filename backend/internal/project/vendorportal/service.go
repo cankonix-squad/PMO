@@ -11,10 +11,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/harmanto-49/cankora/internal/identity/auth"
 	"github.com/harmanto-49/cankora/internal/identity/rbac"
+	notification "github.com/harmanto-49/cankora/internal/notifications/delivery"
 	"github.com/harmanto-49/cankora/internal/project"
 	"github.com/harmanto-49/cankora/internal/shared/constants"
 	"github.com/harmanto-49/cankora/internal/shared/utils"
 	"github.com/jackc/pgx/v5/pgconn"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
@@ -25,6 +27,8 @@ type Service struct {
 	storageRoot string
 	maxSize     int64
 	now         func() time.Time
+	notifier    Notifier
+	log         *zap.Logger
 }
 
 func NewService(db *gorm.DB, storageRoot string, maxSize int64) *Service {
@@ -182,6 +186,10 @@ func (s *Service) CreateReport(orgID, vendorID, userID, contractID uuid.UUID, re
 		}
 		return nil, err
 	}
+	s.notify(orgID, s.reviewersFor(orgID, c.ID), notification.PriorityNormal,
+		"Laporan progres baru menunggu verifikasi",
+		fmt.Sprintf("%s mengirim progres fisik %.2f%% untuk %s. Periksa di menu Verifikasi Penyedia.", s.contextLabel(orgID, c.ID), r.PhysicalProgressPct, periodLabel(r.PeriodYear, r.PeriodMonth)),
+		"vendor_progress_report", r.ID)
 	return &r, nil
 }
 
@@ -260,6 +268,10 @@ func (s *Service) UploadDocument(orgID, vendorID, userID, contractID uuid.UUID, 
 		_ = project.DeleteStoredFile(s.storageRoot, key)
 		return nil, err
 	}
+	s.notify(orgID, s.reviewersFor(orgID, c.ID), notification.PriorityNormal,
+		"Dokumen penyedia menunggu verifikasi",
+		fmt.Sprintf("%s mengunggah dokumen \"%s\". Periksa di menu Verifikasi Penyedia.", s.contextLabel(orgID, c.ID), d.Name),
+		"vendor_document", d.ID)
 	return &d, nil
 }
 
@@ -433,14 +445,39 @@ func (s *Service) ReviewReport(orgID uuid.UUID, rv Reviewer, id uuid.UUID, req R
 	}
 	now := s.now()
 	r.Status, r.ReviewNotes, r.ReviewedBy, r.ReviewedAt = decision, notes, &reviewerID, &now
-	// Guard against a concurrent review: only update while still SUBMITTED.
-	res := s.db.Model(&ProgressReport{}).Where("id = ? AND status = ?", r.ID, StatusSubmitted).
-		Updates(map[string]interface{}{"status": decision, "review_notes": notes, "reviewed_by": reviewerID, "reviewed_at": now, "updated_at": now})
-	if res.Error != nil {
-		return nil, res.Error
+	var projectPct *float64
+	err = s.db.Transaction(func(tx *gorm.DB) error {
+		// Guard against a concurrent review: only update while still SUBMITTED.
+		res := tx.Model(&ProgressReport{}).Where("id = ? AND status = ?", r.ID, StatusSubmitted).
+			Updates(map[string]interface{}{"status": decision, "review_notes": notes, "reviewed_by": reviewerID, "reviewed_at": now, "updated_at": now})
+		if res.Error != nil {
+			return res.Error
+		}
+		if res.RowsAffected == 0 {
+			return ErrAlreadyDecided
+		}
+		if decision != StatusVerified {
+			return nil
+		}
+		pct, err := syncPeriodic(tx, orgID, r.ProjectID, r.PeriodYear, r.PeriodMonth, reviewerID, now)
+		projectPct = &pct
+		return err
+	})
+	if err != nil {
+		return nil, err
 	}
-	if res.RowsAffected == 0 {
-		return nil, ErrAlreadyDecided
+	r.ProjectProgressPct = projectPct
+	label := s.contextLabel(orgID, r.ContractID)
+	if decision == StatusVerified {
+		s.notify(orgID, []uuid.UUID{r.SubmittedBy}, notification.PriorityNormal,
+			"Laporan progres diverifikasi",
+			fmt.Sprintf("Laporan %s untuk %s (%.2f%%) telah diverifikasi dan masuk ke laporan periodik proyek.", periodLabel(r.PeriodYear, r.PeriodMonth), label, r.PhysicalProgressPct),
+			"vendor_progress_report", r.ID)
+	} else {
+		s.notify(orgID, []uuid.UUID{r.SubmittedBy}, notification.PriorityHigh,
+			"Laporan progres ditolak",
+			fmt.Sprintf("Laporan %s untuk %s ditolak. Alasan: %s. Perbaiki lalu kirim ulang.", periodLabel(r.PeriodYear, r.PeriodMonth), label, notes),
+			"vendor_progress_report", r.ID)
 	}
 	return &r, nil
 }
@@ -474,6 +511,14 @@ func (s *Service) ReviewDocument(orgID uuid.UUID, rv Reviewer, id uuid.UUID, req
 	}
 	if res.RowsAffected == 0 {
 		return nil, ErrAlreadyDecided
+	}
+	label := s.contextLabel(orgID, d.ContractID)
+	if decision == StatusVerified {
+		s.notify(orgID, []uuid.UUID{d.SubmittedBy}, notification.PriorityNormal, "Dokumen diverifikasi",
+			fmt.Sprintf("Dokumen \"%s\" untuk %s telah diverifikasi.", d.Name, label), "vendor_document", d.ID)
+	} else {
+		s.notify(orgID, []uuid.UUID{d.SubmittedBy}, notification.PriorityHigh, "Dokumen ditolak",
+			fmt.Sprintf("Dokumen \"%s\" untuk %s ditolak. Alasan: %s. Perbaiki lalu unggah ulang.", d.Name, label, notes), "vendor_document", d.ID)
 	}
 	return &d, nil
 }

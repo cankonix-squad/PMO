@@ -137,7 +137,10 @@ const settingsItems: NavItem[] = [
 const vendorNavSections: NavSection[] = [
   {
     label: "Portal Penyedia",
-    items: [{ label: "Kontrak Saya", href: "/vendor-portal", icon: HardHat }],
+    items: [
+      { label: "Kontrak Saya", href: "/vendor-portal", icon: HardHat },
+      { label: "Notifikasi", href: "/notifications", icon: Bell },
+    ],
   },
 ];
 

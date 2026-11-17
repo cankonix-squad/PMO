@@ -10,3 +10,6 @@ export function isVendorUser(user: Pick<UserInfo, "roles"> | null | undefined): 
 }
 
 export const VENDOR_HOME = "/vendor-portal";
+
+/** Internal routes a contractor account may open besides the portal. */
+export const VENDOR_ALLOWED_PATHS = [VENDOR_HOME, "/notifications"];

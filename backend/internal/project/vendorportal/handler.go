@@ -26,8 +26,12 @@ type Handler struct {
 	log   *zap.Logger
 }
 
-func NewHandler(db *gorm.DB, storageRoot string, maxSize int64, auditWriter *audit.Writer, log *zap.Logger) *Handler {
-	return &Handler{svc: NewService(db, storageRoot, maxSize), audit: auditWriter, log: log}
+func NewHandler(db *gorm.DB, storageRoot string, maxSize int64, auditWriter *audit.Writer, log *zap.Logger, notifier Notifier) *Handler {
+	svc := NewService(db, storageRoot, maxSize)
+	if notifier != nil {
+		svc.SetNotifier(notifier, log)
+	}
+	return &Handler{svc: svc, audit: auditWriter, log: log}
 }
 
 func claimsFromGin(c *gin.Context) *auth.Claims {

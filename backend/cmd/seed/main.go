@@ -185,7 +185,7 @@ func main() {
 			// portal: no access to any internal module.
 			Code:      constants.RoleVendor,
 			Name:      "Penyedia / Kontraktor",
-			Resources: []string{constants.ResourceVendorPortal},
+			Resources: []string{constants.ResourceVendorPortal, constants.ResourceNotification},
 		},
 	}
 

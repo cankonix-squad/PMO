@@ -6,7 +6,7 @@ import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth.store";
-import { isVendorUser, VENDOR_HOME } from "@/lib/roles";
+import { isVendorUser, VENDOR_ALLOWED_PATHS, VENDOR_HOME } from "@/lib/roles";
 
 interface DashboardLayoutProps {
   title: string;
@@ -24,7 +24,7 @@ export function DashboardLayout({ title, children }: DashboardLayoutProps) {
   // Contractor accounts are confined to the contractor portal. The backend
   // enforces this with permissions; this only avoids showing 403 pages.
   useEffect(() => {
-    if (vendor && !pathname.startsWith(VENDOR_HOME)) {
+    if (vendor && !VENDOR_ALLOWED_PATHS.some((p) => pathname.startsWith(p))) {
       router.replace(VENDOR_HOME);
     }
   }, [vendor, pathname, router]);

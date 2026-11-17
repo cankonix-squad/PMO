@@ -216,6 +216,12 @@ function ReviewModal({ target, onClose }: { target: Target; onClose: () => void 
           )}
           {item.notes && <div className="col-span-2"><dt className="text-xs text-gray-500">Catatan penyedia</dt><dd className="whitespace-pre-line">{item.notes}</dd></div>}
         </dl>
+        {target.kind === "report" && (
+          <p className="rounded-lg bg-blue-50 p-3 text-xs text-blue-800">
+            Bila diverifikasi, progres ini otomatis mengisi laporan periodik proyek bulan tersebut (progres fisik, rata-rata tertimbang nilai
+            kontrak) dan memperbarui progres proyek. Data keuangan di laporan periodik tidak diubah.
+          </p>
+        )}
         <Field label="Catatan verifikasi (wajib bila ditolak)">
           <textarea className={textareaCls} rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} />
         </Field>

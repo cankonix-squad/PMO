@@ -36,6 +36,7 @@ var (
 	ErrDuplicate      = errors.New("vendorportal: a live report already exists for this period")
 	ErrAlreadyDecided = errors.New("vendorportal: submission already reviewed")
 	ErrEmailTaken     = errors.New("vendorportal: email already in use")
+	ErrNotContractPPK = errors.New("vendorportal: only the contract PPK may review this submission")
 )
 
 // ValidationError is a client input error (HTTP 400).
@@ -104,10 +105,12 @@ func (Document) TableName() string { return "vendor_documents" }
 
 // Context carries display names for review screens. Not stored.
 type Context struct {
-	ContractNumber string `gorm:"-" json:"contract_number,omitempty"`
-	ProjectCode    string `gorm:"-" json:"project_code,omitempty"`
-	ProjectName    string `gorm:"-" json:"project_name,omitempty"`
-	VendorName     string `gorm:"-" json:"vendor_name,omitempty"`
+	ContractNumber string     `gorm:"-" json:"contract_number,omitempty"`
+	ProjectCode    string     `gorm:"-" json:"project_code,omitempty"`
+	ProjectName    string     `gorm:"-" json:"project_name,omitempty"`
+	VendorName     string     `gorm:"-" json:"vendor_name,omitempty"`
+	PPKUserID      *uuid.UUID `gorm:"-" json:"ppk_user_id,omitempty"`
+	PPKName        string     `gorm:"-" json:"ppk_name,omitempty"`
 }
 
 // ContractSummary is a contract as seen by its contractor.

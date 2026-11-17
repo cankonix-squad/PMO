@@ -50,6 +50,17 @@ func (s *Service) CreateContract(ctx context.Context, projectID, orgID, createdB
 	if err := validateContractDates(req.StartDate, req.EndDate); err != nil {
 		return nil, err
 	}
+	form, err := normalizeAgreementForm(req.AgreementForm)
+	if err != nil {
+		return nil, err
+	}
+	var ppk *uuid.UUID
+	if req.PPKUserID != nil && *req.PPKUserID != uuid.Nil {
+		if err := s.checkPPK(ctx, *req.PPKUserID, orgID); err != nil {
+			return nil, err
+		}
+		ppk = req.PPKUserID
+	}
 
 	c := &Contract{
 		OrganizationID: orgID,
@@ -65,6 +76,10 @@ func (s *Service) CreateContract(ctx context.Context, projectID, orgID, createdB
 		EndDate:        req.EndDate,
 		Status:         status,
 		ScopeOfWork:    req.ScopeOfWork,
+		PPKUserID:      ppk,
+		AgreementForm:  form,
+		SirupCode:      strings.TrimSpace(req.SirupCode),
+		SPSETenderCode: strings.TrimSpace(req.SPSETenderCode),
 		CreatedBy:      createdBy,
 	}
 	if err := s.repo.CreateContract(ctx, c); err != nil {
@@ -158,11 +173,35 @@ func (s *Service) UpdateContract(ctx context.Context, projectID, contractID, org
 	if req.ScopeOfWork != "" {
 		c.ScopeOfWork = req.ScopeOfWork
 	}
+	if req.PPKUserID != nil {
+		if *req.PPKUserID == uuid.Nil {
+			c.PPKUserID = nil
+		} else {
+			if err := s.checkPPK(ctx, *req.PPKUserID, orgID); err != nil {
+				return nil, err
+			}
+			c.PPKUserID = req.PPKUserID
+		}
+	}
+	if req.AgreementForm != nil {
+		form, err := normalizeAgreementForm(*req.AgreementForm)
+		if err != nil {
+			return nil, err
+		}
+		c.AgreementForm = form
+	}
+	if req.SirupCode != nil {
+		c.SirupCode = strings.TrimSpace(*req.SirupCode)
+	}
+	if req.SPSETenderCode != nil {
+		c.SPSETenderCode = strings.TrimSpace(*req.SPSETenderCode)
+	}
 
 	if err := validateContractDates(c.StartDate, c.EndDate); err != nil {
 		return nil, err
 	}
 
+	c.PPK = nil // never let GORM upsert the preloaded user association
 	if err := s.repo.UpdateContract(ctx, c); err != nil {
 		if errors.Is(err, ErrContractNumberTaken) {
 			return nil, ErrContractNumberTaken
@@ -198,4 +237,34 @@ func validateContractDates(start, end *types.FlexTime) error {
 		return ErrInvalidContractDates
 	}
 	return nil
+}
+
+var validAgreementForms = map[string]bool{"SPK": true, "SURAT_PERJANJIAN": true, "SURAT_PESANAN": true, "BUKTI_PEMBELIAN": true}
+
+// normalizeAgreementForm returns nil for empty input.
+func normalizeAgreementForm(v string) (*string, error) {
+	f := strings.ToUpper(strings.TrimSpace(v))
+	if f == "" {
+		return nil, nil
+	}
+	if !validAgreementForms[f] {
+		return nil, ErrInvalidAgreementForm
+	}
+	return &f, nil
+}
+
+func (s *Service) checkPPK(ctx context.Context, userID, orgID uuid.UUID) error {
+	ok, err := s.repo.IsActiveInternalUser(ctx, userID, orgID)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return ErrInvalidPPK
+	}
+	return nil
+}
+
+// ListPPKCandidates returns users that can be assigned as a contract PPK.
+func (s *Service) ListPPKCandidates(ctx context.Context, orgID uuid.UUID) ([]ContractUser, error) {
+	return s.repo.ListInternalUsers(ctx, orgID)
 }

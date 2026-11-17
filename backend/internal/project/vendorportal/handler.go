@@ -70,6 +70,8 @@ func (h *Handler) writeErr(c *gin.Context, err error, notFound string) {
 		response.Conflict(c, "a progress report for this period is already submitted or verified")
 	case errors.Is(err, ErrAlreadyDecided):
 		response.Conflict(c, "this submission has already been reviewed")
+	case errors.Is(err, ErrNotContractPPK):
+		response.Forbidden(c, "only the contract's PPK (or PMO/Admin) can review this submission")
 	case errors.Is(err, ErrEmailTaken):
 		response.Conflict(c, "email already in use")
 	case errors.As(err, &ve):
@@ -332,7 +334,7 @@ func (h *Handler) ReviewReport(c *gin.Context) {
 		response.BadRequest(c, err.Error())
 		return
 	}
-	r, err := h.svc.ReviewReport(claims.OrganizationID, claims.UserID, id, req)
+	r, err := h.svc.ReviewReport(claims.OrganizationID, Reviewer{UserID: claims.UserID}, id, req)
 	if err != nil {
 		h.writeErr(c, err, "progress report not found")
 		return
@@ -359,7 +361,7 @@ func (h *Handler) ReviewDocument(c *gin.Context) {
 		response.BadRequest(c, err.Error())
 		return
 	}
-	d, err := h.svc.ReviewDocument(claims.OrganizationID, claims.UserID, id, req)
+	d, err := h.svc.ReviewDocument(claims.OrganizationID, Reviewer{UserID: claims.UserID}, id, req)
 	if err != nil {
 		h.writeErr(c, err, "document not found")
 		return

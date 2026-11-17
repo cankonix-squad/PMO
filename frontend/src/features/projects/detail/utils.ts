@@ -206,6 +206,10 @@ export function readContractForm(form: HTMLFormElement): ContractFormValues {
     end_date: getString(data, "end_date"),
     status: getString(data, "status") as ContractFormValues["status"],
     scope_of_work: getString(data, "scope_of_work"),
+    ppk_user_id: getString(data, "ppk_user_id"),
+    agreement_form: getString(data, "agreement_form"),
+    sirup_code: getString(data, "sirup_code"),
+    spse_tender_code: getString(data, "spse_tender_code"),
   };
 }
 
@@ -222,6 +226,10 @@ export function toContractCreatePayload(values: ContractFormValues): CreateContr
     end_date: optionalString(values.end_date),
     status: values.status,
     scope_of_work: optionalString(values.scope_of_work),
+    ppk_user_id: optionalString(values.ppk_user_id) ?? null,
+    agreement_form: values.agreement_form ?? "",
+    sirup_code: values.sirup_code ?? "",
+    spse_tender_code: values.spse_tender_code ?? "",
   };
 }
 
@@ -238,6 +246,10 @@ export function toContractUpdatePayload(values: ContractFormValues): UpdateContr
     end_date: optionalString(values.end_date),
     status: values.status,
     scope_of_work: optionalString(values.scope_of_work),
+    ppk_user_id: values.ppk_user_id ? values.ppk_user_id : "00000000-0000-0000-0000-000000000000",
+    agreement_form: values.agreement_form ?? "",
+    sirup_code: values.sirup_code ?? "",
+    spse_tender_code: values.spse_tender_code ?? "",
   };
 }
 

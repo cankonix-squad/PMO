@@ -202,6 +202,7 @@ function ReviewModal({ target, onClose }: { target: Target; onClose: () => void 
           <div className="col-span-2"><dt className="text-xs text-gray-500">Proyek</dt><dd className="font-medium">{item.project_code} · {item.project_name}</dd></div>
           <div><dt className="text-xs text-gray-500">Kontrak</dt><dd>{item.contract_number}</dd></div>
           <div><dt className="text-xs text-gray-500">Penyedia</dt><dd>{item.vendor_name}</dd></div>
+          <div className="col-span-2"><dt className="text-xs text-gray-500">PPK kontrak</dt><dd>{item.ppk_name || "Belum ditetapkan — semua verifikator berwenang dapat memverifikasi"}</dd></div>
           {target.kind === "report" ? (
             <>
               <div><dt className="text-xs text-gray-500">Periode</dt><dd>{fmtPeriod(target.item.period_year, target.item.period_month)}</dd></div>

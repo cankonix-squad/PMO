@@ -64,6 +64,8 @@ type Repository interface {
 	// Vendors
 	CreateVendor(ctx context.Context, v *Vendor) error
 	FindVendorByID(ctx context.Context, id, orgID uuid.UUID) (*Vendor, error)
+	IsActiveInternalUser(ctx context.Context, userID, orgID uuid.UUID) (bool, error)
+	ListInternalUsers(ctx context.Context, orgID uuid.UUID) ([]ContractUser, error)
 	ListVendors(ctx context.Context, filter VendorListFilter) ([]Vendor, int64, error)
 	UpdateVendor(ctx context.Context, v *Vendor) error
 	DeleteVendor(ctx context.Context, id, orgID uuid.UUID) error

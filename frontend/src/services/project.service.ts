@@ -42,6 +42,7 @@ import type {
   CorrectiveActionListFilter,
   CreateCorrectiveActionRequest,
   UpdateCorrectiveActionRequest,
+  ContractUser,
 } from "@/types/project";
 
 export const projectService = {
@@ -193,6 +194,8 @@ export const projectService = {
 
   deleteVendor: (vendorId: string) =>
     api.delete<ApiResponse<null>>(`/vendors/${vendorId}`),
+
+  listPPKCandidates: () => api.get<ApiResponse<ContractUser[]>>("/contract-ppk-candidates"),
 
   listContracts: (projectId: string, params?: ContractListFilter) =>
     api.get<ApiResponse<Contract[]>>(

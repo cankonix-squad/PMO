@@ -96,7 +96,7 @@ func (h *Handler) CreateContract(c *gin.Context) {
 			response.NotFound(c, "vendor not found")
 			return
 		}
-		if errors.Is(err, ErrInvalidContractStatus) || errors.Is(err, ErrInvalidContractDates) || errors.Is(err, ErrInvalidContractValue) {
+		if errors.Is(err, ErrInvalidContractStatus) || errors.Is(err, ErrInvalidContractDates) || errors.Is(err, ErrInvalidContractValue) || errors.Is(err, ErrInvalidPPK) || errors.Is(err, ErrInvalidAgreementForm) {
 			response.BadRequest(c, err.Error())
 			return
 		}
@@ -191,7 +191,7 @@ func (h *Handler) UpdateContract(c *gin.Context) {
 			response.NotFound(c, "vendor not found")
 			return
 		}
-		if errors.Is(err, ErrInvalidContractStatus) || errors.Is(err, ErrInvalidContractDates) || errors.Is(err, ErrInvalidContractValue) {
+		if errors.Is(err, ErrInvalidContractStatus) || errors.Is(err, ErrInvalidContractDates) || errors.Is(err, ErrInvalidContractValue) || errors.Is(err, ErrInvalidPPK) || errors.Is(err, ErrInvalidAgreementForm) {
 			response.BadRequest(c, err.Error())
 			return
 		}
@@ -249,4 +249,19 @@ func (h *Handler) DeleteContract(c *gin.Context) {
 
 	h.recordContractAudit(c, "contract.deleted", contract)
 	response.NoContent(c)
+}
+
+// ListPPKCandidates GET /contract-ppk-candidates — internal users eligible as PPK.
+func (h *Handler) ListPPKCandidates(c *gin.Context) {
+	claims := claimsFromGin(c)
+	if claims == nil {
+		response.Unauthorized(c, "")
+		return
+	}
+	list, err := h.svc.ListPPKCandidates(c.Request.Context(), claims.OrganizationID)
+	if err != nil {
+		response.InternalError(c)
+		return
+	}
+	response.OK(c, "PPK candidates retrieved", list)
 }

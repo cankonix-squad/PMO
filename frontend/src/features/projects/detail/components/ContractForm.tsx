@@ -1,7 +1,9 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
-import type { Contract, Vendor, VendorType } from "@/types/project";
+import { projectService } from "@/services/project.service";
+import { AGREEMENT_FORM_LABEL, type Contract, type Vendor, type VendorType } from "@/types/project";
 import type { FormEvent } from "react";
 import { CONTRACT_STATUSES, inputClassName } from "../schemas";
 import { toDateInput } from "../utils";
@@ -28,6 +30,10 @@ export function ContractForm({
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onCancel: () => void;
 }) {
+  const { data: ppkOptions = [], isLoading: ppkLoading } = useQuery({
+    queryKey: ["contract-ppk-candidates"],
+    queryFn: () => projectService.listPPKCandidates().then((r) => r.data.data ?? []),
+  });
   return (
     <form onSubmit={onSubmit} className="mb-6 rounded-lg border border-border bg-card p-5 shadow-sm">
       <FormHeader title={contract ? "Edit Kontrak" : "Tambah Kontrak"} onCancel={onCancel} />
@@ -158,7 +164,34 @@ export function ContractForm({
             className={inputClassName}
           />
         </Field>
+        <Field label="PPK (Pejabat Pembuat Komitmen)">
+          <select name="ppk_user_id" defaultValue={contract?.ppk_user_id ?? ""} className={inputClassName} disabled={ppkLoading}>
+            <option value="">{ppkLoading ? "Memuat pengguna..." : "— Belum ditetapkan —"}</option>
+            {ppkOptions.map((u) => (
+              <option key={u.id} value={u.id}>
+                {`${u.first_name} ${u.last_name}`.trim() || u.email} · {u.email}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Bentuk Perjanjian">
+          <select name="agreement_form" defaultValue={contract?.agreement_form ?? ""} className={inputClassName}>
+            <option value="">— Belum ditetapkan —</option>
+            {Object.entries(AGREEMENT_FORM_LABEL).map(([k, l]) => (
+              <option key={k} value={k}>{l}</option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Kode RUP (SIRUP)">
+          <input name="sirup_code" defaultValue={contract?.sirup_code ?? ""} maxLength={50} className={inputClassName} />
+        </Field>
+        <Field label="Kode Tender (SPSE)">
+          <input name="spse_tender_code" defaultValue={contract?.spse_tender_code ?? ""} maxLength={50} className={inputClassName} />
+        </Field>
       </div>
+      <p className="mt-2 text-xs text-muted-foreground">
+        Bila PPK ditetapkan, hanya PPK tersebut (atau PMO/Admin) yang dapat memverifikasi laporan dan dokumen penyedia untuk kontrak ini (Perpres 16/2018 Ps.11).
+      </p>
       <div className="mt-4">
         <Field label="Scope of Work">
           <textarea

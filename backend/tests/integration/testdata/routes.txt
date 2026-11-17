@@ -62,6 +62,7 @@ GET /api/v1/benefits/summary
 GET /api/v1/command-center
 GET /api/v1/command-center/decisions
 GET /api/v1/command-center/escalations
+GET /api/v1/contract-ppk-candidates
 GET /api/v1/dashboard
 GET /api/v1/dashboard/trend
 GET /api/v1/governance/lock-periods

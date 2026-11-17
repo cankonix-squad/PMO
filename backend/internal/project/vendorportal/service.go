@@ -292,6 +292,8 @@ type contextRow struct {
 	ProjectCode    string
 	ProjectName    string
 	VendorName     string
+	PPKUserID      *uuid.UUID
+	PPKName        string
 }
 
 func (s *Service) contexts(orgID uuid.UUID, contractIDs []uuid.UUID) (map[uuid.UUID]Context, error) {
@@ -301,13 +303,15 @@ func (s *Service) contexts(orgID uuid.UUID, contractIDs []uuid.UUID) (map[uuid.U
 	}
 	var rows []contextRow
 	err := s.db.Table("contracts c").
-		Select("c.id AS contract_id, c.contract_number, p.code AS project_code, p.name AS project_name, v.name AS vendor_name").
+		Select("c.id AS contract_id, c.contract_number, p.code AS project_code, p.name AS project_name, v.name AS vendor_name, "+
+			"c.ppk_user_id, TRIM(CONCAT(u.first_name, ' ', u.last_name)) AS ppk_name").
 		Joins("JOIN projects p ON p.id = c.project_id").
+		Joins("LEFT JOIN users u ON u.id = c.ppk_user_id").
 		Joins("LEFT JOIN vendors v ON v.id = c.vendor_id").
 		Where("c.organization_id = ? AND c.id IN ?", orgID, contractIDs).
 		Scan(&rows).Error
 	for _, r := range rows {
-		out[r.ContractID] = Context{ContractNumber: r.ContractNumber, ProjectCode: r.ProjectCode, ProjectName: r.ProjectName, VendorName: r.VendorName}
+		out[r.ContractID] = Context{ContractNumber: r.ContractNumber, ProjectCode: r.ProjectCode, ProjectName: r.ProjectName, VendorName: r.VendorName, PPKUserID: r.PPKUserID, PPKName: r.PPKName}
 	}
 	return out, err
 }
@@ -368,8 +372,48 @@ func normalizeDecision(req ReviewRequest) (string, string, error) {
 	return decision, notes, nil
 }
 
+// Reviewer identifies who reviews a submission.
+type Reviewer struct {
+	UserID uuid.UUID
+}
+
+// PrivilegedReviewRoles may review submissions regardless of the contract PPK.
+var PrivilegedReviewRoles = []string{"SUPER_ADMIN", "ADMIN", "PMO"}
+
+func (s *Service) isPrivileged(userID uuid.UUID) (bool, error) {
+	var n int64
+	err := s.db.Table("user_roles ur").
+		Joins("JOIN roles r ON r.id = ur.role_id").
+		Where("ur.user_id = ? AND r.code IN ?", userID, PrivilegedReviewRoles).
+		Count(&n).Error
+	return n > 0, err
+}
+
+// canReview enforces Perpres 16/2018 Ps.11: when a contract has a PPK, only
+// that PPK (or a privileged reviewer) may verify its submissions. Contracts
+// without a PPK keep the permission-only rule.
+func (s *Service) canReview(orgID, contractID uuid.UUID, rv Reviewer) error {
+	var ppk struct{ PPKUserID *uuid.UUID }
+	if err := s.db.Table("contracts").Select("ppk_user_id").
+		Where("id = ? AND organization_id = ?", contractID, orgID).Scan(&ppk).Error; err != nil {
+		return err
+	}
+	if ppk.PPKUserID == nil || *ppk.PPKUserID == rv.UserID {
+		return nil
+	}
+	priv, err := s.isPrivileged(rv.UserID)
+	if err != nil {
+		return err
+	}
+	if !priv {
+		return ErrNotContractPPK
+	}
+	return nil
+}
+
 // ReviewReport verifies or rejects a SUBMITTED progress report.
-func (s *Service) ReviewReport(orgID, reviewerID, id uuid.UUID, req ReviewRequest) (*ProgressReport, error) {
+func (s *Service) ReviewReport(orgID uuid.UUID, rv Reviewer, id uuid.UUID, req ReviewRequest) (*ProgressReport, error) {
+	reviewerID := rv.UserID
 	decision, notes, err := normalizeDecision(req)
 	if err != nil {
 		return nil, err
@@ -383,6 +427,9 @@ func (s *Service) ReviewReport(orgID, reviewerID, id uuid.UUID, req ReviewReques
 	}
 	if r.Status != StatusSubmitted {
 		return nil, ErrAlreadyDecided
+	}
+	if err := s.canReview(orgID, r.ContractID, rv); err != nil {
+		return nil, err
 	}
 	now := s.now()
 	r.Status, r.ReviewNotes, r.ReviewedBy, r.ReviewedAt = decision, notes, &reviewerID, &now
@@ -399,7 +446,8 @@ func (s *Service) ReviewReport(orgID, reviewerID, id uuid.UUID, req ReviewReques
 }
 
 // ReviewDocument verifies or rejects a SUBMITTED document.
-func (s *Service) ReviewDocument(orgID, reviewerID, id uuid.UUID, req ReviewRequest) (*Document, error) {
+func (s *Service) ReviewDocument(orgID uuid.UUID, rv Reviewer, id uuid.UUID, req ReviewRequest) (*Document, error) {
+	reviewerID := rv.UserID
 	decision, notes, err := normalizeDecision(req)
 	if err != nil {
 		return nil, err
@@ -413,6 +461,9 @@ func (s *Service) ReviewDocument(orgID, reviewerID, id uuid.UUID, req ReviewRequ
 	}
 	if d.Status != StatusSubmitted {
 		return nil, ErrAlreadyDecided
+	}
+	if err := s.canReview(orgID, d.ContractID, rv); err != nil {
+		return nil, err
 	}
 	now := s.now()
 	d.Status, d.ReviewNotes, d.ReviewedBy, d.ReviewedAt = decision, notes, &reviewerID, &now

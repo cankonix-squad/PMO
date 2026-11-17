@@ -149,6 +149,10 @@ export const contractSchema = z.object({
   end_date: z.string().trim().optional(),
   status: z.enum(["DRAFT", "ACTIVE", "AMENDED", "COMPLETED", "TERMINATED"]),
   scope_of_work: z.string().trim().optional(),
+  ppk_user_id: z.string().trim().optional(),
+  agreement_form: z.string().trim().optional(),
+  sirup_code: z.string().trim().max(50, "Kode RUP maksimal 50 karakter").optional(),
+  spse_tender_code: z.string().trim().max(50, "Kode tender maksimal 50 karakter").optional(),
 });
 
 export const vendorSchema = z.object({

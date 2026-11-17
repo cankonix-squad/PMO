@@ -51,6 +51,12 @@ var ErrInvalidContractStatus = errors.New("invalid contract status")
 // ErrInvalidContractDates is returned when start_date is after end_date.
 var ErrInvalidContractDates = errors.New("contract start_date cannot be after end_date")
 
+// ErrInvalidPPK is returned when ppk_user_id is not an active internal user of the organization.
+var ErrInvalidPPK = errors.New("ppk_user_id must be an active internal user of this organization")
+
+// ErrInvalidAgreementForm is returned for an unknown agreement_form.
+var ErrInvalidAgreementForm = errors.New("agreement_form must be SPK, SURAT_PERJANJIAN, SURAT_PESANAN or BUKTI_PEMBELIAN")
+
 // ErrInvalidContractValue is returned when contract_value is negative.
 var ErrInvalidContractValue = errors.New("contract value cannot be negative")
 

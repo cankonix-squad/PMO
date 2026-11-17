@@ -373,11 +373,33 @@ export interface Contract {
   end_date: string | null;
   status: ContractStatus;
   scope_of_work: string | null;
+  ppk_user_id: string | null;
+  agreement_form: AgreementForm | null;
+  sirup_code: string;
+  spse_tender_code: string;
+  ppk?: ContractUser | null;
   created_by: string;
   created_at: string;
   updated_at: string;
   vendor?: Vendor;
   consultant?: Vendor;
+}
+
+/** Agreement form (Perpres 16/2018 Ps.27–28). */
+export type AgreementForm = "SPK" | "SURAT_PERJANJIAN" | "SURAT_PESANAN" | "BUKTI_PEMBELIAN";
+export const AGREEMENT_FORM_LABEL: Record<AgreementForm, string> = {
+  SPK: "SPK (Surat Perintah Kerja)",
+  SURAT_PERJANJIAN: "Surat Perjanjian",
+  SURAT_PESANAN: "Surat Pesanan (e-purchasing)",
+  BUKTI_PEMBELIAN: "Bukti Pembelian / Kuitansi",
+};
+
+/** Minimal user view for a contract PPK. */
+export interface ContractUser {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
 }
 
 export interface ContractListFilter extends PaginationParams {
@@ -398,6 +420,11 @@ export interface CreateContractRequest {
   end_date?: string;
   status?: ContractStatus;
   scope_of_work?: string;
+  /** Update: "00000000-0000-0000-0000-000000000000" clears the PPK. */
+  ppk_user_id?: string | null;
+  agreement_form?: string;
+  sirup_code?: string;
+  spse_tender_code?: string;
 }
 
 export interface UpdateContractRequest extends Partial<CreateContractRequest> {

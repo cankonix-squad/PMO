@@ -25,6 +25,8 @@ export interface SubmissionContext {
   project_code?: string;
   project_name?: string;
   vendor_name?: string;
+  ppk_user_id?: string;
+  ppk_name?: string;
 }
 
 export interface VendorContract {

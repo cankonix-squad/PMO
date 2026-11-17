@@ -239,15 +239,34 @@ type Contract struct {
 	EndDate        *types.FlexTime `json:"end_date,omitempty"`
 	Status         string          `gorm:"size:50;not null;default:'DRAFT'" json:"status"` // DRAFT | ACTIVE | AMENDED | COMPLETED | TERMINATED
 	ScopeOfWork    string          `gorm:"type:text" json:"scope_of_work,omitempty"`
-	CreatedBy      uuid.UUID       `gorm:"type:uuid;not null" json:"created_by"`
-	CreatedAt      time.Time       `json:"created_at"`
-	UpdatedAt      time.Time       `json:"updated_at"`
-	DeletedAt      gorm.DeletedAt  `gorm:"index" json:"-"`
+	// PPKUserID is the Pejabat Pembuat Komitmen controlling the contract
+	// (Perpres 16/2018 Ps.11). When set, only the PPK (or PMO/Admin) may
+	// verify contractor submissions.
+	PPKUserID *uuid.UUID `gorm:"column:ppk_user_id;type:uuid" json:"ppk_user_id"`
+	// AgreementForm: SPK | SURAT_PERJANJIAN | SURAT_PESANAN | BUKTI_PEMBELIAN (Perpres 16/2018 Ps.27–28).
+	AgreementForm  *string        `gorm:"size:30" json:"agreement_form"`
+	SirupCode      string         `gorm:"size:50" json:"sirup_code"`
+	SPSETenderCode string         `gorm:"column:spse_tender_code;size:50" json:"spse_tender_code"`
+	CreatedBy      uuid.UUID      `gorm:"type:uuid;not null" json:"created_by"`
+	CreatedAt      time.Time      `json:"created_at"`
+	UpdatedAt      time.Time      `json:"updated_at"`
+	DeletedAt      gorm.DeletedAt `gorm:"index" json:"-"`
 
 	// Preloaded associations (vendor display names for the response).
-	Vendor     *Vendor `gorm:"foreignKey:VendorID" json:"vendor,omitempty"`
-	Consultant *Vendor `gorm:"foreignKey:ConsultantID" json:"consultant,omitempty"`
+	Vendor     *Vendor       `gorm:"foreignKey:VendorID" json:"vendor,omitempty"`
+	Consultant *Vendor       `gorm:"foreignKey:ConsultantID" json:"consultant,omitempty"`
+	PPK        *ContractUser `gorm:"foreignKey:PPKUserID" json:"ppk,omitempty"`
 }
+
+// ContractUser is the minimal user view preloaded for a contract's PPK.
+type ContractUser struct {
+	ID        uuid.UUID `json:"id"`
+	FirstName string    `json:"first_name"`
+	LastName  string    `json:"last_name"`
+	Email     string    `json:"email"`
+}
+
+func (ContractUser) TableName() string { return "users" }
 
 func (Contract) TableName() string {
 	return "contracts"
@@ -607,6 +626,10 @@ type CreateContractRequest struct {
 	EndDate        *types.FlexTime `json:"end_date"`
 	Status         string          `json:"status" binding:"max=50"`
 	ScopeOfWork    string          `json:"scope_of_work"`
+	PPKUserID      *uuid.UUID      `json:"ppk_user_id"`
+	AgreementForm  string          `json:"agreement_form" binding:"max=30"`
+	SirupCode      string          `json:"sirup_code" binding:"max=50"`
+	SPSETenderCode string          `json:"spse_tender_code" binding:"max=50"`
 }
 
 // UpdateContractRequest is the DTO for contract updates.
@@ -622,6 +645,12 @@ type UpdateContractRequest struct {
 	EndDate        *types.FlexTime `json:"end_date"`
 	Status         string          `json:"status" binding:"max=50"`
 	ScopeOfWork    string          `json:"scope_of_work"`
+	// PPKUserID: nil = unchanged, uuid.Nil = clear.
+	PPKUserID *uuid.UUID `json:"ppk_user_id"`
+	// AgreementForm: nil = unchanged, "" = clear.
+	AgreementForm  *string `json:"agreement_form" binding:"omitempty,max=30"`
+	SirupCode      *string `json:"sirup_code" binding:"omitempty,max=50"`
+	SPSETenderCode *string `json:"spse_tender_code" binding:"omitempty,max=50"`
 }
 
 // DocumentListFilter carries query params for listing project documents.

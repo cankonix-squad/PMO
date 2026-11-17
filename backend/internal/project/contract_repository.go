@@ -24,6 +24,7 @@ func (r *postgresRepository) FindContractByID(ctx context.Context, projectID, co
 		Where("id = ? AND project_id = ? AND organization_id = ?", contractID, projectID, orgID).
 		Preload("Vendor").
 		Preload("Consultant").
+		Preload("PPK").
 		First(&c).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, ErrContractNotFound
@@ -61,7 +62,7 @@ func (r *postgresRepository) ListContracts(ctx context.Context, filter ContractL
 	}
 
 	var contracts []Contract
-	err := q.Preload("Vendor").Preload("Consultant").
+	err := q.Preload("Vendor").Preload("Consultant").Preload("PPK").
 		Order("created_at DESC").
 		Limit(pageSize).Offset((page - 1) * pageSize).
 		Find(&contracts).Error
@@ -91,4 +92,24 @@ func (r *postgresRepository) countContractsForVendor(ctx context.Context, vendor
 	return r.db.WithContext(ctx).Model(&Contract{}).
 		Where("organization_id = ? AND (vendor_id = ? OR consultant_id = ?)", orgID, vendorID, vendorID).
 		Count(out).Error
+}
+
+// IsActiveInternalUser reports whether userID is an active, non-contractor
+// user of the organization (eligible as a contract PPK).
+func (r *postgresRepository) IsActiveInternalUser(ctx context.Context, userID, orgID uuid.UUID) (bool, error) {
+	var n int64
+	err := r.db.WithContext(ctx).Table("users").
+		Where("id = ? AND organization_id = ? AND is_active = TRUE AND vendor_id IS NULL AND deleted_at IS NULL", userID, orgID).
+		Count(&n).Error
+	return n > 0, err
+}
+
+// ListInternalUsers returns active, non-contractor users eligible as PPK.
+func (r *postgresRepository) ListInternalUsers(ctx context.Context, orgID uuid.UUID) ([]ContractUser, error) {
+	var out []ContractUser
+	err := r.db.WithContext(ctx).
+		Where("organization_id = ? AND is_active = TRUE AND vendor_id IS NULL AND deleted_at IS NULL", orgID).
+		Order("first_name ASC, last_name ASC").
+		Find(&out).Error
+	return out, err
 }

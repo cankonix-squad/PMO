@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import type { Contract } from "@/types/project";
+import { AGREEMENT_FORM_LABEL, type Contract } from "@/types/project";
 import { contractStatusTone, formatCurrency, toDateInput } from "../utils";
 import { EmptyState } from "./EmptyState";
 import { ErrorState } from "./ErrorState";
@@ -86,6 +86,16 @@ export function ContractPanel({
                         ? `${toDateInput(contract.start_date)} — ${contract.end_date ? toDateInput(contract.end_date) : "?"}`
                         : "TBD"}
                     </p>
+                    {(contract.ppk || contract.agreement_form || contract.sirup_code || contract.spse_tender_code) && (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {[
+                          contract.ppk ? `PPK: ${`${contract.ppk.first_name} ${contract.ppk.last_name}`.trim() || contract.ppk.email}` : "",
+                          contract.agreement_form ? AGREEMENT_FORM_LABEL[contract.agreement_form] : "",
+                          contract.sirup_code ? `RUP ${contract.sirup_code}` : "",
+                          contract.spse_tender_code ? `Tender ${contract.spse_tender_code}` : "",
+                        ].filter(Boolean).join(" · ")}
+                      </p>
+                    )}
                   </div>
                   <div className="flex flex-col items-end gap-2">
                     <span

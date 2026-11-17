@@ -86,7 +86,11 @@ export function TopBar({
     },
     "Detail Proyek KPBU": {
       title: "Proyek KPBU",
-      subtitle: "Tahapan, target, dan para pihak",
+      subtitle: "Tahapan, dokumen, jaminan, dan para pihak",
+    },
+    "Checklist Dokumen KPBU": {
+      title: "Checklist Dokumen KPBU",
+      subtitle: "Master dokumen wajib badan usaha per tahap",
     },
     "BIM / Digital Twin": {
       title: "BIM / Digital Twin",

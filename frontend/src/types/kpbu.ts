@@ -100,6 +100,12 @@ export interface KpbuProject {
   financial_close_actual: string | null;
   cod_target: string | null;
   cod_actual: string | null;
+  procurement_method: KpbuProcurementMethod | null;
+  procurement_reason: string;
+  agreement_signed_date: string | null;
+  financial_close_deadline: string | null;
+  financial_close_days_left: number | null;
+  financial_close_status: KpbuFinancialCloseStatus;
   org_unit_id: string | null;
   org_unit_name?: string;
   province: string;
@@ -161,6 +167,9 @@ export interface KpbuProjectRequest {
   concession_end?: string | null;
   financial_close_target?: string | null;
   cod_target?: string | null;
+  procurement_method?: KpbuProcurementMethod | null;
+  procurement_reason?: string;
+  agreement_signed_date?: string | null;
   org_unit_id?: string | null;
   province?: string;
   latitude?: number | null;
@@ -171,6 +180,8 @@ export interface KpbuTransitionRequest {
   to_stage: KpbuStage;
   date?: string;
   notes?: string;
+  override_document_check?: boolean;
+  override_reason?: string;
 }
 
 export interface KpbuStageMilestoneRequest {
@@ -196,4 +207,170 @@ export interface KpbuListFilter {
   stage?: string;
   sector?: string;
   search?: string;
+}
+
+// ── K1.5: document checklist, guarantees, procurement ───────────────────────
+
+export type KpbuProcurementMethod = "TENDER" | "PENUNJUKAN_LANGSUNG";
+export const KPBU_PROCUREMENT_LABEL: Record<KpbuProcurementMethod, string> = {
+  TENDER: "Tender (lelang)",
+  PENUNJUKAN_LANGSUNG: "Penunjukan Langsung",
+};
+
+export type KpbuFinancialCloseStatus = "NONE" | "ON_TRACK" | "WARNING" | "OVERDUE" | "ACHIEVED";
+
+export type KpbuDocCategory =
+  | "PRAKARSA"
+  | "PRAKUALIFIKASI"
+  | "PENAWARAN"
+  | "PENANDATANGANAN"
+  | "PEMBIAYAAN_PELAKSANAAN";
+export const KPBU_DOC_CATEGORY_LABEL: Record<KpbuDocCategory, string> = {
+  PRAKARSA: "A. Pengajuan Prakarsa",
+  PRAKUALIFIKASI: "B. Prakualifikasi",
+  PENAWARAN: "C. Penawaran",
+  PENANDATANGANAN: "D. Penetapan s.d. Penandatanganan",
+  PEMBIAYAAN_PELAKSANAAN: "E. Pembiayaan & Pelaksanaan",
+};
+
+export type KpbuAppliesTo = "ALL" | "SOLICITED" | "UNSOLICITED";
+export const KPBU_APPLIES_LABEL: Record<KpbuAppliesTo, string> = {
+  ALL: "Semua prakarsa",
+  SOLICITED: "Prakarsa Pemerintah",
+  UNSOLICITED: "Prakarsa Badan Usaha",
+};
+
+export type KpbuSourceStatus = "VERIFIED" | "SECONDARY" | "UNVERIFIED";
+export const KPBU_SOURCE_LABEL: Record<KpbuSourceStatus, string> = {
+  VERIFIED: "Terverifikasi (teks regulasi)",
+  SECONDARY: "Sumber sekunder",
+  UNVERIFIED: "Belum terverifikasi",
+};
+
+export type KpbuDocStatus = "MISSING" | "SUBMITTED" | "APPROVED" | "REJECTED";
+export const KPBU_DOC_STATUS_LABEL: Record<KpbuDocStatus, string> = {
+  MISSING: "Belum ada",
+  SUBMITTED: "Menunggu verifikasi",
+  APPROVED: "Disetujui",
+  REJECTED: "Ditolak",
+};
+
+export interface KpbuDocumentRequirement {
+  id: string;
+  code: string;
+  category: KpbuDocCategory;
+  name: string;
+  description: string;
+  applies_to: KpbuAppliesTo;
+  required_before_stage: KpbuStage | null;
+  is_mandatory: boolean;
+  legal_basis: string;
+  source_status: KpbuSourceStatus;
+  sort_order: number;
+  is_active: boolean;
+}
+
+export interface KpbuRequirementRequest {
+  code: string;
+  category: KpbuDocCategory;
+  name: string;
+  description?: string;
+  applies_to: KpbuAppliesTo;
+  required_before_stage: KpbuStage | null;
+  is_mandatory: boolean;
+  legal_basis?: string;
+  source_status: KpbuSourceStatus;
+  sort_order: number;
+  is_active: boolean;
+}
+
+export interface KpbuDocument {
+  id: string;
+  kpbu_project_id: string;
+  requirement_id: string | null;
+  name: string;
+  mime_type: string;
+  file_size: number;
+  document_number: string;
+  document_date: string | null;
+  notes: string;
+  status: Exclude<KpbuDocStatus, "MISSING">;
+  uploaded_by: string;
+  uploaded_at: string;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  review_notes: string;
+}
+
+export interface KpbuChecklistItem {
+  requirement: KpbuDocumentRequirement;
+  status: KpbuDocStatus;
+  documents: KpbuDocument[];
+}
+
+export interface KpbuChecklist {
+  items: KpbuChecklistItem[];
+  other_documents: KpbuDocument[];
+  initiative: KpbuInitiative;
+  summary: {
+    mandatory_total: number;
+    mandatory_approved: number;
+    pending_review: number;
+    blocking_next_stage: string[];
+    next_stage: KpbuStage | "";
+  };
+}
+
+export interface KpbuDocumentUpload {
+  file: File;
+  requirement_id?: string;
+  name?: string;
+  document_number?: string;
+  document_date?: string;
+  notes?: string;
+}
+
+export type KpbuGuaranteeType = "BID" | "PERFORMANCE" | "GOVERNMENT" | "OTHER";
+export const KPBU_GUARANTEE_TYPE_LABEL: Record<KpbuGuaranteeType, string> = {
+  BID: "Jaminan Penawaran",
+  PERFORMANCE: "Jaminan Pelaksanaan",
+  GOVERNMENT: "Penjaminan Pemerintah (PII)",
+  OTHER: "Lainnya",
+};
+
+export type KpbuGuaranteeStatus = "ACTIVE" | "RELEASED" | "CLAIMED" | "EXPIRED";
+export const KPBU_GUARANTEE_STATUS_LABEL: Record<KpbuGuaranteeStatus, string> = {
+  ACTIVE: "Aktif",
+  RELEASED: "Dikembalikan",
+  CLAIMED: "Dicairkan",
+  EXPIRED: "Kedaluwarsa",
+};
+
+export interface KpbuGuarantee {
+  id: string;
+  kpbu_project_id: string;
+  type: KpbuGuaranteeType;
+  issuer: string;
+  guarantee_number: string;
+  amount: number;
+  currency: string;
+  issued_date: string | null;
+  expiry_date: string | null;
+  status: KpbuGuaranteeStatus;
+  notes: string;
+  pct_of_investment: number | null;
+  exceeds_limit: boolean;
+  days_to_expiry: number | null;
+}
+
+export interface KpbuGuaranteeRequest {
+  type: KpbuGuaranteeType;
+  issuer?: string;
+  guarantee_number?: string;
+  amount: number;
+  currency?: string;
+  issued_date?: string | null;
+  expiry_date?: string | null;
+  status?: KpbuGuaranteeStatus;
+  notes?: string;
 }

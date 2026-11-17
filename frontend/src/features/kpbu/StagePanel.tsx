@@ -23,6 +23,9 @@ export function StagePanel({ detail, canWrite }: { detail: KpbuProjectDetail; ca
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [gated, setGated] = useState(false);
+  const [override, setOverride] = useState(false);
+  const [overrideReason, setOverrideReason] = useState("");
   const [editing, setEditing] = useState<KpbuStageMilestone | null>(null);
 
   const currentIdx = (KPBU_MAIN_STAGES as readonly string[]).indexOf(
@@ -31,19 +34,40 @@ export function StagePanel({ detail, canWrite }: { detail: KpbuProjectDetail; ca
   const finished = project.stage === "CLOSED";
 
   const transition = useMutation({
-    mutationFn: () => kpbuService.transition(project.id, { to_stage: toStage as KpbuStage, date, notes }),
+    mutationFn: () =>
+      kpbuService.transition(project.id, {
+        to_stage: toStage as KpbuStage,
+        date,
+        notes,
+        ...(override ? { override_document_check: true, override_reason: overrideReason.trim() } : {}),
+      }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["kpbu"] });
       setToStage("");
       setNotes("");
       setError(null);
+      setGated(false);
+      setOverride(false);
+      setOverrideReason("");
     },
-    onError: (err) => setError(kpbuErrorMessage(err, "Gagal mengubah tahap.")),
+    onError: (err) => {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      setGated(status === 409);
+      setError(
+        status === 409
+          ? `Dokumen wajib belum disetujui. ${kpbuErrorMessage(err, "")}. Lengkapi di Checklist Dokumen, atau lanjutkan dengan pengecualian beralasan.`
+          : kpbuErrorMessage(err, "Gagal mengubah tahap."),
+      );
+    },
   });
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
     if (!toStage) return;
+    if (override && !overrideReason.trim()) {
+      setError("Alasan pengecualian wajib diisi.");
+      return;
+    }
     transition.mutate();
   };
 
@@ -77,7 +101,7 @@ export function StagePanel({ detail, canWrite }: { detail: KpbuProjectDetail; ca
       {canWrite && allowed.length > 0 && (
         <form onSubmit={submit} className="mb-5 grid grid-cols-1 gap-3 rounded-lg bg-gray-50 p-3 sm:grid-cols-[1fr_10rem_1fr_auto] sm:items-end">
           <Field label="Pindah ke tahap">
-            <select className={inputCls} value={toStage} onChange={(e) => setToStage(e.target.value as KpbuStage)} aria-label="Tahap tujuan">
+            <select className={inputCls} value={toStage} onChange={(e) => { setToStage(e.target.value as KpbuStage); setGated(false); setOverride(false); setError(null); }} aria-label="Tahap tujuan">
               <option value="">— Pilih —</option>
               {allowed.map((s) => (
                 <option key={s} value={s}>
@@ -96,6 +120,17 @@ export function StagePanel({ detail, canWrite }: { detail: KpbuProjectDetail; ca
             {transition.isPending ? "Menyimpan..." : "Ubah Tahap"}
           </button>
           {error && <p className="text-sm text-red-600 sm:col-span-4">{error}</p>}
+          {gated && (
+            <div className="space-y-2 sm:col-span-4">
+              <label className="flex items-center gap-2 text-sm text-gray-700">
+                <input type="checkbox" checked={override} onChange={(e) => setOverride(e.target.checked)} />
+                Lanjutkan tanpa dokumen lengkap (tercatat di audit log)
+              </label>
+              {override && (
+                <input className={inputCls} value={overrideReason} onChange={(e) => setOverrideReason(e.target.value)} placeholder="Alasan pengecualian, cth. data migrasi proyek berjalan" />
+              )}
+            </div>
+          )}
         </form>
       )}
 

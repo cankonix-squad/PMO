@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/harmanto-49/cankora/internal/kpbu"
 	"log"
 	"os"
 	"strings"
@@ -538,6 +539,16 @@ func main() {
 		}
 	}
 	logger.Info("project categories seeded", zap.Int("count", len(categoryDefs)))
+
+	// ------------------------------------------------------------------
+	// 8. KPBU document checklist (KPBU-K1.5 — insert missing rows only;
+	//    admin edits and deletions are preserved)
+	// ------------------------------------------------------------------
+	nReq, err := kpbu.SeedDefaultRequirements(db.WithContext(ctx), org.ID)
+	if err != nil {
+		log.Fatalf("seed: kpbu document requirements: %v", err)
+	}
+	logger.Info("kpbu document requirements seeded", zap.Int("created", nReq))
 
 	logger.Info("seed completed successfully")
 }

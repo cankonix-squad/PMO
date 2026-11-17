@@ -126,108 +126,108 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-white lg:grid lg:grid-cols-[minmax(0,1.95fr)_minmax(420px,1fr)]">
-      <section className="relative hidden min-h-screen overflow-hidden lg:flex lg:flex-col lg:justify-between">
-        <Image
-          src="/images/cankora-dam-login.png"
-          alt="Bendungan dan waduk di kawasan pegunungan"
-          fill
-          priority
-          sizes="(min-width: 1024px) 66vw, 100vw"
-          className="object-cover object-center"
-        />
-        <div className="absolute inset-0 bg-[#052c58]/65" />
-        <div className="absolute inset-y-0 left-0 w-2 bg-[#f6c515]" />
+    <main className="min-h-screen bg-[#F4F6F8] lg:grid lg:grid-cols-[minmax(0,1.63fr)_minmax(0,1fr)]">
+      <section className="relative hidden min-h-screen overflow-hidden bg-white lg:flex lg:flex-col lg:justify-between">
+        <div className="absolute inset-0 bg-white" />
+        <svg className="absolute inset-0 h-full w-full opacity-[.075]" viewBox="0 0 1200 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs>
+            <pattern id="draft-hatch" width="12" height="12" patternTransform="rotate(28)" patternUnits="userSpaceOnUse"><path d="M0 0v12" stroke="#aeb6c0" strokeWidth="1" /></pattern>
+            <pattern id="draft-hatch-light" width="17" height="17" patternTransform="rotate(-22)" patternUnits="userSpaceOnUse"><path d="M0 0v17" stroke="#c0c6ce" strokeWidth=".8" /></pattern>
+          </defs>
+          <g fill="none" stroke="#8c97a5" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            {/* Sparse structural sketch, kept toward the open upper and right areas */}
+            <path d="M390 470 490 95l265-35 94 410M422 470 512 108l224-29 79 391M452 470 535 121l187-24 65 373" />
+            <path d="M492 100 503 470M574 88 578 470M656 76 650 470M738 92 728 470M820 172 806 470" />
+            <path d="m492 172 350-42M476 242l385-47M460 312l420-53M442 386l458-60" />
+            {/* Soft hand-drawn contour strokes */}
+            <path d="M-30 250q55-26 93 3t77-5q37-22 76 7t72 0M-20 276q58-20 94 7t78-4q39-20 77 8t70 1" />
+            <path d="M914 64q32 14 48 1t34 17q19 24 45 8t36 22q14 26 47 12t58 29M904 84q33 12 49 0t35 18q19 23 46 7t36 23q14 25 47 11t59 30" />
+            {/* One small hatch detail */}
+            <path d="M918 430q46-24 86-5t76-5l-12 38q-53 13-91-8t-64 14z" fill="url(#draft-hatch)" stroke="none" />
+            <path d="M112 665h690M112 659v12M802 659v12" strokeDasharray="3 7" />
+          </g>
+        </svg>
+        <div className="absolute inset-x-0 bottom-0 h-[28%] bg-gradient-to-t from-[#17385D]/[.035] to-transparent" />
+        <div className="absolute inset-y-0 left-0 w-1.5 bg-[#EBAA16]" />
 
-        <header className="relative z-10 flex items-center gap-4 px-12 pt-10 xl:px-16 xl:pt-12">
-          <BrandMark />
-          <div className="text-sm font-semibold uppercase leading-snug text-white xl:text-base">
-            <p>Kementerian Pekerjaan Umum</p>
-            <p>Direktorat Jenderal Sumber Daya Air</p>
+        <header className="relative z-10 flex items-center justify-between px-10 pt-9 xl:px-14 xl:pt-11">
+          <div className="flex items-center gap-4">
+            <BrandMark />
+            <div className="text-xs font-semibold uppercase leading-snug tracking-[.12em] text-[#17385D] xl:text-sm">
+              <p>Kementerian Pekerjaan Umum</p>
+            </div>
+          </div>
+          <div className="rounded-full border border-[#17385D]/10 bg-white/80 px-4 py-2 text-xs font-medium tracking-wide text-[#17385D]/70">
+            PROJECT MANAGEMENT OFFICE
           </div>
         </header>
 
-        <div className="relative z-10 max-w-4xl px-12 xl:px-16">
-          <p className="mb-4 text-sm font-semibold uppercase text-[#f6c515]">
-            PMO Control Tower
+        <div className="relative z-10 max-w-4xl px-10 pb-14 xl:px-14">
+          <p className="mb-5 text-sm font-semibold uppercase tracking-[.18em] text-[#A77508]">
+            PMO DIGITAL PLATFORM
           </p>
-          <h1 className="text-5xl font-bold leading-tight text-white xl:text-6xl">
-            PMO Digital Platform
+          <h1 className="max-w-3xl text-5xl font-bold leading-[1.04] tracking-tight text-[#17385D] xl:text-6xl 2xl:text-7xl">
+            Pantau proyek.<br /><span className="text-[#EBAA16]">Bangun dampak.</span>
           </h1>
-          <p className="mt-3 max-w-3xl text-lg text-white/85 xl:text-xl">
-            Project Management Office - Direktorat Jenderal Sumber Daya Air
+          <p className="mt-5 max-w-2xl text-base leading-7 text-slate-600 xl:text-lg">
+            PMO Digital Platform menyatukan data, progres, dan risiko proyek dalam satu ruang kendali untuk keputusan yang lebih cepat.
           </p>
-          <div className="my-7 h-1 w-20 bg-[#f6c515]" />
-          <p className="max-w-xl text-2xl font-semibold leading-snug text-white xl:text-3xl">
-            Data akurat. Proyek terkendali. Keputusan lebih cepat.
-          </p>
-          <p className="mt-4 max-w-xl text-sm leading-6 text-white/75 xl:text-base">
-            Platform terintegrasi untuk monitoring proyek, peringatan dini, dan
-            pengambilan keputusan strategis pengelolaan sumber daya air.
-          </p>
+          <div className="mt-8 h-1 w-16 rounded-full bg-[#EBAA16]" />
+          <div className="mt-7 flex flex-wrap items-center gap-x-8 gap-y-3 text-sm font-medium text-[#17385D]/75">
+            <span>Monitoring terintegrasi</span>
+            <span>Peringatan dini</span>
+            <span>Keputusan berbasis data</span>
+          </div>
         </div>
 
-        <div className="relative z-10 grid grid-cols-3 gap-5 border-t border-white/20 bg-[#052c58]/55 px-12 py-7 xl:px-16">
+        <div className="relative z-10 grid grid-cols-3 gap-5 border-t border-[#17385D]/10 bg-white/80 px-10 py-6 xl:px-14">
           {platformBenefits.map(({ icon: Icon, title, description }) => (
             <div key={title} className="flex min-w-0 gap-3">
-              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-md border border-[#f6c515]/70 text-[#f6c515]">
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-[#EBAA16]/50 bg-white text-[#A77508]">
                 <Icon className="h-5 w-5" aria-hidden="true" />
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-white">{title}</p>
-                <p className="mt-1 text-xs leading-5 text-white/70">{description}</p>
+                <p className="text-sm font-semibold text-[#17385D]">{title}</p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">{description}</p>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="flex min-h-screen flex-col bg-[#f7f9fc] lg:justify-center lg:px-8 xl:px-12">
-        <div className="relative h-48 overflow-hidden lg:hidden">
-          <Image
-            src="/images/cankora-dam-login.png"
-            alt="Bendungan dan waduk di kawasan pegunungan"
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-center"
-          />
-          <div className="absolute inset-0 bg-[#052c58]/70" />
+      <section className="relative flex min-h-screen flex-col bg-[#F4F6F8] lg:justify-center lg:px-7 xl:px-10 2xl:px-14">
+        <div className="relative h-48 overflow-hidden bg-[#17365b] lg:hidden">
+          <div className="absolute -right-8 -top-24 h-64 w-64 rounded-full border border-white/15" />
+          <div className="absolute -right-2 -top-16 h-48 w-48 rounded-full border border-[#f4b323]/35" />
           <div className="relative z-10 flex h-full flex-col justify-between p-5">
             <div className="flex items-center gap-3">
               <BrandMark compact />
               <div className="text-xs font-semibold uppercase leading-snug text-white">
                 <p>Kementerian Pekerjaan Umum</p>
-                <p>Ditjen Sumber Daya Air</p>
               </div>
             </div>
             <div>
               <p className="text-2xl font-bold text-white">PMO Digital Platform</p>
-              <p className="mt-1 text-sm text-white/75">PMO National Project Control Tower</p>
+              <p className="mt-1 text-sm text-white/75">Kementerian Pekerjaan Umum</p>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-1 items-center justify-center px-5 py-8 lg:flex-none lg:px-0 lg:py-0">
-          <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white px-6 py-8 shadow-[0_18px_50px_rgba(15,45,85,0.12)] sm:px-9 sm:py-10">
-            <div className="mb-8 text-center">
-              <div className="mx-auto mb-5 hidden justify-center lg:flex">
-                <div className="overflow-hidden rounded-md bg-white p-2 shadow-sm ring-1 ring-slate-200">
-                  <Image
-                    src="/images/logo-kemenpu.png"
-                    alt="Logo Kementerian Pekerjaan Umum"
-                    width={110}
-                    height={110}
-                    priority
-                    className="h-auto w-auto object-contain"
-                  />
+        <div className="relative z-10 flex flex-1 items-center justify-center px-5 py-6 lg:px-5 lg:py-4">
+          <div className="w-full max-w-[440px] rounded-[24px] border border-white bg-white/90 px-6 py-6 shadow-[0_20px_56px_rgba(23,56,93,0.08)] sm:px-9 sm:py-7">
+            <div className="mb-6">
+              <div className="mb-6 flex items-center gap-3">
+                <div className="grid h-11 w-11 place-items-center overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
+                  <Image src="/images/logo-kemenpu.png" alt="Logo Kementerian Pekerjaan Umum" width={40} height={40} priority className="h-10 w-10 object-contain" />
+                </div>
+                <div className="text-left">
+                  <p className="text-[11px] font-bold uppercase tracking-[.14em] text-[#17385D]">Kementerian PU</p>
+                  <p className="mt-0.5 text-xs text-[#64748B]">PMO Digital Platform</p>
                 </div>
               </div>
-              <h2 className="text-2xl font-bold text-[#082e63]">Masuk ke Sistem</h2>
-              <div className="mx-auto mt-3 h-1 w-12 bg-[#f6c515]" />
-              <p className="mt-4 text-sm text-slate-500">
-                Gunakan akun PMO Anda untuk melanjutkan
-              </p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[.13em] text-[#A77508]">Selamat datang kembali</p>
+              <h2 className="whitespace-nowrap text-[26px] font-bold tracking-[-.04em] text-[#17385D]">Masuk ke akun Anda</h2>
+              <p className="mt-1.5 text-sm leading-5 text-[#64748B]">Gunakan akun PMO untuk melanjutkan.</p>
             </div>
 
             {serverError && (
@@ -241,7 +241,7 @@ export default function LoginPage() {
 
             <form
               onSubmit={handleSubmit(onSubmit)}
-              className="space-y-5"
+              className="space-y-3.5"
               method="post"
               noValidate
             >
@@ -257,9 +257,9 @@ export default function LoginPage() {
                     autoComplete="email"
                     {...register("email")}
                     className={cn(
-                      "h-12 w-full rounded-md border bg-white pl-11 pr-4 text-sm text-slate-900",
-                      "placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1554b8]/25",
-                      errors.email ? "border-red-400" : "border-slate-300 focus:border-[#1554b8]"
+                      "h-[52px] w-full rounded-xl border bg-white pl-11 pr-4 text-sm text-slate-900 transition-colors",
+                      "placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-[#17385D]/[.08]",
+                      errors.email ? "border-red-400" : "border-slate-300 focus:border-[#17385D]/40"
                     )}
                     placeholder="nama@pu.go.id"
                   />
@@ -281,9 +281,9 @@ export default function LoginPage() {
                     autoComplete="current-password"
                     {...register("password")}
                     className={cn(
-                      "h-12 w-full rounded-md border bg-white pl-11 pr-12 text-sm text-slate-900",
-                      "placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1554b8]/25",
-                      errors.password ? "border-red-400" : "border-slate-300 focus:border-[#1554b8]"
+                      "h-[52px] w-full rounded-xl border bg-white pl-11 pr-12 text-sm text-slate-900 transition-colors",
+                      "placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-[#17385D]/[.08]",
+                      errors.password ? "border-red-400" : "border-slate-300 focus:border-[#17385D]/40"
                     )}
                     placeholder="Masukkan password"
                   />
@@ -324,8 +324,8 @@ export default function LoginPage() {
                 type="submit"
                 disabled={isSubmitting}
                 className={cn(
-                  "inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-[#0d4ba8] px-4 text-sm font-semibold text-white",
-                  "transition-colors hover:bg-[#083b86] focus:outline-none focus:ring-2 focus:ring-[#1554b8] focus:ring-offset-2",
+                  "inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-[#17385D] px-4 text-sm font-semibold text-white shadow-[0_8px_18px_rgba(23,56,93,0.16)]",
+                  "transition-all hover:-translate-y-0.5 hover:bg-[#1E416B] hover:shadow-[0_12px_24px_rgba(23,56,93,0.2)] focus:outline-none focus:ring-4 focus:ring-[#17385D]/20 focus:ring-offset-2",
                   "disabled:cursor-not-allowed disabled:opacity-60"
                 )}
               >
@@ -334,7 +334,7 @@ export default function LoginPage() {
               </button>
             </form>
 
-            <div className="mt-7 flex items-center justify-center gap-2 border-t border-slate-100 pt-5 text-xs text-slate-500">
+            <div className="mt-5 flex items-center justify-center gap-2 border-t border-slate-100 pt-4 text-xs text-slate-500">
               <ShieldCheck className="h-4 w-4 text-slate-600" aria-hidden="true" />
               <span>Akses terbatas untuk pengguna berwenang</span>
             </div>

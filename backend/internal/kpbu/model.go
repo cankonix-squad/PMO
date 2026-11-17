@@ -83,6 +83,9 @@ type Project struct {
 	FinancialCloseActual *types.FlexTime `json:"financial_close_actual"`
 	CODTarget            *types.FlexTime `gorm:"column:cod_target" json:"cod_target"`
 	CODActual            *types.FlexTime `gorm:"column:cod_actual" json:"cod_actual"`
+	ProcurementMethod    *string         `json:"procurement_method"`
+	ProcurementReason    string          `json:"procurement_reason"`
+	AgreementSignedDate  *types.FlexTime `json:"agreement_signed_date"`
 	OrgUnitID            *uuid.UUID      `gorm:"type:uuid" json:"org_unit_id"`
 	RegionID             *uuid.UUID      `gorm:"type:uuid" json:"region_id"`
 	RiverBasinID         *uuid.UUID      `gorm:"type:uuid" json:"river_basin_id"`
@@ -99,6 +102,12 @@ type Project struct {
 	StageDelayDays  int             `gorm:"-" json:"stage_delay_days"`
 	StageIsDelayed  bool            `gorm:"-" json:"stage_is_delayed"`
 	StagePlannedEnd *types.FlexTime `gorm:"-" json:"stage_planned_end"`
+
+	// Financial close deadline = agreement signed + 12 months (Perpres 38/2015 Ps.42).
+	FinancialCloseDeadline *types.FlexTime `gorm:"-" json:"financial_close_deadline"`
+	FinancialCloseDaysLeft *int            `gorm:"-" json:"financial_close_days_left"`
+	// NONE | ON_TRACK | WARNING | OVERDUE | ACHIEVED
+	FinancialCloseStatus string `gorm:"-" json:"financial_close_status"`
 }
 
 func (Project) TableName() string { return "kpbu_projects" }
@@ -163,6 +172,9 @@ type ProjectRequest struct {
 	ConcessionEnd        *types.FlexTime `json:"concession_end"`
 	FinancialCloseTarget *types.FlexTime `json:"financial_close_target"`
 	CODTarget            *types.FlexTime `json:"cod_target"`
+	ProcurementMethod    *string         `json:"procurement_method"`
+	ProcurementReason    string          `json:"procurement_reason"`
+	AgreementSignedDate  *types.FlexTime `json:"agreement_signed_date"`
 	ProjectID            *uuid.UUID      `json:"project_id"`
 	OrgUnitID            *uuid.UUID      `json:"org_unit_id"`
 	Province             string          `json:"province" binding:"max=100"`
@@ -175,6 +187,10 @@ type TransitionRequest struct {
 	ToStage string          `json:"to_stage" binding:"required"`
 	Date    *types.FlexTime `json:"date"`
 	Notes   string          `json:"notes"`
+	// OverrideDocumentCheck skips the document gate; OverrideReason is required
+	// and recorded in the audit log.
+	OverrideDocumentCheck bool   `json:"override_document_check"`
+	OverrideReason        string `json:"override_reason"`
 }
 
 // StageMilestoneRequest upserts planned/actual dates for one stage.

@@ -14,13 +14,18 @@ import (
 
 // Service implements KPBU K1 business rules. Every query is tenant-scoped.
 type Service struct {
-	db  *gorm.DB
-	log *zap.Logger
-	now func() time.Time
+	db          *gorm.DB
+	log         *zap.Logger
+	now         func() time.Time
+	storageRoot string
+	maxSize     int64
 }
 
-func NewService(db *gorm.DB, log *zap.Logger) *Service {
-	return &Service{db: db, log: log, now: time.Now}
+func NewService(db *gorm.DB, log *zap.Logger, storageRoot string, maxSize int64) *Service {
+	if maxSize <= 0 {
+		maxSize = 20 << 20
+	}
+	return &Service{db: db, log: log, now: time.Now, storageRoot: storageRoot, maxSize: maxSize}
 }
 
 func isUniqueViolation(err error) bool {
@@ -85,6 +90,19 @@ func (s *Service) validateProject(orgID uuid.UUID, req *ProjectRequest) error {
 	if !validReturnSchemes[req.ReturnScheme] {
 		return invalid("invalid return_scheme")
 	}
+	if req.ProcurementMethod != nil {
+		m := strings.ToUpper(strings.TrimSpace(*req.ProcurementMethod))
+		if m == "" {
+			req.ProcurementMethod = nil
+		} else if !validProcMethod[m] {
+			return invalid("invalid procurement_method")
+		} else {
+			req.ProcurementMethod = &m
+		}
+	}
+	if req.ProcurementMethod != nil && *req.ProcurementMethod == "PENUNJUKAN_LANGSUNG" && strings.TrimSpace(req.ProcurementReason) == "" {
+		return invalid("procurement_reason is required for direct appointment (Perpres 38/2015 Ps.39)")
+	}
 	if (req.Latitude == nil) != (req.Longitude == nil) {
 		return invalid("latitude and longitude must be provided together")
 	}
@@ -132,6 +150,9 @@ func applyProject(p *Project, req ProjectRequest) {
 	p.ConcessionEnd = req.ConcessionEnd
 	p.FinancialCloseTarget = req.FinancialCloseTarget
 	p.CODTarget = req.CODTarget
+	p.ProcurementMethod = req.ProcurementMethod
+	p.ProcurementReason = strings.TrimSpace(req.ProcurementReason)
+	p.AgreementSignedDate = req.AgreementSignedDate
 	p.ProjectID = req.ProjectID
 	p.OrgUnitID = req.OrgUnitID
 	p.Province = strings.TrimSpace(req.Province)
@@ -186,6 +207,7 @@ func (s *Service) enrich(orgID uuid.UUID, list []Project) error {
 			p.StageDelayDays = delay(m.PlannedEnd, m.ActualEnd, now)
 			p.StageIsDelayed = p.StageDelayDays > 0
 		}
+		financialCloseStatus(p, now)
 	}
 	return nil
 }
@@ -322,6 +344,15 @@ func (s *Service) Transition(orgID, id uuid.UUID, req TransitionRequest) (*Proje
 	if req.Date != nil && !req.Date.IsZero() {
 		date = *req.Date
 	}
+	if req.OverrideDocumentCheck {
+		if strings.TrimSpace(req.OverrideReason) == "" {
+			return nil, from, invalid("override_reason is required when overriding the document check")
+		}
+	} else if missing, err := s.missingForStage(orgID, p, to); err != nil {
+		return nil, from, err
+	} else if len(missing) > 0 {
+		return nil, from, &GateError{Stage: to, Missing: missing}
+	}
 
 	err = s.db.Transaction(func(tx *gorm.DB) error {
 		if isMainStage(from) && to != StageOnHold {
@@ -340,6 +371,10 @@ func (s *Service) Transition(orgID, id uuid.UUID, req TransitionRequest) (*Proje
 			p.PreviousStage = &prev
 		case from == StageOnHold:
 			p.PreviousStage = nil
+		}
+		if to == StageContractSigned && (p.AgreementSignedDate == nil || p.AgreementSignedDate.IsZero()) {
+			d := date
+			p.AgreementSignedDate = &d
 		}
 		if to == StageFinancialClose {
 			d := date

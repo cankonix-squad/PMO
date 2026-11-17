@@ -3,11 +3,11 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: "--font-pu" });
 
 export const metadata: Metadata = {
-  title: "PMO — Enterprise Operations Platform",
-  description: "Enterprise project management and operations monitoring platform by Cankonix",
+  title: "PMO — Kementerian Pekerjaan Umum",
+  description: "Platform monitoring dan pengendalian proyek Kementerian Pekerjaan Umum",
   icons: {
     icon: "/images/logo-kemenpu.png",
     apple: "/images/logo-kemenpu.png",
@@ -20,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="id" suppressHydrationWarning>
       <body className={inter.className}>
         <Providers>{children}</Providers>
       </body>

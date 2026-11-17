@@ -19,8 +19,8 @@ type Handler struct {
 	log   *zap.Logger
 }
 
-func NewHandler(db *gorm.DB, auditWriter *audit.Writer, log *zap.Logger) *Handler {
-	return &Handler{svc: NewService(db, log), audit: auditWriter, log: log}
+func NewHandler(db *gorm.DB, storageRoot string, maxSize int64, auditWriter *audit.Writer, log *zap.Logger) *Handler {
+	return &Handler{svc: NewService(db, log, storageRoot, maxSize), audit: auditWriter, log: log}
 }
 
 func claimsFromGin(c *gin.Context) *auth.Claims {
@@ -55,6 +55,7 @@ func (h *Handler) record(c *gin.Context, claims *auth.Claims, action, entityType
 // writeErr maps service errors to HTTP responses.
 func (h *Handler) writeErr(c *gin.Context, err error, notFoundMsg string) {
 	var ve *ValidationError
+	var ge *GateError
 	switch {
 	case errors.Is(err, ErrNotFound):
 		response.NotFound(c, notFoundMsg)
@@ -66,6 +67,8 @@ func (h *Handler) writeErr(c *gin.Context, err error, notFoundMsg string) {
 		response.BadRequest(c, "stage transition not allowed")
 	case errors.As(err, &ve):
 		response.BadRequest(c, ve.Msg)
+	case errors.As(err, &ge):
+		response.Conflict(c, ge.Error())
 	default:
 		h.log.Error("kpbu: internal error", zap.Error(err))
 		response.InternalError(c)
@@ -205,7 +208,8 @@ func (h *Handler) TransitionProject(c *gin.Context) {
 		return
 	}
 	h.record(c, claims, "kpbu_project.transitioned", "kpbu_project", p.ID, p.Code+" — "+p.Name,
-		gin.H{"from_stage": from, "to_stage": p.Stage, "date": req.Date, "notes": req.Notes})
+		gin.H{"from_stage": from, "to_stage": p.Stage, "date": req.Date, "notes": req.Notes,
+			"override_document_check": req.OverrideDocumentCheck, "override_reason": req.OverrideReason})
 	response.OK(c, "KPBU project stage updated", p)
 }
 

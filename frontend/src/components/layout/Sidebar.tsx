@@ -130,6 +130,7 @@ const settingsItems: NavItem[] = [
   { label: "DAS", href: "/settings/river-basins", icon: MapPinned, roles: PMO_AND_ABOVE },
   { label: "Kategori Proyek", href: "/settings/project-categories", icon: Tag, roles: PMO_AND_ABOVE },
   { label: "Akun Penyedia", href: "/settings/vendor-accounts", icon: KeyRound, roles: ADMIN_ROLES },
+  { label: "Checklist Dokumen KPBU", href: "/settings/kpbu-requirements", icon: Tag, roles: PMO_AND_ABOVE },
 ];
 
 /** Contractor accounts see only the contractor portal. */

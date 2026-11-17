@@ -460,6 +460,23 @@ func New(deps *Dependencies) *gin.Engine {
 	kpbuGroup.POST("/:id/parties", kpbuPerm(constants.ActionCreate), deps.KPBUHandler.CreateParty)
 	kpbuGroup.PUT("/:id/parties/:partyID", kpbuPerm(constants.ActionUpdate), deps.KPBUHandler.UpdateParty)
 	kpbuGroup.DELETE("/:id/parties/:partyID", kpbuPerm(constants.ActionDelete), deps.KPBUHandler.DeleteParty)
+	// KPBU-K1.5: document checklist, documents with verification, guarantees
+	kpbuGroup.GET("/:id/checklist", kpbuPerm(constants.ActionView), deps.KPBUHandler.GetChecklist)
+	kpbuGroup.POST("/:id/documents", kpbuPerm(constants.ActionCreate), deps.KPBUHandler.UploadDocument)
+	kpbuGroup.GET("/:id/documents/:docID/download", kpbuPerm(constants.ActionView), deps.KPBUHandler.DownloadDocument)
+	kpbuGroup.POST("/:id/documents/:docID/review", kpbuPerm(constants.ActionApprove), deps.KPBUHandler.ReviewDocument)
+	kpbuGroup.DELETE("/:id/documents/:docID", kpbuPerm(constants.ActionDelete), deps.KPBUHandler.DeleteDocument)
+	kpbuGroup.GET("/:id/guarantees", kpbuPerm(constants.ActionView), deps.KPBUHandler.ListGuarantees)
+	kpbuGroup.POST("/:id/guarantees", kpbuPerm(constants.ActionCreate), deps.KPBUHandler.CreateGuarantee)
+	kpbuGroup.PUT("/:id/guarantees/:guaranteeID", kpbuPerm(constants.ActionUpdate), deps.KPBUHandler.UpdateGuarantee)
+	kpbuGroup.DELETE("/:id/guarantees/:guaranteeID", kpbuPerm(constants.ActionDelete), deps.KPBUHandler.DeleteGuarantee)
+
+	kpbuReq := v1.Group("/kpbu/document-requirements")
+	kpbuReq.Use(middleware.AuthRequired(deps.TokenSvc, deps.AuthSvc))
+	kpbuReq.GET("", kpbuPerm(constants.ActionView), deps.KPBUHandler.ListRequirements)
+	kpbuReq.POST("", kpbuPerm(constants.ActionCreate), deps.KPBUHandler.CreateRequirement)
+	kpbuReq.PUT("/:reqID", kpbuPerm(constants.ActionUpdate), deps.KPBUHandler.UpdateRequirement)
+	kpbuReq.DELETE("/:reqID", kpbuPerm(constants.ActionDelete), deps.KPBUHandler.DeleteRequirement)
 
 	// Contractor portal — VENDOR-PORTAL-001. Vendor-side routes additionally
 	// require the caller to be linked to a vendor (users.vendor_id) and only

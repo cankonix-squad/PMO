@@ -7,6 +7,8 @@ import { kpbuErrorMessage, kpbuService } from "@/services/kpbu.service";
 import { orgUnitService } from "@/services/org-unit.service";
 import {
   KPBU_INITIATIVE_LABEL,
+  KPBU_PROCUREMENT_LABEL,
+  type KpbuProcurementMethod,
   KPBU_RETURN_SCHEME_LABEL,
   KPBU_SECTOR_LABEL,
   type KpbuInitiative,
@@ -42,10 +44,16 @@ const schema = z
     concession_end: z.string(),
     financial_close_target: z.string(),
     cod_target: z.string(),
+    procurement_method: z.string(),
+    procurement_reason: z.string(),
+    agreement_signed_date: z.string(),
     org_unit_id: z.string(),
     province: z.string().trim().max(100),
     latitude: optionalNumber(-90, 90, "Latitude harus antara -90 dan 90"),
     longitude: optionalNumber(-180, 180, "Longitude harus antara -180 dan 180"),
+  })
+  .refine((v) => v.procurement_method !== "PENUNJUKAN_LANGSUNG" || v.procurement_reason.trim() !== "", {
+    message: "Alasan penunjukan langsung wajib diisi (Perpres 38/2015 Ps.39)",
   })
   .refine((v) => (v.latitude === "") === (v.longitude === ""), {
     message: "Latitude dan longitude harus diisi berpasangan",
@@ -72,6 +80,9 @@ function initial(p?: KpbuProject): FormValues {
     concession_end: toDateInput(p?.concession_end),
     financial_close_target: toDateInput(p?.financial_close_target),
     cod_target: toDateInput(p?.cod_target),
+    procurement_method: p?.procurement_method ?? "",
+    procurement_reason: p?.procurement_reason ?? "",
+    agreement_signed_date: toDateInput(p?.agreement_signed_date),
     org_unit_id: p?.org_unit_id ?? "",
     province: p?.province ?? "",
     latitude: p?.latitude != null ? String(p.latitude) : "",
@@ -99,6 +110,9 @@ function toPayload(v: FormValues): KpbuProjectRequest {
     concession_end: strOrNull(v.concession_end),
     financial_close_target: strOrNull(v.financial_close_target),
     cod_target: strOrNull(v.cod_target),
+    procurement_method: (strOrNull(v.procurement_method) as KpbuProcurementMethod | null),
+    procurement_reason: v.procurement_reason.trim(),
+    agreement_signed_date: strOrNull(v.agreement_signed_date),
     org_unit_id: strOrNull(v.org_unit_id),
     province: v.province,
     latitude: numOrNull(v.latitude),
@@ -203,6 +217,22 @@ export function ProjectFormModal({ project, onClose, onSaved }: { project?: Kpbu
           <Field label="Target COD (mulai operasi)">
             <input className={inputCls} type="date" value={values.cod_target} onChange={set("cod_target")} />
           </Field>
+          <Field label="Metode Pengadaan BUP">
+            <select className={inputCls} value={values.procurement_method} onChange={set("procurement_method")}>
+              <option value="">— Belum ditetapkan —</option>
+              {Object.entries(KPBU_PROCUREMENT_LABEL).map(([k, l]) => (
+                <option key={k} value={k}>{l}</option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Tanggal Penandatanganan Perjanjian KPBU">
+            <input className={inputCls} type="date" value={values.agreement_signed_date} onChange={set("agreement_signed_date")} />
+          </Field>
+          {values.procurement_method === "PENUNJUKAN_LANGSUNG" && (
+            <Field label="Alasan Penunjukan Langsung (Perpres 38/2015 Ps.39)" required className="sm:col-span-2">
+              <textarea className={textareaCls} rows={2} value={values.procurement_reason} onChange={set("procurement_reason")} />
+            </Field>
+          )}
         </section>
 
         <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">

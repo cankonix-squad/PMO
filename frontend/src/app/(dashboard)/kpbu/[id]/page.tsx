@@ -11,8 +11,10 @@ import { useAuthStore } from "@/store/auth.store";
 import { ProjectFormModal } from "@/features/kpbu/ProjectFormModal";
 import { StagePanel } from "@/features/kpbu/StagePanel";
 import { PartiesPanel } from "@/features/kpbu/PartiesPanel";
+import { DocumentsPanel, FinancialCloseBanner } from "@/features/kpbu/DocumentsPanel";
+import { GuaranteesPanel } from "@/features/kpbu/GuaranteesPanel";
 import { btnSecondary, fmtDate, fmtRupiahShort, StageBadge } from "@/features/kpbu/ui";
-import { KPBU_INITIATIVE_LABEL, KPBU_RETURN_SCHEME_LABEL, KPBU_SECTOR_LABEL } from "@/types/kpbu";
+import { KPBU_INITIATIVE_LABEL, KPBU_PROCUREMENT_LABEL, KPBU_RETURN_SCHEME_LABEL, KPBU_SECTOR_LABEL } from "@/types/kpbu";
 
 const WRITE_ROLES = ["SUPER_ADMIN", "ADMIN", "PMO", "PROJECT_MANAGER"];
 const DELETE_ROLES = ["SUPER_ADMIN", "ADMIN", "PMO"];
@@ -87,6 +89,8 @@ export default function KpbuDetailPage() {
               {deleteError && <p className="w-full text-sm text-red-600">{deleteError}</p>}
             </div>
 
+            <FinancialCloseBanner status={p.financial_close_status} deadline={p.financial_close_deadline} daysLeft={p.financial_close_days_left} />
+
             <div className="grid grid-cols-2 gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm md:grid-cols-4">
               <Info label="Sektor" value={KPBU_SECTOR_LABEL[p.sector] ?? p.sector} />
               <Info label="Nilai Investasi" value={fmtRupiahShort(p.investment_value)} />
@@ -94,6 +98,8 @@ export default function KpbuDetailPage() {
               <Info label="Prakarsa" value={KPBU_INITIATIVE_LABEL[p.initiative] ?? p.initiative} />
               <Info label="PJPK" value={p.pjpk_name || "—"} sub={p.pjpk_unit} />
               <Info label="Masa Konsesi" value={p.concession_years ? `${p.concession_years} tahun` : "—"} sub={p.concession_start ? `${fmtDate(p.concession_start)} – ${fmtDate(p.concession_end)}` : undefined} />
+              <Info label="Metode Pengadaan" value={p.procurement_method ? KPBU_PROCUREMENT_LABEL[p.procurement_method] : "—"} sub={p.procurement_reason || undefined} />
+              <Info label="Perjanjian KPBU Ditandatangani" value={fmtDate(p.agreement_signed_date)} sub={p.financial_close_deadline ? `Batas financial close ${fmtDate(p.financial_close_deadline)}` : undefined} />
               <Info label="Financial Close" value={p.financial_close_actual ? fmtDate(p.financial_close_actual) : "Belum"} sub={`Target ${fmtDate(p.financial_close_target)}`} />
               <Info label="COD (mulai operasi)" value={p.cod_actual ? fmtDate(p.cod_actual) : "Belum"} sub={`Target ${fmtDate(p.cod_target)}`} />
               <Info label="Balai / Unit" value={p.org_unit_name || "—"} />
@@ -102,10 +108,12 @@ export default function KpbuDetailPage() {
             </div>
 
             <StagePanel detail={data} canWrite={canWrite} />
+            <DocumentsPanel projectId={p.id} canWrite={canWrite} canReview={canWrite} canDelete={canWrite} />
+            <GuaranteesPanel projectId={p.id} canWrite={canWrite} canDelete={canDelete} />
             <PartiesPanel projectId={p.id} parties={data.parties} canWrite={canWrite} />
 
             <p className="text-xs text-gray-400">
-              Modul KPBU fase K1: data proyek, tahapan, dan para pihak. Dukungan pemerintah, Availability Payment, dan KPI layanan menyusul di fase K2–K3.
+              Modul KPBU fase K1–K1.5: data proyek, tahapan, para pihak, checklist dokumen badan usaha, dan jaminan. Dukungan pemerintah, Availability Payment, dan KPI layanan menyusul di fase K2–K3.
             </p>
           </>
         )}

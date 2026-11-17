@@ -4,13 +4,60 @@
 
 > **IMPORTANT READING RULE:** When the user says "baca CLAUDE.md", "read CLAUDE.md", "cek CLAUDE.md", or equivalent, automatically read these core docs too before coding: `docs/planning/DEVELOPMENT-BACKLOG.md`, `docs/planning/PHASED-IMPLEMENTATION-PLAN.md`, `docs/architecture/SRS.md`, `docs/architecture/ARCHITECTURE.md`, `docs/architecture/ERD-CONCEPTUAL.md`, `docs/planning/IMPLEMENTATION-GAP-ANALYSIS.md`, `docs/architecture/PERMISSION-MATRIX.md`, `docs/uat/UAT-DEMO-GUIDE.md`, `docs/uat/UAT-FINAL-CHECKLIST.md`, and `docs/uat/RELEASE-CANDIDATE-RUNBOOK.md`. Start from each document's newest status/header, identify current project status, last Done ticket, next planned ticket, blockers, explicit prohibitions, and docs read. Conflict priority: `CLAUDE.md` > `docs/planning/DEVELOPMENT-BACKLOG.md` > `docs/planning/PHASED-IMPLEMENTATION-PLAN.md` > domain docs. Do not start coding until the latest status, blockers, known limitations, and rules such as "IoT Future/Last" are understood.
 
+> **STATUS (2026-11-17 — GIS, KPBU K1, Portal Kontraktor):** Newest work, all pushed to `main` and auto-deployed to production.
+> - **GIS** (`c6a92ea`): project location fields are editable, and the map is full width without the project list.
+> - **KPBU grand design** (`fbd5f54`): `docs/planning/KPBU-GRAND-DESIGN.md`.
+> - **KPBU K1** (`b0e2d77` + fix `f4ce03f`):
+>   - Module `internal/kpbu`: stage FSM IDENTIFIED→…→CLOSED, stage milestones (target/actual + delay), and parties (PJPK/BUP/SPONSOR/LENDER/GUARANTOR/…).
+>   - Initiative field `SOLICITED`/`UNSOLICITED`. Frontend `/kpbu`.
+>   - **K1 did NOT implement per-stage documents** even though the grand design lists them.
+>   - Tailwind `content` now includes `./src/features/**`.
+> - **VENDOR-PORTAL-001** (`3b0e313`): contractor portal for APBN projects.
+>   - Migration `000041`. Module `internal/project/vendorportal`.
+>   - Role `VENDOR`: permission `vendor_portal` only, scoped to contracts where `contracts.vendor_id = users.vendor_id`.
+>   - Monthly progress reports and documents are reviewed through `/vendor-submissions` (resource `vendor_submission`, review = action `approve`; rejection requires notes).
+>   - Accounts are admin-created only at `/settings/vendor-accounts`: one-time temporary password and forced change at first login. **No self-registration.**
+>   - Seed also grants `kpbu_project` to PM/Executive.
+>   - Production: deployed, pages respond. The vendor master is still empty, so the end-to-end test is pending until a vendor and contract exist.
+>
+> **Regulatory basis (read 2026-11-17 from pasal.id / JDIH; summaries, not legal advice):**
+> - **APBN contractors.** The relationship is a **Kontrak** from procurement (SPSE/LPSE), not an MOU.
+>   - Perpres 16/2018 jo. 12/2021 jo. 46/2025: Ps.1 angka 44 (Kontrak = PA/KPA/PPK with Penyedia); Ps.28 (SPK ≤ Rp400 juta construction, Surat Perjanjian above that); Ps.11 (PPK controls the contract, e-Kontrak, assesses provider performance); Ps.70 (electronic contract management).
+>   - Permen PUPR 14/2020 is in force. Its contract chapter (Ps.113–120) is not yet read.
+> - **KPBU.**
+>   - Perpres 38/2015: Ps.14 (unsolicited proposal; the proposer needs a feasibility study and financial capability, and gets compensation); Ps.37–39 (BUP procurement by tender or direct appointment, with prequalification; Ps.39 lists the direct-appointment conditions); Ps.41 (Perjanjian KPBU signed by PJPK and BUP); Ps.42 (financial close ≤ 12 months after signing); performance guarantee ≤ 5% of investment value; Ps.7(2) (MOU only between PJPKs).
+>   - Procedure: **Peraturan LKPP 1/2025**, which replaces Perka 19/2015 and Perlem 29/2018 and adds Swiss challenge. **Its text is NOT yet read.**
+>   - Planning: Permen PPN 7/2023 jo. 9/2025.
+>
+> **NEXT PLANNED (2026-11-17):**
+> 1. **KPBU K1.5 — business-entity document checklist** (proposed, awaiting user approval):
+>    - Master checklist per stage and initiative type (prakarsa, prakualifikasi, penawaran, penandatanganan, pembiayaan/pelaksanaan), with legal basis and a source-verification flag. Rows come from the "Matriks Dokumen Badan Usaha" agreed in chat.
+>    - Upload and verify documents per item. Stage transition gated on required documents.
+>    - Procurement method and reason, bid and performance guarantees, and a 12-month financial-close warning.
+> 2. **Contractor portal follow-ups:**
+>    - Contract fields `ppk_user_id`, agreement form (SPK/Surat Perjanjian/Surat Pesanan), and SIRUP/SPSE codes.
+>    - Restrict reviewers to the contract's PPK (plus PMO/Admin).
+>    - Verified progress feeding the official periodic report; notifications.
+> 3. Then K2 (finance), K3 (service KPI), and the **BUP portal** (reusing the vendor-portal pattern and the K1.5 checklist).
+>
+> **Open items:**
+> - 5 demo accounts and the default admin password are still active in production.
+> - "Proyek Kritis" counts differ between Dashboard (9) and Executive (6).
+>
+> **Working rules (this user):**
+> - Ask before every commit/push.
+> - Never type passwords on production; the user logs in manually.
+> - No server/DB access.
+> - Local Postgres is unusable, so verify on production after deploy.
+> - Cite regulations only from texts actually read, and mark unverified items.
+
 > **STATUS (2026-08-30 — PROJECT-FORM-002 applied):** `PMO-PROJECT-FORM-002` is `Done` (2026-08-30): Project Master Data Input + Rich Text Editor. Backend: migration `000039_create_project_categories` (tenant-scoped, soft-delete, unique code per org); module `internal/project/category/` (handler/model/service): full CRUD, `ErrNotFound`/`ErrCodeTaken`, duplicate code → 409; `ResourceProjectCategory` constant seeded to all roles; 7 default SDA categories (BND/IRG/SNP/ABK/ATN/BNJ/OP) + 5 regions + 5 river_basins idempotent seed; `server.go` wires `/api/v1/project-categories` (GET/POST/GET:id/PUT:id/DELETE:id) with RBAC. Frontend: `types/project-category.ts` + `services/project-category.service.ts`; `app/(dashboard)/settings/project-categories/page.tsx` (CRUD modal, toggle active); `components/editor/RichTextEditor.tsx` (TipTap: bold/italic/bulletList/orderedList/hr, paste image, attach file); `ProjectForm` refactored to stateful — description/objectives → RichTextEditor (controlled state), category dropdown from API not hardcoded, `onSubmit` callback changed from FormEvent to `ProjectFormValues`; Sidebar: "Kategori Proyek" (PMO_AND_ABOVE); `onError` handlers show API error in form. Decision: `category` stores `code` string — no `project_category_id` FK added to `projects` (blast radius avoided; documented as known limitation). Rich content stored as HTML string; sanitization deferred. Smoke: CRUD 5/5 PASS, duplicate 409 PASS, project create with rich description PASS. `go build ./...` OK · `npx tsc --noEmit` OK · `npm run lint` OK · migration applied · seed OK. Push: `9d18153` on `harmanto-49/PMO` main.
 
 > **STATUS (2026-08-30 — PROJECT-FORM-001 applied):** `PMO-PROJECT-FORM-001` is `Done` (2026-08-30): Add Project mandatory metadata hardening. Frontend `/projects` Add/Edit Project form now treats all visible core fields as mandatory: code, name, description, objectives, priority, category, start/end dates, budget, progress, Balai/Unit Pemilik, Program, Sektor SDA, Wilayah, and DAS. Budget input displays as Rupiah text format (`Rp. 100,000,000,-`) and parses digits back to numeric `budget_total`; progress field shows percent affordance and sends `progress_pct` on create. `Kategori` is currently a controlled UI option list because no true `project_categories` master table exists yet. Backend `CreateProjectRequest` now requires the core project metadata and accepts/persists `program_id`, `sector_id`, `region_id`, `river_basin_id`, and `progress_pct`; create/update validates org unit/program/sector/region/river basin IDs against tenant-scoped active master rows. Seed permissions now include `ResourceProgram` to fix 403 on `/api/v1/programs`; `make seed` rerun and `/api/v1/programs` verified 200 as Super Admin. Verification: `gofmt` OK · `go build ./...` OK · `go test ./...` OK · `npx tsc --noEmit` OK · `npm run lint` OK. **Follow-up recommended:** create real `project_categories` master data module/table and replace temporary UI category list with API-backed master data.
 
 > **STATUS (2026-08-29 — DASH-003 applied):** `PMO-DASH-003` is `Done` (2026-08-29): Dashboard Priority Table BALAI Column. Column `BALAI` added to Dashboard → "10 Proyek Prioritas" using `projects.org_unit_id` → `org_units.name`. Backend: `Project` struct has `OrgUnitName string` (gorm:"-", json:"org_unit_name,omitempty"); `postgresRepository.List()` does post-query batch lookup — collects unique `org_unit_id`s, fetches names via `SELECT id, name FROM org_units WHERE id IN ? AND deleted_at IS NULL`, populates each project; `FindByID()` does single lookup if `OrgUnitID != nil`. Seed-demo: `demoOrgUnits` slice (5 BBWS/BWS: BBWS Ciliwung Cisadane, BBWS Citanduy, BWS Sumatera VII, BBWS Serayu Opak, BWS Nusa Tenggara II, level 3); `upsertOrgUnit()` idempotent; `projectSeed.OrgUnitCode` field; all 10 demo projects assigned to a BBWS/BWS. Frontend: `Project` type gets `org_unit_name: string | null`; Dashboard "10 Proyek Prioritas" table gets `BALAI` column after `KODE` with `-` fallback, `TableLoading columns={10}`; form label `Unit Organisasi` → `Balai / Unit Pemilik`. Fix: `ResourceOrgUnit` added to `cmd/seed/main.go` resources slice (was missing — caused 403 on `/settings/org-units`). Verification: `go build ./...` OK · `npx tsc --noEmit` OK · regression **44/44 PASS** · `org_unit_name` verified in API for all 10 demo projects.
 
-> **NEXT PLANNED (2026-08-29):** No next planned ticket specified. Recommended: staging deployment → stakeholder UAT session → bug collection → production hardening. IoT (`PMO-P3-004`) tetap Future/Last.
+> **NEXT PLANNED (2026-08-29, superseded by 2026-11-17 above):** No next planned ticket specified. Recommended: staging deployment → stakeholder UAT session → bug collection → production hardening. IoT (`PMO-P3-004`) tetap Future/Last.
 
 > **STATUS (2026-08-29 — DASH-002 applied):** `PMO-DASH-002` is `Done` (2026-08-29): Periodic Progress & Financial Realization Input. Dashboard trend `/api/v1/dashboard/trend` now prioritizes data from `project_periodic_reports` table (`data_type: "PERIODIC_REPORT"`) before falling back to progress history + budget aggregate. New table `project_periodic_reports` (migration 000038): organization_id, project_id, period_year, period_month, physical_progress_pct, financial_planned, financial_actual, financial_pct (backend-computed), notes, reported_by, reported_at, soft-delete; unique active index per org+project+year+month. CRUD API `GET/POST/GET/:id/PUT/:id/DELETE/:id` under `/api/v1/projects/:id/periodic-reports` with RBAC (`ResourcePeriodicReport`), tenant guard via parent project, duplicate → 409, validation → 400, soft delete → 204. Handler uses `Handler.WithDB(db)` pattern to avoid bloating the Repository interface. `Service.SyncProjectProgressFromPeriodic()` updates `projects.progress_pct` after create/update. Seed-demo idempotent: 6 months of periodic reports per project × 10 demo projects. Frontend: `types/periodic-report.ts`, `services/periodic-report.service.ts`, `components/project/PeriodicReportPanel.tsx` (inline form, computed preview, sortable table, mobile-friendly), wired to `/projects/[id]/page.tsx`. Dashboard disclaimer shows blue label "Laporan periodik operasional" for PERIODIC_REPORT, amber label for OPERATIONAL fallback. Verification: migration applied · seed-demo 10 projects · `go build ./...` OK · `go test ./...` OK · `npx tsc --noEmit` OK · `npm run lint` OK · `npm run build` OK (31 pages) · smoke-test-dash-002 **28 PASS 0 FAIL 1 SKIP** · REL-001 regression **44/44 PASS** · dashboard/trend `data_type: PERIODIC_REPORT` with realistic 6-month data.
 

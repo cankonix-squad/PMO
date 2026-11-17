@@ -471,6 +471,22 @@ func New(deps *Dependencies) *gin.Engine {
 	kpbuGroup.PUT("/:id/guarantees/:guaranteeID", kpbuPerm(constants.ActionUpdate), deps.KPBUHandler.UpdateGuarantee)
 	kpbuGroup.DELETE("/:id/guarantees/:guaranteeID", kpbuPerm(constants.ActionDelete), deps.KPBUHandler.DeleteGuarantee)
 
+	// KPBU-K2: financing structure, government support, availability payments
+	fin := deps.KPBUHandler.Finance()
+	kpbuGroup.GET("/:id/finance-summary", kpbuPerm(constants.ActionView), deps.KPBUHandler.FinanceSummary)
+	kpbuGroup.GET("/:id/financings", kpbuPerm(constants.ActionView), fin.Financing.List)
+	kpbuGroup.POST("/:id/financings", kpbuPerm(constants.ActionCreate), fin.Financing.Create)
+	kpbuGroup.PUT("/:id/financings/:financingID", kpbuPerm(constants.ActionUpdate), fin.Financing.Update)
+	kpbuGroup.DELETE("/:id/financings/:financingID", kpbuPerm(constants.ActionDelete), fin.Financing.Delete)
+	kpbuGroup.GET("/:id/government-supports", kpbuPerm(constants.ActionView), fin.Support.List)
+	kpbuGroup.POST("/:id/government-supports", kpbuPerm(constants.ActionCreate), fin.Support.Create)
+	kpbuGroup.PUT("/:id/government-supports/:supportID", kpbuPerm(constants.ActionUpdate), fin.Support.Update)
+	kpbuGroup.DELETE("/:id/government-supports/:supportID", kpbuPerm(constants.ActionDelete), fin.Support.Delete)
+	kpbuGroup.GET("/:id/availability-payments", kpbuPerm(constants.ActionView), fin.Payment.List)
+	kpbuGroup.POST("/:id/availability-payments", kpbuPerm(constants.ActionCreate), fin.Payment.Create)
+	kpbuGroup.PUT("/:id/availability-payments/:paymentID", kpbuPerm(constants.ActionUpdate), fin.Payment.Update)
+	kpbuGroup.DELETE("/:id/availability-payments/:paymentID", kpbuPerm(constants.ActionDelete), fin.Payment.Delete)
+
 	kpbuReq := v1.Group("/kpbu/document-requirements")
 	kpbuReq.Use(middleware.AuthRequired(deps.TokenSvc, deps.AuthSvc))
 	kpbuReq.GET("", kpbuPerm(constants.ActionView), deps.KPBUHandler.ListRequirements)

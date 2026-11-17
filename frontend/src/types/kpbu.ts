@@ -374,3 +374,124 @@ export interface KpbuGuaranteeRequest {
   status?: KpbuGuaranteeStatus;
   notes?: string;
 }
+
+// ── K2 — finance ───────────────────────────────────────────────────────────
+
+export type KpbuFinancingSource = "EQUITY" | "SENIOR_DEBT" | "SUBORDINATED_DEBT" | "BOND" | "SHAREHOLDER_LOAN" | "OTHER";
+export const KPBU_FINANCING_SOURCE_LABEL: Record<KpbuFinancingSource, string> = {
+  EQUITY: "Ekuitas (modal sendiri)",
+  SENIOR_DEBT: "Pinjaman senior",
+  SUBORDINATED_DEBT: "Pinjaman subordinasi",
+  BOND: "Obligasi / sukuk",
+  SHAREHOLDER_LOAN: "Pinjaman pemegang saham",
+  OTHER: "Lainnya",
+};
+export type KpbuFinancingStatus = "PLANNED" | "COMMITTED" | "DISBURSED" | "CANCELLED";
+export const KPBU_FINANCING_STATUS_LABEL: Record<KpbuFinancingStatus, string> = {
+  PLANNED: "Rencana",
+  COMMITTED: "Komitmen / perjanjian",
+  DISBURSED: "Dicairkan",
+  CANCELLED: "Batal",
+};
+
+export interface KpbuFinancing {
+  id: string;
+  kpbu_project_id: string;
+  source: KpbuFinancingSource;
+  provider: string;
+  agreement_number: string;
+  agreement_date: string | null;
+  amount: number;
+  disbursed_amount: number;
+  currency: string;
+  status: KpbuFinancingStatus;
+  notes: string;
+}
+export type KpbuFinancingRequest = Omit<KpbuFinancing, "id" | "kpbu_project_id">;
+
+export type KpbuSupportType = "VGF" | "FISCAL_INCENTIVE" | "LAND_ACQUISITION" | "PERMIT" | "GUARANTEE" | "OTHER";
+export const KPBU_SUPPORT_TYPE_LABEL: Record<KpbuSupportType, string> = {
+  VGF: "Dukungan kelayakan (VGF)",
+  FISCAL_INCENTIVE: "Insentif perpajakan",
+  LAND_ACQUISITION: "Pengadaan tanah",
+  PERMIT: "Perizinan",
+  GUARANTEE: "Penjaminan infrastruktur",
+  OTHER: "Lainnya",
+};
+export type KpbuSupportStatus = "PROPOSED" | "IN_PROCESS" | "APPROVED" | "REALIZED" | "REJECTED";
+export const KPBU_SUPPORT_STATUS_LABEL: Record<KpbuSupportStatus, string> = {
+  PROPOSED: "Diusulkan",
+  IN_PROCESS: "Dalam proses",
+  APPROVED: "Disetujui",
+  REALIZED: "Terealisasi",
+  REJECTED: "Ditolak",
+};
+
+export interface KpbuGovernmentSupport {
+  id: string;
+  kpbu_project_id: string;
+  type: KpbuSupportType;
+  provider: string;
+  decision_number: string;
+  decision_date: string | null;
+  amount: number;
+  currency: string;
+  status: KpbuSupportStatus;
+  notes: string;
+}
+export type KpbuGovernmentSupportRequest = Omit<KpbuGovernmentSupport, "id" | "kpbu_project_id">;
+
+export type KpbuPaymentStatus = "SCHEDULED" | "PARTIAL" | "PAID" | "OVERDUE";
+export const KPBU_PAYMENT_STATUS_LABEL: Record<KpbuPaymentStatus, string> = {
+  SCHEDULED: "Terjadwal",
+  PARTIAL: "Dibayar sebagian",
+  PAID: "Lunas",
+  OVERDUE: "Lewat jatuh tempo",
+};
+
+export interface KpbuAvailabilityPayment {
+  id: string;
+  kpbu_project_id: string;
+  period_year: number;
+  period_month: number;
+  due_date: string | null;
+  scheduled_amount: number;
+  deduction_amount: number;
+  deduction_reason: string;
+  paid_amount: number;
+  paid_date: string | null;
+  invoice_number: string;
+  currency: string;
+  notes: string;
+  net_amount: number;
+  outstanding: number;
+  status: KpbuPaymentStatus;
+  days_overdue: number;
+}
+export type KpbuAvailabilityPaymentRequest = Omit<
+  KpbuAvailabilityPayment,
+  "id" | "kpbu_project_id" | "net_amount" | "outstanding" | "status" | "days_overdue"
+>;
+
+export interface KpbuFinanceSummary {
+  currency: string;
+  investment_value: number;
+  financing_total: number;
+  financing_by_source: Partial<Record<KpbuFinancingSource, number>>;
+  equity_total: number;
+  debt_total: number;
+  equity_pct: number | null;
+  debt_to_equity: number | null;
+  disbursed_total: number;
+  funding_coverage_pct: number | null;
+  support_approved: number;
+  support_proposed: number;
+  support_count: number;
+  ap_scheduled: number;
+  ap_deductions: number;
+  ap_net: number;
+  ap_paid: number;
+  ap_outstanding_due: number;
+  ap_overdue_count: number;
+  skipped_other_currency: number;
+}

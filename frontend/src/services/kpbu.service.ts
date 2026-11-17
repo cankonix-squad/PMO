@@ -1,7 +1,14 @@
 import api from "@/lib/axios";
 import type { ApiResponse } from "@/types/api";
 import type {
+  KpbuAvailabilityPayment,
+  KpbuAvailabilityPaymentRequest,
   KpbuChecklist,
+  KpbuFinanceSummary,
+  KpbuFinancing,
+  KpbuFinancingRequest,
+  KpbuGovernmentSupport,
+  KpbuGovernmentSupportRequest,
   KpbuDocument,
   KpbuDocumentRequirement,
   KpbuDocumentUpload,
@@ -105,6 +112,38 @@ export const kpbuService = {
   },
   deleteGuarantee(id: string, gid: string): Promise<void> {
     return api.delete(`${base}/${id}/guarantees/${gid}`).then(() => undefined);
+  },
+
+  // K2 — finance
+  financeSummary(id: string): Promise<ApiResponse<KpbuFinanceSummary>> {
+    return api.get(`${base}/${id}/finance-summary`).then((r) => r.data);
+  },
+  listFinancings(id: string): Promise<ApiResponse<KpbuFinancing[]>> {
+    return api.get(`${base}/${id}/financings`).then((r) => r.data);
+  },
+  saveFinancing(id: string, rid: string | null, payload: KpbuFinancingRequest): Promise<ApiResponse<KpbuFinancing>> {
+    return (rid ? api.put(`${base}/${id}/financings/${rid}`, payload) : api.post(`${base}/${id}/financings`, payload)).then((r) => r.data);
+  },
+  deleteFinancing(id: string, rid: string): Promise<void> {
+    return api.delete(`${base}/${id}/financings/${rid}`).then(() => undefined);
+  },
+  listSupports(id: string): Promise<ApiResponse<KpbuGovernmentSupport[]>> {
+    return api.get(`${base}/${id}/government-supports`).then((r) => r.data);
+  },
+  saveSupport(id: string, rid: string | null, payload: KpbuGovernmentSupportRequest): Promise<ApiResponse<KpbuGovernmentSupport>> {
+    return (rid ? api.put(`${base}/${id}/government-supports/${rid}`, payload) : api.post(`${base}/${id}/government-supports`, payload)).then((r) => r.data);
+  },
+  deleteSupport(id: string, rid: string): Promise<void> {
+    return api.delete(`${base}/${id}/government-supports/${rid}`).then(() => undefined);
+  },
+  listPayments(id: string): Promise<ApiResponse<KpbuAvailabilityPayment[]>> {
+    return api.get(`${base}/${id}/availability-payments`).then((r) => r.data);
+  },
+  savePayment(id: string, rid: string | null, payload: KpbuAvailabilityPaymentRequest): Promise<ApiResponse<KpbuAvailabilityPayment>> {
+    return (rid ? api.put(`${base}/${id}/availability-payments/${rid}`, payload) : api.post(`${base}/${id}/availability-payments`, payload)).then((r) => r.data);
+  },
+  deletePayment(id: string, rid: string): Promise<void> {
+    return api.delete(`${base}/${id}/availability-payments/${rid}`).then(() => undefined);
   },
 
   // K1.5 — checklist master

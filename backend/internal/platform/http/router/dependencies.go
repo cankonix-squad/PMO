@@ -24,6 +24,7 @@ import (
 	"github.com/harmanto-49/cankora/internal/integrations/government"
 	"github.com/harmanto-49/cankora/internal/integrations/imports"
 	"github.com/harmanto-49/cankora/internal/integrations/primavera"
+	"github.com/harmanto-49/cankora/internal/kpbu"
 	"github.com/harmanto-49/cankora/internal/notifications"
 	notification "github.com/harmanto-49/cankora/internal/notifications/delivery"
 	"github.com/harmanto-49/cankora/internal/platform/config"
@@ -92,4 +93,5 @@ type Dependencies struct {
 	AuditLogHandler           *auditlog.Handler
 	NotificationHandler       *notifications.Handler
 	ProjectCategoryHandler    *projectcategory.Handler
+	KPBUHandler               *kpbu.Handler
 }

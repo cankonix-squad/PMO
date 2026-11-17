@@ -14,6 +14,7 @@ import {
   ChevronDown,
   ClipboardCheck,
   FileText,
+  Handshake,
   Crown,
   Gavel,
   Layers3,
@@ -85,6 +86,12 @@ const navSections: NavSection[] = [
       { label: "Peta GIS", href: "/gis", icon: MapPinned, roles: EXECUTIVE_ROLES },
       { label: "Pendukung Keputusan", href: "/decision-support", icon: Gavel, roles: EXECUTIVE_ROLES },
       { label: "Manfaat", href: "/benefits", icon: BarChart3, roles: EXECUTIVE_ROLES },
+    ],
+  },
+  {
+    label: "KPBU",
+    items: [
+      { label: "Portofolio KPBU", href: "/kpbu", icon: Handshake, roles: [...EXECUTIVE_ROLES, R_PROJECT_MANAGER] },
     ],
   },
   {

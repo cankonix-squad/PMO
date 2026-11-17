@@ -68,6 +68,14 @@ export function TopBar({
       title: "Peta GIS",
       subtitle: "Sebaran lokasi proyek dan status kesehatan",
     },
+    "Portofolio KPBU": {
+      title: "Portofolio KPBU",
+      subtitle: "Kerjasama Pemerintah dengan Badan Usaha",
+    },
+    "Detail Proyek KPBU": {
+      title: "Proyek KPBU",
+      subtitle: "Tahapan, target, dan para pihak",
+    },
     "BIM / Digital Twin": {
       title: "BIM / Digital Twin",
       subtitle: "Metadata model, versi, dan pemetaan proyek",

@@ -101,6 +101,9 @@ const (
 	// PROJECT-FORM-002: Project Category master
 	ResourceProjectCategory = "project_category"
 
+	// KPBU-K1: KPBU (PPP) project monitoring
+	ResourceKPBUProject = "kpbu_project"
+
 	// P3-003: Data Governance — official validation & approval workflow
 	ResourceDataGovernance = "data_governance"
 

@@ -442,6 +442,25 @@ func New(deps *Dependencies) *gin.Engine {
 	projectCategoryGroup.PUT("/:id", middleware.RequirePermission(deps.RBACRepo, constants.ResourceProjectCategory, constants.ActionUpdate), deps.ProjectCategoryHandler.Update)
 	projectCategoryGroup.DELETE("/:id", middleware.RequirePermission(deps.RBACRepo, constants.ResourceProjectCategory, constants.ActionDelete), deps.ProjectCategoryHandler.Delete)
 
+	// KPBU monitoring — KPBU-K1 (see docs/planning/KPBU-GRAND-DESIGN.md)
+	kpbuGroup := v1.Group("/kpbu/projects")
+	kpbuGroup.Use(middleware.AuthRequired(deps.TokenSvc, deps.AuthSvc))
+	kpbuPerm := func(action string) gin.HandlerFunc {
+		return middleware.RequirePermission(deps.RBACRepo, constants.ResourceKPBUProject, action)
+	}
+	kpbuGroup.GET("", kpbuPerm(constants.ActionView), deps.KPBUHandler.ListProjects)
+	kpbuGroup.POST("", kpbuPerm(constants.ActionCreate), deps.KPBUHandler.CreateProject)
+	kpbuGroup.GET("/:id", kpbuPerm(constants.ActionView), deps.KPBUHandler.GetProject)
+	kpbuGroup.PUT("/:id", kpbuPerm(constants.ActionUpdate), deps.KPBUHandler.UpdateProject)
+	kpbuGroup.DELETE("/:id", kpbuPerm(constants.ActionDelete), deps.KPBUHandler.DeleteProject)
+	kpbuGroup.POST("/:id/transition", kpbuPerm(constants.ActionUpdate), deps.KPBUHandler.TransitionProject)
+	kpbuGroup.GET("/:id/stage-milestones", kpbuPerm(constants.ActionView), deps.KPBUHandler.ListStageMilestones)
+	kpbuGroup.PUT("/:id/stage-milestones", kpbuPerm(constants.ActionUpdate), deps.KPBUHandler.UpsertStageMilestone)
+	kpbuGroup.GET("/:id/parties", kpbuPerm(constants.ActionView), deps.KPBUHandler.ListParties)
+	kpbuGroup.POST("/:id/parties", kpbuPerm(constants.ActionCreate), deps.KPBUHandler.CreateParty)
+	kpbuGroup.PUT("/:id/parties/:partyID", kpbuPerm(constants.ActionUpdate), deps.KPBUHandler.UpdateParty)
+	kpbuGroup.DELETE("/:id/parties/:partyID", kpbuPerm(constants.ActionDelete), deps.KPBUHandler.DeleteParty)
+
 	return r
 }
 

@@ -32,6 +32,7 @@ import (
 	"github.com/harmanto-49/cankora/internal/integrations/government"
 	"github.com/harmanto-49/cankora/internal/integrations/imports"
 	"github.com/harmanto-49/cankora/internal/integrations/primavera"
+	"github.com/harmanto-49/cankora/internal/kpbu"
 	"github.com/harmanto-49/cankora/internal/notifications"
 	notification "github.com/harmanto-49/cankora/internal/notifications/delivery"
 	"github.com/harmanto-49/cankora/internal/platform/config"
@@ -112,6 +113,7 @@ func Wire(cfg *config.Config, log *zap.Logger) (*httprouter.Dependencies, error)
 	notifSvc := notification.NewService(notifRepo, notifProvider, log, cfg.SMTP.From)
 	notificationHandler := notifications.NewHandler(notifSvc)
 	projectCategoryHandler := projectcategory.NewHandler(db, log)
+	kpbuHandler := kpbu.NewHandler(db, auditWriter, log)
 
 	_ = auditWriter
 
@@ -160,6 +162,7 @@ func Wire(cfg *config.Config, log *zap.Logger) (*httprouter.Dependencies, error)
 		AuditLogHandler:           auditLogHandler,
 		NotificationHandler:       notificationHandler,
 		ProjectCategoryHandler:    projectCategoryHandler,
+		KPBUHandler:               kpbuHandler,
 	}, nil
 }
 

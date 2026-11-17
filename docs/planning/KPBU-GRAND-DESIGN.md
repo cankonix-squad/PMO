@@ -3,7 +3,7 @@
 
 **Versi**: 0.1.0 (draft)
 **Tanggal**: 2026-11-17
-**Status**: Draft untuk diskusi. Bukan bukti implementasi.
+**Status**: Draft untuk diskusi. Fase K1 diimplementasikan 2026-11-17 (lihat `DEVELOPMENT-BACKLOG.md`, PMO-KPBU-K1); K2–K5 belum.
 
 > **Catatan sumber.** Dokumen ini disusun dari pemahaman umum tentang skema KPBU di Indonesia
 > (Perpres 38/2015 beserta aturan turunannya), bukan dari dokumen resmi Kementerian PU.

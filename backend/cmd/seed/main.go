@@ -86,6 +86,7 @@ func main() {
 		constants.ResourcePeriodicReport,
 		constants.ResourceOrgUnit,
 		constants.ResourceProjectCategory,
+		constants.ResourceKPBUProject,
 	}
 	actions := []string{
 		constants.ActionView, constants.ActionCreate, constants.ActionUpdate,

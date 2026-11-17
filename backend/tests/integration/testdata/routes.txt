@@ -2,6 +2,8 @@ DELETE /api/v1/benefits/:indicatorID
 DELETE /api/v1/benefits/:indicatorID/measurements/:measurementID
 DELETE /api/v1/integrations/bim/models/:id
 DELETE /api/v1/integrations/bim/models/:id/mappings/:project_id
+DELETE /api/v1/kpbu/projects/:id
+DELETE /api/v1/kpbu/projects/:id/parties/:partyID
 DELETE /api/v1/org-units/:unitID
 DELETE /api/v1/programs/:programID
 DELETE /api/v1/project-categories/:id
@@ -84,6 +86,10 @@ GET /api/v1/integrations/government/runs/:id/records
 GET /api/v1/integrations/primavera/runs
 GET /api/v1/integrations/primavera/runs/:id
 GET /api/v1/integrations/primavera/runs/:id/mappings
+GET /api/v1/kpbu/projects
+GET /api/v1/kpbu/projects/:id
+GET /api/v1/kpbu/projects/:id/parties
+GET /api/v1/kpbu/projects/:id/stage-milestones
 GET /api/v1/notifications
 GET /api/v1/notifications/:id
 GET /api/v1/notifications/admin
@@ -193,6 +199,9 @@ POST /api/v1/integrations/government/runs/:id/cancel
 POST /api/v1/integrations/primavera/runs
 POST /api/v1/integrations/primavera/runs/:id/cancel
 POST /api/v1/integrations/primavera/runs/:id/process
+POST /api/v1/kpbu/projects
+POST /api/v1/kpbu/projects/:id/parties
+POST /api/v1/kpbu/projects/:id/transition
 POST /api/v1/notifications/:id/retry
 POST /api/v1/notifications/test
 POST /api/v1/org-units
@@ -233,6 +242,9 @@ POST /api/v1/validation-queue
 POST /api/v1/vendors
 PUT /api/v1/benefits/:indicatorID
 PUT /api/v1/benefits/:indicatorID/measurements/:measurementID
+PUT /api/v1/kpbu/projects/:id
+PUT /api/v1/kpbu/projects/:id/parties/:partyID
+PUT /api/v1/kpbu/projects/:id/stage-milestones
 PUT /api/v1/org-units/:unitID
 PUT /api/v1/organizations/:orgID
 PUT /api/v1/priority/formulas/:id

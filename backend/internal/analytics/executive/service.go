@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/harmanto-49/cankora/internal/analytics/critical"
 	"gorm.io/gorm"
 )
 
@@ -21,7 +22,11 @@ func (s *Service) GetDashboard(ctx context.Context, orgID uuid.UUID, f Filter) (
 		return nil, err
 	}
 
-	critical, err := s.getCriticalProjects(ctx, orgID)
+	criticalList, err := s.getCriticalProjects(ctx, orgID)
+	if err != nil {
+		return nil, err
+	}
+	summary.CriticalProjects, err = critical.Count(ctx, s.db, orgID)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +53,7 @@ func (s *Service) GetDashboard(ctx context.Context, orgID uuid.UUID, f Filter) (
 
 	return &ExecutiveDashboard{
 		Summary:          *summary,
-		CriticalProjects: critical,
+		CriticalProjects: criticalList,
 		Escalations:      escalations,
 		PendingDecisions: decisions,
 		Programs:         programs,
@@ -223,27 +228,11 @@ func (s *Service) getCriticalProjects(ctx context.Context, orgID uuid.UUID) ([]C
 			COALESCE(prg.name, '') AS program_name,
 			COALESCE(sec.name, '') AS sector_name
 		FROM projects p
-		LEFT JOIN LATERAL (
-			SELECT health_class
-			FROM health_snapshots
-			WHERE project_id = p.id
-			ORDER BY calculated_at DESC
-			LIMIT 1
-		) hs ON true
-		LEFT JOIN LATERAL (
-			SELECT total_score, score_category
-			FROM project_priority_scores
-			WHERE project_id = p.id
-			ORDER BY calculated_at DESC
-			LIMIT 1
-		) pps ON true
+		`+critical.Joins+`
 		LEFT JOIN programs prg ON prg.id = p.program_id AND prg.deleted_at IS NULL
 		LEFT JOIN sectors sec ON sec.id = p.sector_id AND sec.deleted_at IS NULL
 		WHERE p.organization_id = ? AND p.deleted_at IS NULL
-		  AND (
-			COALESCE(hs.health_class, 'UNSCORED') IN ('CRITICAL', 'RED')
-			OR COALESCE(pps.score_category, '') IN ('CRITICAL', 'HIGH')
-		  )
+		  AND `+critical.Predicate+`
 		ORDER BY
 			CASE COALESCE(hs.health_class, 'UNSCORED')
 				WHEN 'CRITICAL' THEN 1

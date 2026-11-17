@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/harmanto-49/cankora/internal/analytics/critical"
 	"github.com/harmanto-49/cankora/internal/identity/auth"
 	"github.com/harmanto-49/cankora/internal/platform/response"
 	"go.uber.org/zap"
@@ -19,6 +20,8 @@ type StatsRow struct {
 	ActiveProjects int64 `json:"active_projects"`
 	OnHoldProjects int64 `json:"on_hold_projects"`
 	ClosedProjects int64 `json:"closed_projects"`
+	// CriticalProjects uses the shared definition (analytics/critical); same number as Executive.
+	CriticalProjects int64 `json:"critical_projects"`
 
 	// Tasks
 	TotalTasks      int64 `json:"total_tasks"`
@@ -216,6 +219,10 @@ func (h *Handler) aggregate(ctx context.Context, orgID uuid.UUID) (*StatsRow, er
 		return nil, err
 	}
 	s.EarlyWarnings = warnings
+
+	if s.CriticalProjects, err = critical.Count(ctx, h.db, orgID); err != nil {
+		return nil, err
+	}
 
 	// ---- Budget absorption ----------------------------------------------------
 	budget, err := h.currentBudgetAggregate(ctx, orgID)

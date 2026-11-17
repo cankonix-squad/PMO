@@ -398,7 +398,7 @@ export default function ExecutiveDashboardPage() {
               <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
                 <AlertTriangle className="h-4 w-4 text-red-500" />
                 <h2 className="text-sm font-semibold text-gray-700">
-                  Proyek Kritis ({data.critical_projects.length})
+                  Proyek Kritis ({data.summary.critical_projects ?? data.critical_projects.length})
                 </h2>
               </div>
               <div className="p-4">

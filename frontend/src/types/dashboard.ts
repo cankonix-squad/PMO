@@ -39,6 +39,8 @@ export interface DashboardStats {
   active_projects: number;
   on_hold_projects: number;
   closed_projects: number;
+  /** Shared definition with Executive: latest health RED/CRITICAL or priority HIGH/CRITICAL. */
+  critical_projects?: number;
   total_tasks: number;
   todo_tasks: number;
   in_progress_tasks: number;

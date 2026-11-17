@@ -10,6 +10,8 @@ type NationalSummary struct {
 	TotalProjects  int64 `json:"total_projects"`
 	ActiveProjects int64 `json:"active_projects"`
 	DraftProjects  int64 `json:"draft_projects"`
+	// CriticalProjects uses the shared definition (analytics/critical); same number as the Dashboard.
+	CriticalProjects int64 `json:"critical_projects"`
 
 	// Anggaran (total dari projects.budget_total)
 	TotalBudget    float64 `json:"total_budget"`

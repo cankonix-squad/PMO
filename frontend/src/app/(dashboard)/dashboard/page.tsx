@@ -199,8 +199,8 @@ export default function DashboardPage() {
     },
     {
       label: "Proyek Kritis",
-      value: formatNumber(portfolio.criticalProjects),
-      detail: `${portfolio.highWarnings} peringatan prioritas tinggi`,
+      value: formatNumber(stats.critical_projects ?? portfolio.criticalProjects),
+      detail: `Health merah/kritis atau prioritas tinggi · ${portfolio.highWarnings} peringatan tinggi`,
       icon: AlertTriangle,
       tone: "red",
     },

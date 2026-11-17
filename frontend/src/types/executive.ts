@@ -2,6 +2,7 @@ export interface NationalSummary {
   total_projects: number;
   active_projects: number;
   draft_projects: number;
+  critical_projects?: number;
   total_budget: number;
   budget_realized: number;
   budget_usage_pct: number;

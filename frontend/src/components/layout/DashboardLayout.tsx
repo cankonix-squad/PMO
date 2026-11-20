@@ -35,11 +35,12 @@ export function DashboardLayout({ title, children }: DashboardLayoutProps) {
         mobileOpen={mobileNavOpen}
         onClose={() => setMobileNavOpen(false)}
         desktopOpen={desktopNavOpen}
+        onToggleDesktop={() => setDesktopNavOpen(false)}
       />
       <div
         className={cn(
           "flex min-h-screen flex-col transition-[margin] duration-200 ease-out",
-          desktopNavOpen ? "lg:ml-60" : "lg:ml-0"
+          desktopNavOpen ? "lg:ml-64" : "lg:ml-0"
         )}
       >
         <TopBar

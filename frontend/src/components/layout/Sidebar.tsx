@@ -11,7 +11,10 @@ import {
   BarChart3,
   Bell,
   Building2,
-  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Database,
+  Plug,
   ClipboardCheck,
   FileText,
   FileCheck2,
@@ -56,6 +59,7 @@ interface SidebarProps {
   mobileOpen: boolean;
   onClose: () => void;
   desktopOpen: boolean;
+  onToggleDesktop?: () => void;
 }
 
 interface NavItem {
@@ -68,12 +72,14 @@ interface NavItem {
 
 interface NavSection {
   label: string;
+  icon: typeof LayoutDashboard;
   items: NavItem[];
 }
 
 const navSections: NavSection[] = [
   {
     label: "Operasional",
+    icon: LayoutDashboard,
     items: [
       { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
       { label: "Proyek", href: "/projects", icon: Building2 },
@@ -85,6 +91,7 @@ const navSections: NavSection[] = [
   },
   {
     label: "Control Tower",
+    icon: Crown,
     items: [
       { label: "Eksekutif", href: "/executive", icon: Crown, roles: EXECUTIVE_ROLES },
       { label: "Program", href: "/programs", icon: Layers3, roles: EXECUTIVE_ROLES },
@@ -95,12 +102,14 @@ const navSections: NavSection[] = [
   },
   {
     label: "KPBU",
+    icon: Handshake,
     items: [
       { label: "Portofolio KPBU", href: "/kpbu", icon: Handshake, roles: [...EXECUTIVE_ROLES, R_PROJECT_MANAGER] },
     ],
   },
   {
     label: "Data & Pelaporan",
+    icon: Database,
     items: [
       { label: "Pusat Reporting", href: "/reports/analytics", icon: BarChart2, roles: REPORTING_ROLES },
       { label: "Laporan Periodik", href: "/reports", icon: FileText, roles: REPORTING_ROLES },
@@ -111,6 +120,7 @@ const navSections: NavSection[] = [
   },
   {
     label: "Integrasi",
+    icon: Plug,
     items: [
       { label: "Connector Pemerintah", href: "/integrations/government", icon: Building2, roles: PMO_AND_ABOVE },
       { label: "Primavera P6", href: "/integrations/primavera", icon: Network, roles: PMO_AND_ABOVE },
@@ -137,6 +147,7 @@ const settingsItems: NavItem[] = [
 const vendorNavSections: NavSection[] = [
   {
     label: "Portal Penyedia",
+    icon: HardHat,
     items: [
       { label: "Kontrak Saya", href: "/vendor-portal", icon: HardHat },
       { label: "Notifikasi", href: "/notifications", icon: Bell },
@@ -148,7 +159,7 @@ const defaultOpenSections: Record<string, boolean> = {
   Operasional: true,
 };
 
-export function Sidebar({ mobileOpen, onClose, desktopOpen }: SidebarProps) {
+export function Sidebar({ mobileOpen, onClose, desktopOpen, onToggleDesktop }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const clearAuth = useAuthStore((state) => state.clearAuth);
@@ -162,7 +173,7 @@ export function Sidebar({ mobileOpen, onClose, desktopOpen }: SidebarProps) {
   }, []);
 
   useEffect(() => {
-    const allSections = [...navSections, ...vendorNavSections, { label: "Pengaturan", items: settingsItems }];
+    const allSections = [...navSections, ...vendorNavSections, { label: "Pengaturan", icon: Settings, items: settingsItems }];
     const activeSection = allSections.find((section) =>
       section.items.some((item) => isItemActive(item, pathname))
     );
@@ -192,7 +203,7 @@ export function Sidebar({ mobileOpen, onClose, desktopOpen }: SidebarProps) {
   const visibleSections = [
     ...visibleNavSections,
     ...(visibleSettingsItems.length > 0
-      ? [{ label: "Pengaturan", items: visibleSettingsItems }]
+      ? [{ label: "Pengaturan", icon: Settings, items: visibleSettingsItems }]
       : []),
   ];
 
@@ -215,6 +226,8 @@ export function Sidebar({ mobileOpen, onClose, desktopOpen }: SidebarProps) {
     }
   };
 
+  const primaryRole = isMounted ? user?.roles?.[0] : undefined;
+
   return (
     <>
       {mobileOpen && (
@@ -228,62 +241,81 @@ export function Sidebar({ mobileOpen, onClose, desktopOpen }: SidebarProps) {
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-60 flex-col bg-[#17385D] text-white shadow-xl transition-transform duration-200 ease-out",
+          "fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-slate-200 bg-white text-slate-700 transition-transform duration-200 ease-out",
           mobileOpen ? "translate-x-0" : "-translate-x-full",
           desktopOpen ? "lg:translate-x-0" : "lg:-translate-x-full"
         )}
       >
-        <div className="flex min-h-20 items-center gap-3 border-b border-white/15 px-5 py-3">
-          <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-white/20">
+        <div className="flex items-center gap-3 px-5 pb-4 pt-5">
+          <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden">
             <Image
               src="/images/logo-kemenpu.png"
               alt="Logo Kementerian Pekerjaan Umum"
               width={44}
               height={44}
-              className="h-full w-full object-contain p-0.5"
+              className="h-full w-full object-contain"
             />
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-bold uppercase leading-5">Kementerian PU</p>
-            <p className="mt-0.5 text-[10px] uppercase leading-4 tracking-wide text-blue-100/80">
-              PMO Digital Platform
-            </p>
+            <p className="truncate text-base font-bold uppercase leading-5 text-slate-800">Kementerian PU</p>
+            <p className="mt-0.5 truncate text-xs text-slate-500">PMO Digital Platform</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="ml-auto grid h-8 w-8 place-items-center rounded-md text-blue-100 hover:bg-white/10 hover:text-white lg:hidden"
+            className="ml-auto grid h-8 w-8 place-items-center rounded-md text-slate-500 hover:bg-slate-100 lg:hidden"
             aria-label="Tutup navigasi"
           >
             <X className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
 
-        <div className="px-5 pb-3 pt-5">
-          <p className="text-[10px] font-semibold uppercase tracking-[.12em] text-[#EBAA16]">PMO Control Tower</p>
-          <p className="mt-1 text-sm font-semibold">Ruang Kendali Proyek</p>
+        {onToggleDesktop && (
+          <button
+            type="button"
+            onClick={onToggleDesktop}
+            className="absolute -right-4 top-6 hidden h-8 w-8 place-items-center rounded-full bg-[#17385D] text-white shadow-md ring-4 ring-white transition-colors hover:bg-[#0F2742] lg:grid"
+            aria-label="Sembunyikan navigasi"
+          >
+            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+          </button>
+        )}
+
+        <div className="mx-4 mb-3 rounded-2xl border border-[#17385D]/15 bg-[#17385D]/[.05] px-4 py-3">
+          <p className="text-[10px] font-medium uppercase tracking-[.12em] text-slate-500">Ruang Kerja Aktif</p>
+          <p className="mt-1 truncate text-sm font-semibold text-slate-800">PMO Control Tower</p>
+          {primaryRole && (
+            <p className="mt-1 flex items-center gap-1.5 truncate text-xs text-[#B7800A]">
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#EBAA16]" aria-hidden="true" />
+              {primaryRole.replace(/_/g, " ")}
+            </p>
+          )}
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-3 py-2" aria-label="Navigasi utama">
-          <div className="space-y-2">
-            {visibleSections.map((section) => (
-              <SidebarSection
-                key={section.label}
-                section={section}
-                pathname={pathname}
-                open={openSections[section.label] ?? false}
-                onToggle={() => toggleSection(section.label)}
-                onClose={onClose}
-              />
-            ))}
-          </div>
+        <nav className="flex-1 overflow-y-auto px-4 py-1" aria-label="Navigasi utama">
+          <ul className="space-y-1" role="list">
+            {visibleSections.map((section) =>
+              section.items.length === 1 ? (
+                <SidebarLink key={section.label} item={section.items[0]} pathname={pathname} onClose={onClose} />
+              ) : (
+                <SidebarSection
+                  key={section.label}
+                  section={section}
+                  pathname={pathname}
+                  open={openSections[section.label] ?? false}
+                  onToggle={() => toggleSection(section.label)}
+                  onClose={onClose}
+                />
+              )
+            )}
+          </ul>
         </nav>
 
-        <div className="border-t border-white/15 p-3">
+        <div className="border-t border-slate-100 p-4">
           <button
             type="button"
             onClick={handleLogout}
-            className="flex h-10 w-full items-center gap-3 rounded-md px-3 text-sm text-blue-100 transition-colors hover:bg-red-500/15 hover:text-white"
+            className="flex h-11 w-full items-center gap-3 rounded-xl px-3 text-sm text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600"
           >
             <LogOut className="h-5 w-5" aria-hidden="true" />
             Keluar
@@ -308,34 +340,34 @@ function SidebarSection({
   onClose: () => void;
 }) {
   const active = section.items.some((item) => isItemActive(item, pathname));
+  const Icon = section.icon;
 
   return (
-    <section>
+    <li>
       <button
         type="button"
         onClick={onToggle}
         className={cn(
-          "flex h-9 w-full items-center justify-between rounded-md px-3 text-left text-[10px] font-semibold uppercase tracking-wide transition-colors",
-          active || open
-            ? "bg-white/10 text-[#F5C34B]"
-            : "text-blue-100/75 hover:bg-white/10 hover:text-white"
+          "flex h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm transition-colors",
+          active ? "font-semibold text-[#17385D]" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
         )}
         aria-expanded={open}
       >
-        <span className="truncate">{section.label}</span>
-        <ChevronDown
-          className={cn("h-4 w-4 shrink-0 transition-transform", open ? "rotate-0" : "-rotate-90")}
+        <Icon className="h-5 w-5 shrink-0 text-[#17385D]" aria-hidden="true" />
+        <span className="min-w-0 flex-1 truncate">{section.label}</span>
+        <ChevronRight
+          className={cn("h-4 w-4 shrink-0 text-slate-400 transition-transform", open && "rotate-90")}
           aria-hidden="true"
         />
       </button>
       {open && (
-        <ul className="mt-1 space-y-1" role="list">
+        <ul className="mt-1 space-y-1 border-l border-slate-200 pl-3 ml-5" role="list">
           {section.items.map((item) => (
-            <SidebarLink key={item.href} item={item} pathname={pathname} onClose={onClose} />
+            <SidebarLink key={item.href} item={item} pathname={pathname} onClose={onClose} nested />
           ))}
         </ul>
       )}
-    </section>
+    </li>
   );
 }
 
@@ -343,10 +375,12 @@ function SidebarLink({
   item,
   pathname,
   onClose,
+  nested = false,
 }: {
   item: NavItem;
   pathname: string;
   onClose: () => void;
+  nested?: boolean;
 }) {
   const Icon = item.icon;
   const isActive = isItemActive(item, pathname);
@@ -357,21 +391,18 @@ function SidebarLink({
         href={item.href}
         onClick={onClose}
         className={cn(
-          "group flex h-10 items-center gap-3 rounded-md px-3 text-sm font-medium transition-colors",
+          "flex items-center gap-3 rounded-xl px-3 transition-colors",
+          nested ? "h-9 text-[13px]" : "h-11 text-sm",
           isActive
-            ? "bg-white/[.12] text-white shadow-sm ring-1 ring-inset ring-white/10"
-            : "text-blue-100/85 hover:bg-white/10 hover:text-white"
+            ? "bg-[#17385D]/[.08] font-semibold text-[#17385D]"
+            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
         )}
         aria-current={isActive ? "page" : undefined}
       >
-        <span
-          className={cn(
-            "h-5 w-0.5 rounded-full transition-colors",
-            isActive ? "bg-[#EBAA16]" : "bg-transparent"
-          )}
+        <Icon
+          className={cn("shrink-0 text-[#17385D]", nested ? "h-4 w-4" : "h-5 w-5", !isActive && nested && "text-slate-400")}
           aria-hidden="true"
         />
-        <Icon className={cn("h-4 w-4 shrink-0", isActive && "text-[#F5C34B]")} aria-hidden="true" />
         <span className="min-w-0 flex-1 truncate">{item.label}</span>
       </Link>
     </li>
